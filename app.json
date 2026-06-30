@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "hammer",
+    "name": "Hammer",
     "slug": "hammer",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,9 +8,11 @@
     "scheme": "hammer",
     "userInterfaceStyle": "automatic",
     "ios": {
+      "bundleIdentifier": "com.hammer.app",
       "icon": "./assets/expo.icon"
     },
     "android": {
+      "package": "com.hammer.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
