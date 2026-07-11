@@ -13,7 +13,7 @@ import LottieLoader from '../common/lottie/LottieLoader';
 
 const { width, height } = Dimensions.get('window');
 
-const SPLASH_DELAY = 4000;
+const SPLASH_DELAY = 6000;
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 

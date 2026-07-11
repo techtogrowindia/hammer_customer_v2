@@ -1,6 +1,6 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
-import { router } from 'expo-router';
+import { useAuthApisHelper } from '@/hooks/useAuthApisHelper';
 import { Lock, MessageCircle, Smartphone, Sparkles } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, StatusBar, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -16,6 +16,7 @@ const font = {
 const COUNTRY_CODE = '+91';
 
 export default function GenerateOtpScreen() {
+  const { sendOTP } = useAuthApisHelper();
   const [mobile, setMobile] = useState('');
   const [isFocused, setIsFocused] = useState(false);
 
@@ -23,8 +24,9 @@ export default function GenerateOtpScreen() {
 
   const sendOtp = () => {
     if (!isValid) return;
+
     // TODO: trigger OTP send request here
-    router.push({ pathname: '/otp/verify-otp', params: { mobile: `${COUNTRY_CODE}${mobile}` } });
+    // router.push({ pathname: '/otp/verify-otp', params: { mobile: `${COUNTRY_CODE}${mobile}` } });
   };
 
   return (
