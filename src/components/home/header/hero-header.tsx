@@ -51,7 +51,7 @@ export function HeroHeader({
           <View style={styles.greetingWrap}>
             <Text style={styles.greeting}>{greeting}</Text>
             <Pressable accessibilityRole='button' onPress={onLocationPress} style={styles.locationPill} hitSlop={6}>
-              <MapPin size={11} color={AppColors.primary} strokeWidth={2.25} />
+              <MapPin size={11} color={AppColors.primaryDark} strokeWidth={2.25} />
               <Text style={styles.locationText} numberOfLines={1}>
                 {locationLabel}
               </Text>
@@ -124,11 +124,11 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: `${AppColors.textPrimary}10`,
+    backgroundColor: `${AppColors.primaryDark}30`,
     borderWidth: 1.5,
-    borderColor: `${AppColors.textPrimary}35`,
+    borderColor: 'rgba(255,255,255,0.35)',
   },
-  avatarText: { fontFamily: 'Poppins_600SemiBold', fontSize: 15, color: AppColors.textPrimary },
+  avatarText: { fontFamily: 'Poppins_600SemiBold', fontSize: 15, color: AppColors.white },
   greetingWrap: { flex: 1 },
   greeting: { fontFamily: 'Poppins_600SemiBold', fontSize: 15, color: AppColors.textPrimary, marginBottom: 5 },
   locationPill: {
@@ -139,10 +139,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 9,
     paddingVertical: 4,
     borderRadius: 9,
-    backgroundColor: AppColors.secondary,
+    backgroundColor: AppColors.white,
     maxWidth: '90%',
   },
-  locationText: { fontFamily: fontTokens.fontFamily.medium, fontSize: 11, color: AppColors.white },
+  locationText: { fontFamily: fontTokens.fontFamily.medium, fontSize: 11, color: AppColors.primaryDark },
   bellButton: {
     width: 38,
     height: 38,
@@ -203,187 +203,3 @@ const styles = StyleSheet.create({
 });
 
 export default HeroHeader;
-
-// import { AppColors } from '@/core/theme/app-colors';
-// import { fontTokens } from '@/core/theme/typography';
-// import { Bell, ChevronDown, MapPin, Search } from 'lucide-react-native';
-// import React from 'react';
-// import { Pressable, StyleSheet, Text, View } from 'react-native';
-
-// interface HeroHeaderProps {
-//   topInset: number;
-//   userInitial: string;
-//   locationLabel: string;
-//   greeting: string;
-//   searchPlaceholder: string;
-//   onAvatarPress?: () => void;
-//   onLocationPress?: () => void;
-//   onNotificationPress?: () => void;
-//   onSearchPress?: () => void;
-//   onFilterPress?: () => void;
-//   hasUnreadNotification?: boolean;
-// }
-
-// /**
-//  * No colored hero block at all — everything sits on the white background.
-//  * Row 1: avatar + greeting + bell. Row 2: a location chip and the search
-//  * bar share the same row (chip is auto-width, search flexes to fill),
-//  * instead of one stacked above/inside the other. A hairline divider marks
-//  * the header/body boundary rather than a color change or shadow.
-//  */
-// export function HeroHeader({
-//   topInset,
-//   userInitial,
-//   locationLabel,
-//   greeting,
-//   searchPlaceholder,
-//   onAvatarPress,
-//   onLocationPress,
-//   onNotificationPress,
-//   onSearchPress,
-//   onFilterPress,
-//   hasUnreadNotification = true,
-// }: HeroHeaderProps) {
-//   return (
-//     <View style={[styles.wrap, { paddingTop: topInset + 12 }]}>
-//       <View style={styles.topRow}>
-//         <Pressable accessibilityRole='button' onPress={onAvatarPress} style={styles.avatar} hitSlop={4}>
-//           <Text style={styles.avatarText}>{userInitial}</Text>
-//         </Pressable>
-
-//         <Text style={styles.greeting} numberOfLines={1}>
-//           {greeting}
-//         </Text>
-
-//         <Pressable
-//           accessibilityRole='button'
-//           onPress={onNotificationPress}
-//           style={({ pressed }) => [styles.bellButton, pressed && { backgroundColor: AppColors.warningLight }]}
-//           hitSlop={8}
-//         >
-//           <Bell size={18} color={AppColors.textPrimary} strokeWidth={2} />
-//           {hasUnreadNotification && <View style={styles.bellDot} />}
-//         </Pressable>
-//       </View>
-
-//       <View style={styles.searchRow}>
-//         <Pressable
-//           accessibilityRole='button'
-//           onPress={onLocationPress}
-//           style={({ pressed }) => [styles.locationChip, pressed && { backgroundColor: AppColors.warningLight }]}
-//           hitSlop={4}
-//         >
-//           <MapPin size={13} color={AppColors.primary} strokeWidth={2.25} />
-//           <Text style={styles.locationText} numberOfLines={1}>
-//             {locationLabel}
-//           </Text>
-//           <ChevronDown size={13} color={AppColors.textTertiary} strokeWidth={2.25} />
-//         </Pressable>
-
-//         <Pressable
-//           accessibilityRole='button'
-//           onPress={onSearchPress}
-//           style={({ pressed }) => [styles.searchBar, pressed && { borderColor: AppColors.primary }]}
-//         >
-//           <Search size={16} color={AppColors.textTertiary} strokeWidth={2} />
-//           <Text style={styles.searchPlaceholder} numberOfLines={1}>
-//             {searchPlaceholder}
-//           </Text>
-//         </Pressable>
-
-//         {/* <Pressable
-//           accessibilityRole='button'
-//           onPress={onFilterPress}
-//           hitSlop={4}
-//           style={({ pressed }) => [styles.filterButton, pressed && { backgroundColor: AppColors.warningLight }]}
-//         >
-//           <SlidersHorizontal size={16} color={AppColors.primary} strokeWidth={2.25} />
-//         </Pressable> */}
-//       </View>
-//     </View>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   wrap: {
-//     backgroundColor: AppColors.white,
-//     paddingHorizontal: 20,
-//     paddingBottom: 16,
-//     borderBottomWidth: 1,
-//     borderBottomColor: AppColors.divider,
-//   },
-//   topRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16 },
-//   avatar: {
-//     width: 36,
-//     height: 36,
-//     borderRadius: 18,
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//     backgroundColor: AppColors.warningLight,
-//   },
-//   avatarText: { fontFamily: 'Poppins_600SemiBold', fontSize: 13, color: AppColors.primary },
-//   greeting: { flex: 1, fontFamily: 'Poppins_600SemiBold', fontSize: 15, color: AppColors.textPrimary },
-//   bellButton: {
-//     width: 36,
-//     height: 36,
-//     borderRadius: 18,
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//   },
-//   bellDot: {
-//     position: 'absolute',
-//     top: 7,
-//     right: 7,
-//     width: 7,
-//     height: 7,
-//     borderRadius: 4,
-//     backgroundColor: AppColors.error,
-//     borderWidth: 1.5,
-//     borderColor: AppColors.white,
-//   },
-
-//   searchRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-//   locationChip: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     gap: 3,
-//     height: 42,
-//     maxWidth: 108,
-//     paddingHorizontal: 10,
-//     borderRadius: 13,
-//     backgroundColor: AppColors.warningLight,
-//   },
-//   locationText: {
-//     fontFamily: fontTokens.fontFamily.medium,
-//     fontSize: 11,
-//     color: AppColors.textPrimary,
-//     flexShrink: 1,
-//   },
-//   searchBar: {
-//     flex: 1,
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     gap: 8,
-//     height: 42,
-//     borderRadius: 13,
-//     paddingHorizontal: 12,
-//     borderWidth: 1.5,
-//     borderColor: AppColors.divider,
-//   },
-//   searchPlaceholder: {
-//     flex: 1,
-//     fontFamily: fontTokens.fontFamily.regular,
-//     fontSize: 12,
-//     color: AppColors.textTertiary,
-//   },
-//   filterButton: {
-//     width: 42,
-//     height: 42,
-//     borderRadius: 13,
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//     backgroundColor: AppColors.warningLight,
-//   },
-// });
-
-// export default HeroHeader;

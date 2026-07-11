@@ -47,7 +47,7 @@ export function BannerCarousel({ banners, horizontalInset = 20, cardColor = AppC
           <View key={b.id} style={[styles.bannerCard, { width: bannerWidth, backgroundColor: cardColor }]}>
             <View style={styles.bannerDecor} />
             <View style={styles.bannerTag}>
-              <Text style={[styles.bannerTagText, { color: cardColor }]}>{b.tag}</Text>
+              <Text style={[styles.bannerTagText, { color: AppColors.primaryDark }]}>{b.tag}</Text>
             </View>
             <Text style={styles.bannerTitle}>{b.title}</Text>
             <Text style={styles.bannerSubtitle}>{b.subtitle}</Text>
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 10,
-    backgroundColor: AppColors.secondary,
+    backgroundColor: AppColors.white,
     marginBottom: 10,
   },
   bannerTagText: { fontFamily: 'Poppins_600SemiBold', fontSize: 10 },
