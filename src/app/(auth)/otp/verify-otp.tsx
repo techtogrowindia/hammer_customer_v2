@@ -1,5 +1,6 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
+import { useAuthApisHelper } from '@/hooks/useAuthApisHelper';
 import { router, useLocalSearchParams } from 'expo-router';
 import { CheckCircle2, KeyRound, Smartphone, Sparkles } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
@@ -17,12 +18,12 @@ const CODE_LENGTH = 4;
 const RESEND_SECONDS = 30;
 
 export default function VerifyOtpScreen() {
-  const params = useLocalSearchParams<{ mobile?: string }>();
+  const params = useLocalSearchParams<{ mobile?: string; temp_id?: string }>();
   const mobile = params.mobile ?? '+91 98765 43210';
-
+  const { sendOTP, verifyOTP } = useAuthApisHelper();
   const [digits, setDigits] = useState<string[]>(Array(CODE_LENGTH).fill(''));
   const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
-  const inputsRef = useRef<Array<TextInput | null>>([]);
+  const inputsRef = useRef<(TextInput | null)[]>([]);
 
   const isComplete = digits.every((d) => d.length === 1);
 
@@ -56,18 +57,19 @@ export default function VerifyOtpScreen() {
     }
   };
 
-  const handleResend = () => {
+  const handleResend = async () => {
     if (secondsLeft > 0) return;
-    // TODO: trigger resend OTP request here
-    setDigits(Array(CODE_LENGTH).fill(''));
-    setSecondsLeft(RESEND_SECONDS);
-    inputsRef.current[0]?.focus();
+    try {
+      await sendOTP({ mobileNumber: mobile, isFromReSend: true });
+      setDigits(Array(CODE_LENGTH).fill(''));
+      setSecondsLeft(RESEND_SECONDS);
+      inputsRef.current[0]?.focus();
+    } catch (error) {}
   };
 
-  const verifyOtp = () => {
+  const verifyOtp = async () => {
     if (!isComplete) return;
-    // TODO: trigger OTP verification request here
-    router.replace('/profile/complete-profile');
+    await verifyOTP({ otp: digits.join(''), temp_id: params.temp_id ?? '' });
   };
 
   return (

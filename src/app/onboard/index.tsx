@@ -1,5 +1,6 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
+import { useBoundStore } from '@/store/boundStore';
 import { router } from 'expo-router';
 import { ArrowRight, CalendarCheck2, ClipboardList, Wrench } from 'lucide-react-native';
 import React, { useRef, useState } from 'react';
@@ -16,6 +17,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useShallow } from 'zustand/shallow';
 
 type Slide = {
   id: string;
@@ -58,6 +60,7 @@ const font = {
 
 export default function OnboardingScreen() {
   const { width } = useWindowDimensions();
+  const setHasOnBoardCompleted = useBoundStore(useShallow((state) => state.setHasOnBoardCompleted));
   const listRef = useRef<FlatList<Slide>>(null);
   const scrollX = useRef(new Animated.Value(0)).current;
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -70,6 +73,7 @@ export default function OnboardingScreen() {
 
   const goNext = () => {
     if (isLastSlide) {
+      setHasOnBoardCompleted(true);
       goToOtp();
       return;
     }

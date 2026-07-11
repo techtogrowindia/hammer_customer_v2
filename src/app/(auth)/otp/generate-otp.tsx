@@ -22,11 +22,10 @@ export default function GenerateOtpScreen() {
 
   const isValid = mobile.trim().length === 10;
 
-  const sendOtp = () => {
+  const sendOtp = async () => {
     if (!isValid) return;
 
-    // TODO: trigger OTP send request here
-    // router.push({ pathname: '/otp/verify-otp', params: { mobile: `${COUNTRY_CODE}${mobile}` } });
+    await sendOTP({ mobileNumber: mobile, isFromReSend: false });
   };
 
   return (
