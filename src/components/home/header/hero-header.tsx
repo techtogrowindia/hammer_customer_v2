@@ -1,6 +1,6 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
-import { Bell, MapPin, Search } from 'lucide-react-native';
+import { Bell, ChevronDown, MapPin, Search } from 'lucide-react-native';
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -55,6 +55,7 @@ export function HeroHeader({
               <Text style={styles.locationText} numberOfLines={1}>
                 {locationLabel}
               </Text>
+              <ChevronDown size={11} color={AppColors.primaryDark} strokeWidth={2.25} />
             </Pressable>
           </View>
 
