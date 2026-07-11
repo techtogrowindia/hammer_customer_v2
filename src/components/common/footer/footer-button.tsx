@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
   },
 
   disabledButtonText: {
-    color: AppColors.textSecondary,
+    color: AppColors.placeholder,
   },
 
   footerText: {

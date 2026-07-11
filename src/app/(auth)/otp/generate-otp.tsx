@@ -54,6 +54,7 @@ export default function GenerateOtpScreen() {
               <View style={styles.content}>
                 <View style={styles.headerStage}>
                   <RingIcon
+                    animated={false}
                     centerIcon={<Smartphone size={36} color={AppColors.primary} strokeWidth={2} />}
                     orbitItems={[
                       {

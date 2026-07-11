@@ -87,6 +87,7 @@ export default function VerifyOtpScreen() {
       <View style={styles.content}>
         <View style={styles.headerStage}>
           <RingIcon
+            animated={false}
             centerIcon={<KeyRound size={36} color={AppColors.primary} strokeWidth={2} />}
             orbitItems={[
               {

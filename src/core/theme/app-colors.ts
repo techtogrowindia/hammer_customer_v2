@@ -13,8 +13,8 @@ export const AppColors = {
   card: '#FFFFFF',
 
   // Text
-  textPrimary: '#111827',
-  textSecondary: '#6B7280',
+  textPrimary: '#16324F',
+  textSecondary: '#284B6A',
   textTertiary: '#9CA3AF',
   textInverse: '#FFFFFF',
 

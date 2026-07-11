@@ -10,10 +10,7 @@ export default function Index() {
     })),
   );
 
-  console.log('hasOnBoardCoisLoggedInmpleted:', isLoggedIn);
-  console.log('hasOnBoardCompleted:', hasOnBoardCompleted);
+  const redirectTo = hasOnBoardCompleted ? '/(tabs)/(home)/' : hasOnBoardCompleted ? '/otp/generate-otp' : '/onboard';
 
-  const redirectTo = isLoggedIn ? '/coming-soon' : hasOnBoardCompleted ? '/otp/generate-otp' : '/onboard';
-
-  return <Redirect href={redirectTo} />;
+  return <Redirect href={'/(tabs)/(home)'} />;
 }
