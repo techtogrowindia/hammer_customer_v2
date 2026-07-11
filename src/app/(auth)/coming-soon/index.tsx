@@ -1,3 +1,4 @@
+import RingIcon from '@/components/common/ring-icon/ring-icon';
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
 import { useBoundStore } from '@/store/boundStore';
@@ -30,20 +31,20 @@ export default function ComingSoonScreen() {
 
       <View style={styles.content}>
         <View style={styles.headerStage}>
-          <View style={styles.ringOuter}>
-            <View style={styles.ringInner}>
-              <SprayCan size={36} color={AppColors.primary} strokeWidth={2} />
-            </View>
-            <View style={[styles.orbitDot, styles.orbitDotTop]}>
-              <Sparkles size={16} color={AppColors.primary} strokeWidth={2} />
-            </View>
-            <View style={[styles.orbitDot, styles.orbitDotRight]}>
-              <Bell size={16} color={AppColors.primary} strokeWidth={2} />
-            </View>
-            <View style={[styles.orbitDot, styles.orbitDotLeft]}>
-              <Clock3 size={16} color={AppColors.primary} strokeWidth={2} />
-            </View>
-          </View>
+          <RingIcon
+            centerIcon={<SprayCan size={36} color={AppColors.primary} strokeWidth={2} />}
+            orbitItems={[
+              {
+                icon: <Sparkles size={16} color={AppColors.primary} strokeWidth={2} />,
+              },
+              {
+                icon: <Bell size={16} color={AppColors.primary} strokeWidth={2} />,
+              },
+              {
+                icon: <Clock3 size={16} color={AppColors.primary} strokeWidth={2} />,
+              },
+            ]}
+          />
         </View>
 
         <Text style={styles.title}>Coming Soon</Text>
@@ -87,55 +88,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 28,
   },
-  ringOuter: {
-    width: 132,
-    height: 132,
-    borderRadius: 66,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: AppColors.warningLight,
-  },
-  ringInner: {
-    width: 92,
-    height: 92,
-    borderRadius: 46,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: AppColors.white,
-    shadowColor: AppColors.primaryDark,
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 3,
-  },
-  orbitDot: {
-    position: 'absolute',
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: AppColors.white,
-    borderWidth: 1,
-    borderColor: AppColors.divider,
-    shadowColor: AppColors.primaryDark,
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 2,
-  },
-  orbitDotTop: {
-    top: -6,
-    right: 8,
-  },
-  orbitDotRight: {
-    bottom: 10,
-    right: -8,
-  },
-  orbitDotLeft: {
-    bottom: 10,
-    left: -8,
-  },
+
   title: {
     maxWidth: 330,
     fontFamily: font.bold,
