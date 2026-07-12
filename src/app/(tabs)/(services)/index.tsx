@@ -168,7 +168,7 @@ export default function ServicesScreen() {
   );
 
   const goToService = (serviceId: string) => {
-    router.push({ pathname: '/services/[id]', params: { id: serviceId } } as never);
+    router.push({ pathname: '/service/[id]', params: { id: serviceId } } as never);
   };
 
   return (

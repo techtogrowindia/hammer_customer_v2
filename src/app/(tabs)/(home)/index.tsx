@@ -84,6 +84,7 @@ export default function HomeScreen() {
           greeting='Good morning, Aswick'
           searchPlaceholder='Try "AC repair" or "Salon at home"'
           onSearchPress={goToSearch}
+          onLocationPress={() => router.push('/address/select-address' as never)}
         />
 
         <View style={styles.body}>

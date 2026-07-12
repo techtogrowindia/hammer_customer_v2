@@ -1,4 +1,3 @@
-import { CircleIcon } from '@/components/common/circle-icon/circle-icon';
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
 import { RotateCcw } from 'lucide-react-native';
@@ -15,6 +14,16 @@ interface BookAgainListProps {
   actionLabel?: string;
 }
 
+/**
+ * ALTERNATIVE DESIGN — "Banner block card"
+ * The icon fills a full-width tinted block across the top of the card
+ * (like a product photo would), name/date sit below it, and Rebook is
+ * a full-width button flush with the card's bottom edge rather than an
+ * inline pill under the text. Reads closer to a small product/shop
+ * card than a profile-style tile — the icon gets much more visual
+ * presence since it's not competing for space with text on the same
+ * row or being boxed into a small circle.
+ */
 export function BookAgainList({
   items,
   onSeeAll,
@@ -30,11 +39,19 @@ export function BookAgainList({
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         {items.map((item) => (
           <View key={item.id} style={styles.card}>
-            <CircleIcon Icon={item.Icon} size={50} iconSize={20} />
-            <Text style={styles.name} numberOfLines={1}>
-              {item.name}
-            </Text>
-            <Text style={styles.date}>{item.lastDate}</Text>
+            <View style={styles.iconBanner}>
+              <item.Icon size={30} color={AppColors.primary} strokeWidth={1.75} />
+            </View>
+
+            <View style={styles.textWrap}>
+              <Text style={styles.name} numberOfLines={1}>
+                {item.name}
+              </Text>
+              <Text style={styles.date} numberOfLines={1}>
+                {item.lastDate}
+              </Text>
+            </View>
+
             <Pressable
               onPress={() => onRebook(item.id)}
               style={({ pressed }) => [styles.rebookBtn, pressed && { backgroundColor: AppColors.primaryDark }]}
@@ -52,36 +69,37 @@ export function BookAgainList({
 const styles = StyleSheet.create({
   row: { gap: 12, paddingBottom: 28 },
   card: {
-    width: 138,
-    alignItems: 'center',
-    padding: 14,
+    width: 150,
     borderRadius: 18,
     backgroundColor: AppColors.white,
     borderWidth: 1.5,
     borderColor: AppColors.divider,
+    overflow: 'hidden',
   },
+  iconBanner: {
+    height: 72,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: AppColors.warningLight,
+  },
+  textWrap: { paddingHorizontal: 12, paddingTop: 10, paddingBottom: 12 },
   name: {
-    marginTop: 10,
     fontFamily: 'Poppins_600SemiBold',
     fontSize: 12,
     color: AppColors.textPrimary,
-    textAlign: 'center',
   },
   date: {
     marginTop: 2,
     fontFamily: fontTokens.fontFamily.regular,
     fontSize: 10,
     color: AppColors.textTertiary,
-    textAlign: 'center',
   },
   rebookBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    marginTop: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 10,
+    justifyContent: 'center',
+    gap: 5,
+    paddingVertical: 10,
     backgroundColor: AppColors.primary,
   },
   rebookBtnText: { fontFamily: 'Poppins_600SemiBold', fontSize: 11, color: AppColors.white },

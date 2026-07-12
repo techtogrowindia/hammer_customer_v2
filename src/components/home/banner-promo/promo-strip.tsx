@@ -16,30 +16,44 @@ interface PromoStripProps {
   style?: StyleProp<ViewStyle>;
 }
 
+/**
+ * ALTERNATIVE DESIGN — "Dashed outline"
+ * No fill at all — a transparent card with a dashed border in the
+ * accent color, icon sitting in a small filled circle as the only
+ * solid shape. Reads as a "special offer to claim" rather than a
+ * generic info row, since dashed borders carry that connotation
+ * (coupons, vouchers). Lightest-weight visually of all the variants —
+ * good when the surrounding page already has a lot of filled cards
+ * and this one shouldn't add to the visual noise.
+ */
 export function PromoStrip({
   Icon,
   title,
   subtitle,
   onPress,
   backgroundColor = AppColors.warningLight,
-  iconWrapColor = AppColors.white,
-  iconColor = AppColors.primary,
+  iconWrapColor = AppColors.primary,
+  iconColor = AppColors.white,
   style,
 }: PromoStripProps) {
   return (
     <Pressable
       accessibilityRole='button'
       onPress={onPress}
-      style={({ pressed }) => [styles.banner, { backgroundColor }, style, pressed && { opacity: 0.85 }]}
+      style={({ pressed }) => [styles.banner, style, pressed && { backgroundColor }]}
     >
       <View style={[styles.iconWrap, { backgroundColor: iconWrapColor }]}>
         <Icon size={18} color={iconColor} strokeWidth={2} />
       </View>
       <View style={styles.copy}>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.subtitle}>{subtitle}</Text>
+        <Text style={styles.title} numberOfLines={1}>
+          {title}
+        </Text>
+        <Text style={styles.subtitle} numberOfLines={1}>
+          {subtitle}
+        </Text>
       </View>
-      <ChevronRight size={17} color={AppColors.textTertiary} strokeWidth={2} />
+      <ChevronRight size={17} color={iconWrapColor} strokeWidth={2.25} />
     </Pressable>
   );
 }
@@ -52,11 +66,15 @@ const styles = StyleSheet.create({
     height: 62,
     borderRadius: 16,
     paddingHorizontal: 14,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: AppColors.primary,
+    backgroundColor: 'transparent',
   },
   iconWrap: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },
