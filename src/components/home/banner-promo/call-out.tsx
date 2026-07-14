@@ -47,7 +47,7 @@ export function CalloutBanner({
         </Text>
         <View style={styles.ctaRow}>
           <Text style={styles.ctaText}>Claim now</Text>
-          <ArrowRight size={13} color={AppColors.secondary} strokeWidth={2.25} />
+          <ArrowRight size={13} color={AppColors.white} strokeWidth={2.25} />
         </View>
       </View>
     </Pressable>

@@ -2,7 +2,7 @@ import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
 import { Bell, ChevronDown, MapPin, Search } from 'lucide-react-native';
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 interface HeroHeaderProps {
   topInset: number;
@@ -45,7 +45,7 @@ export function HeroHeader({
 
         <View style={styles.topRow}>
           <Pressable accessibilityRole='button' onPress={onAvatarPress} style={styles.avatar} hitSlop={4}>
-            <Text style={styles.avatarText}>{userInitial}</Text>
+            <Image source={{ uri: 'https://i.pravatar.cc/150?img=12' }} style={styles.avatarImage} resizeMode='cover' />
           </Pressable>
 
           <View style={styles.greetingWrap}>
@@ -120,15 +120,14 @@ const styles = StyleSheet.create({
   },
   topRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: `${AppColors.primaryDark}30`,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    overflow: 'hidden',
     borderWidth: 1.5,
     borderColor: 'rgba(255,255,255,0.35)',
   },
+  avatarImage: { width: '100%', height: '100%' },
   avatarText: { fontFamily: 'Poppins_600SemiBold', fontSize: 15, color: AppColors.white },
   greetingWrap: { flex: 1 },
   greeting: { fontFamily: 'Poppins_600SemiBold', fontSize: 15, color: AppColors.textPrimary, marginBottom: 5 },

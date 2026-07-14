@@ -1,6 +1,6 @@
 export const AppColors = {
   // Brand
-  primary: '#ffb502', // Hammer Orange
+  primary: '#f4a703', // Hammer Orange
   primaryLight: '#FCD34D',
   primaryDark: '#D97706',
 
@@ -8,7 +8,7 @@ export const AppColors = {
   secondaryLight: '#284B6A',
 
   // Backgrounds
-  background: '#FAFAFA',
+  background: '#fff9ee',
   surface: '#FFFFFF',
   card: '#FFFFFF',
 
@@ -20,7 +20,7 @@ export const AppColors = {
 
   // Borders & Divider
   border: '#E5E7EB',
-  divider: '#F3F4F6',
+  divider: '#fff5d6',
 
   // Input
   inputBackground: '#F9FAFB',

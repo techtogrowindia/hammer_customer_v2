@@ -1,10 +1,9 @@
-import { CircleIcon } from '@/components/common/circle-icon/circle-icon';
 import { IconType } from '@/components/home/home.types';
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
 import { Pencil, ShieldCheck } from 'lucide-react-native';
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 interface ProfileHeroProps {
   topInset: number;
@@ -35,21 +34,20 @@ export function ProfileHero({
     <View style={styles.wrap}>
       <View style={[styles.hero, { paddingTop: topInset + 14 }]}>
         <View style={styles.heroDecor} />
-        <Text style={styles.eyebrow}>{eyebrow}</Text>
       </View>
 
       {/*  identity card — overlaps hero + body */}
       <View style={styles.cardWrap}>
         <View style={styles.card}>
-          <CircleIcon
-            Icon={Icon}
-            size={56}
-            iconSize={22}
-            ringColor={AppColors.warningLight}
-            innerBgColor={AppColors.white}
-            iconColor={AppColors.primary}
-          />
-
+          <View style={styles.avatar}>
+            <Image
+              source={{
+                uri: 'https://i.pravatar.cc/200?img=12',
+              }}
+              style={styles.avatarImage}
+              resizeMode='cover'
+            />
+          </View>
           <View style={styles.info}>
             <Text style={styles.name} numberOfLines={1}>
               {name}
@@ -112,6 +110,19 @@ const styles = StyleSheet.create({
     left: 20,
     right: 20,
     bottom: -CARD_HEIGHT / 2,
+  },
+  avatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: AppColors.warningLight,
+  },
+
+  avatarImage: {
+    width: '100%',
+    height: '100%',
   },
   card: {
     flexDirection: 'row',

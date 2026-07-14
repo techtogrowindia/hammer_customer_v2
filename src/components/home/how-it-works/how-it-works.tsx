@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     color: AppColors.textSecondary,
     textAlign: 'center',
   },
-  connector: { flex: 1, height: 1.5, marginTop: 27, backgroundColor: AppColors.divider },
+  connector: { flex: 1, height: 1.5, marginTop: 27, backgroundColor: AppColors.textTertiary },
 });
 
 export default StepRow;

@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     borderColor: AppColors.divider,
     overflow: 'hidden',
   },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, paddingHorizontal: 14 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 16, paddingHorizontal: 14 },
   rowDivider: { borderBottomWidth: 1, borderBottomColor: AppColors.divider },
   textWrap: { flex: 1 },
   label: { fontFamily: 'Poppins_600SemiBold', fontSize: 13, color: AppColors.textPrimary },

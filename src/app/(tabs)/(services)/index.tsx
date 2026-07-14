@@ -242,7 +242,7 @@ export default function ServicesScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: AppColors.white },
+  screen: { flex: 1, backgroundColor: AppColors.background },
   body: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 32 },
 
   chipScroll: { flexGrow: 0 },

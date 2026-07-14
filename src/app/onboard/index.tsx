@@ -70,11 +70,14 @@ export default function OnboardingScreen() {
   const goToOtp = () => {
     router.replace('/otp/generate-otp');
   };
+  const goToPermissionScreen = () => {
+    router.replace('/(auth)/permission/location');
+  };
 
   const goNext = () => {
     if (isLastSlide) {
       setHasOnBoardCompleted(true);
-      goToOtp();
+      goToPermissionScreen();
       return;
     }
 

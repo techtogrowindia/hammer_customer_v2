@@ -71,8 +71,8 @@ export default function TabBar({ state, descriptors, navigation }: BottomTabBarP
 
 const styles = StyleSheet.create({
   wrapper: {
-    backgroundColor: AppColors.surface,
-    borderTopWidth: StyleSheet.hairlineWidth,
+    backgroundColor: AppColors.background,
+    borderTopWidth: 1.5,
     borderTopColor: AppColors.divider,
   },
   container: {

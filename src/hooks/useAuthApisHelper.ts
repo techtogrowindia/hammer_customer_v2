@@ -59,7 +59,7 @@ export const useAuthApisHelper = () => {
         setIsLoggedIn(true);
         updateUserInfo(response?.data);
         // router.replace('/profile/complete-profile');
-        router.replace('/coming-soon');
+        router.replace('/(tabs)/(home)');
       } else {
         throw new Error('Invalid response from server. Missing token or user data.');
       }

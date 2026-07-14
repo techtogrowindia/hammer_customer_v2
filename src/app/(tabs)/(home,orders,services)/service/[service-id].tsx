@@ -3,18 +3,7 @@ import { SectionHeader } from '@/components/home/header/section-header';
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
 import { router, useLocalSearchParams } from 'expo-router';
-import {
-  ArrowLeft,
-  Award,
-  Check,
-  ChevronRight,
-  Clock,
-  Heart,
-  Share2,
-  ShieldCheck,
-  Sparkles,
-  Star,
-} from 'lucide-react-native';
+import { ArrowLeft, Award, Check, ChevronRight, Clock, Heart, ShieldCheck, Star } from 'lucide-react-native';
 import React, { useRef, useState } from 'react';
 import { Animated, Pressable, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -25,6 +14,10 @@ const font = {
   semiBold: 'Poppins_600SemiBold',
   bold: fontTokens.fontFamily.bold,
 };
+
+// TODO: replace with the actual service image (local asset or a prop passed
+// in via useLocalSearchParams / a services data lookup keyed by params.id).
+const SERVICE_IMAGE_URL = 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&h=600&fit=crop';
 
 type Package = {
   id: string;
@@ -121,21 +114,17 @@ export default function ServiceDetailsScreen() {
     extrapolate: 'clamp',
   });
 
-  // Icon block + decor circle fade and shrink away early, well before the
-  // hero finishes collapsing, so they don't look squashed mid-transition.
-  const iconOpacity = scrollY.interpolate({
-    inputRange: [0, COLLAPSE_RANGE * 0.6],
+  // Full-bleed background image fades out across the whole collapse range,
+  // so by the time the hero reaches its min height it's a solid color bar
+  // (AppColors.primary, set on `hero` itself) rather than a squashed photo.
+  const imageOpacity = scrollY.interpolate({
+    inputRange: [0, COLLAPSE_RANGE],
     outputRange: [1, 0],
     extrapolate: 'clamp',
   });
-  const iconScale = scrollY.interpolate({
-    inputRange: [0, COLLAPSE_RANGE * 0.6],
-    outputRange: [1, 0.5],
-    extrapolate: 'clamp',
-  });
 
-  // Compact title fades in only once the icon has mostly disappeared, so the
-  // two never visually overlap.
+  // Compact title fades in only once the image is mostly gone, so the
+  // collapsed header reads as clean solid-color + text.
   const compactTitleOpacity = scrollY.interpolate({
     inputRange: [COLLAPSE_RANGE * 0.5, COLLAPSE_RANGE],
     outputRange: [0, 1],
@@ -147,10 +136,18 @@ export default function ServiceDetailsScreen() {
       <StatusBar barStyle='light-content' backgroundColor={AppColors.primary} translucent={false} />
 
       {/* Collapsing hero — sits above the scroll content, animated by scrollY */}
-      <Animated.View style={[styles.hero, { height: heroHeight, paddingTop: top + 12 }]}>
-        <View style={styles.heroDecor} />
+      <Animated.View style={[styles.hero, { height: heroHeight }]}>
+        <Animated.Image
+          source={{ uri: SERVICE_IMAGE_URL }}
+          resizeMode='cover'
+          style={[StyleSheet.absoluteFillObject, { opacity: imageOpacity }]}
+        />
+        {/* Navy tint over the photo so white icons/text stay legible against
+            any image, and so the hero reads as on-brand (secondary navy)
+            rather than washed out. */}
+        <Animated.View style={[styles.heroOverlay, { opacity: imageOpacity }]} />
 
-        <View style={styles.heroTopRow}>
+        <View style={[styles.heroTopRow, { paddingTop: top + 12 }]}>
           <Pressable
             accessibilityRole='button'
             onPress={() => router.back()}
@@ -168,13 +165,6 @@ export default function ServiceDetailsScreen() {
           <View style={{ flexDirection: 'row', gap: 10 }}>
             <Pressable
               accessibilityRole='button'
-              style={({ pressed }) => [styles.iconBtn, pressed && { opacity: 0.8 }]}
-              hitSlop={8}
-            >
-              <Share2 size={17} color={AppColors.white} strokeWidth={2} />
-            </Pressable>
-            <Pressable
-              accessibilityRole='button'
               onPress={() => setIsFavorite((v) => !v)}
               style={({ pressed }) => [styles.iconBtn, pressed && { opacity: 0.8 }]}
               hitSlop={8}
@@ -188,10 +178,6 @@ export default function ServiceDetailsScreen() {
             </Pressable>
           </View>
         </View>
-
-        <Animated.View style={[styles.heroIconWrap, { opacity: iconOpacity, transform: [{ scale: iconScale }] }]}>
-          <Sparkles size={40} color={AppColors.white} strokeWidth={1.5} />
-        </Animated.View>
       </Animated.View>
 
       <Animated.ScrollView
@@ -297,8 +283,8 @@ export default function ServiceDetailsScreen() {
                     <Star
                       key={i}
                       size={11}
-                      color={i < review.rating ? AppColors.primary : AppColors.divider}
-                      fill={i < review.rating ? AppColors.primary : AppColors.divider}
+                      color={i < review.rating ? AppColors.primary : AppColors.border}
+                      fill={i < review.rating ? AppColors.primary : AppColors.border}
                       strokeWidth={0}
                     />
                   ))}
@@ -336,28 +322,29 @@ export default function ServiceDetailsScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: AppColors.white },
+  screen: { flex: 1, backgroundColor: AppColors.background },
 
   // Collapsing hero
   hero: {
     backgroundColor: AppColors.primary,
-    paddingHorizontal: 20,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
     overflow: 'hidden',
     zIndex: 10,
   },
-  heroDecor: {
-    position: 'absolute',
-    width: 220,
-    height: 220,
-    borderRadius: 110,
-    top: -90,
-    right: -60,
-    backgroundColor: 'rgba(255,255,255,0.06)',
+  heroOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    // Was accidentally `${AppColors.primaryDark}01` (~0.4% opacity, basically
+    // invisible) — that left the photo untinted with poor icon/text contrast.
+    // A navy (secondary) tint at ~30% both fixes contrast and ties the hero
+    // back to the brand's secondary color instead of relying on primary alone.
+    backgroundColor: `${AppColors.secondary}4D`,
   },
 
-  heroTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  heroTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+  },
   compactTitle: {
     flex: 1,
     marginHorizontal: 12,
@@ -374,16 +361,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'rgba(255,255,255,0.16)',
   },
-  heroIconWrap: {
-    alignSelf: 'center',
-    width: 96,
-    height: 96,
-    borderRadius: 26,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.14)',
-    marginTop: 24,
-  },
 
   body: { paddingHorizontal: 20, paddingTop: 20 },
 
@@ -397,7 +374,7 @@ const styles = StyleSheet.create({
     backgroundColor: AppColors.warningLight,
     marginBottom: 8,
   },
-  categoryTagText: { fontFamily: font.semiBold, fontSize: 11, color: AppColors.primary },
+  categoryTagText: { fontFamily: font.semiBold, fontSize: 11, color: AppColors.primaryDark },
   title: { fontFamily: font.bold, fontSize: 21, color: AppColors.textPrimary },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 8 },
   ratingChip: {
@@ -413,17 +390,20 @@ const styles = StyleSheet.create({
   metaText: { fontFamily: font.regular, fontSize: 12, color: AppColors.textSecondary },
   metaDot: { fontSize: 12, color: AppColors.textTertiary },
 
-  // Package selector
+  // Package selector — unselected border now uses a neutral (AppColors.border)
+  // instead of primaryLight, which read as "half-selected" since it's a
+  // saturated brand gold rather than a neutral gray.
   packageCard: {
     flexDirection: 'row',
     gap: 12,
     padding: 14,
     borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: AppColors.divider,
+    borderWidth: 1,
+    borderColor: AppColors.border,
+    backgroundColor: AppColors.surface,
     marginBottom: 10,
   },
-  packageCardSelected: { borderColor: AppColors.primary, backgroundColor: AppColors.warningLight },
+  packageCardSelected: { borderColor: AppColors.primary, borderWidth: 1.5, backgroundColor: AppColors.white },
   radioOuter: {
     width: 20,
     height: 20,
@@ -448,11 +428,14 @@ const styles = StyleSheet.create({
   packageDescription: { marginTop: 4, fontFamily: font.regular, fontSize: 12, color: AppColors.textSecondary },
   packageDuration: { marginTop: 6, fontFamily: font.medium, fontSize: 11, color: AppColors.textTertiary },
 
-  // Included
+  // Included — was borderColor: divider with no background, which blended
+  // into the cream page background (#fff5d6 border on #fff9ee page). Now a
+  // real surface card with a neutral border so it visually separates.
   includedCard: {
     borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: AppColors.divider,
+    borderWidth: 1,
+    borderColor: AppColors.border,
+    backgroundColor: AppColors.surface,
     overflow: 'hidden',
     marginBottom: 24,
   },
@@ -468,12 +451,16 @@ const styles = StyleSheet.create({
   },
   includedText: { flex: 1, fontFamily: font.regular, fontSize: 12.5, color: AppColors.textPrimary },
 
-  // Trust
+  // Trust — warningLight (#FFFBEB) was nearly identical to the page
+  // background (#fff9ee), so the strip had no visible separation. Now a
+  // surface card with a border, same treatment as the cards above it.
   trustRow: {
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 16,
-    backgroundColor: AppColors.warningLight,
+    backgroundColor: AppColors.surface,
+    borderWidth: 1,
+    borderColor: AppColors.border,
     paddingVertical: 16,
     marginBottom: 24,
   },
@@ -481,12 +468,13 @@ const styles = StyleSheet.create({
   trustText: { fontFamily: font.medium, fontSize: 10.5, color: AppColors.textSecondary, textAlign: 'center' },
   trustDivider: { width: 1, height: 28, backgroundColor: AppColors.divider },
 
-  // Reviews
+  // Reviews — same background/border fix as includedCard/trustRow
   reviewCard: {
     padding: 14,
     borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: AppColors.divider,
+    borderWidth: 1,
+    borderColor: AppColors.border,
+    backgroundColor: AppColors.surface,
   },
   reviewHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   reviewName: { fontFamily: font.semiBold, fontSize: 12.5, color: AppColors.textPrimary },
@@ -507,9 +495,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingTop: 14,
-    backgroundColor: AppColors.white,
-    borderTopWidth: 1.5,
-    borderTopColor: AppColors.divider,
+    backgroundColor: AppColors.background,
+    borderTopWidth: 1,
+    borderTopColor: AppColors.border,
   },
   bookingBarLabel: { fontFamily: font.regular, fontSize: 11, color: AppColors.textTertiary },
   bookingBarPriceRow: { flexDirection: 'row', alignItems: 'baseline', gap: 6, marginTop: 2 },

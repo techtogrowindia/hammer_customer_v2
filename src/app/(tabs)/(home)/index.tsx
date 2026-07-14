@@ -10,6 +10,7 @@ import { StepRow } from '@/components/home/how-it-works/how-it-works';
 import { BookAgainList } from '@/components/home/services/book-again';
 import { ServiceGrid } from '@/components/home/services/service-grid';
 import { AppColors } from '@/core/theme/app-colors';
+import { useBoundStore } from '@/store/boundStore';
 import { router } from 'expo-router';
 import {
   CalendarCheck2,
@@ -29,6 +30,7 @@ import {
 import React from 'react';
 import { ScrollView, StatusBar, StyleSheet, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useShallow } from 'zustand/shallow';
 
 const categories: CategoryItem[] = [
   { id: 'cleaning', label: 'Cleaning', Icon: Sparkles },
@@ -68,6 +70,12 @@ const howItWorks: HowItWorksStep[] = [
 export default function HomeScreen() {
   const { top } = useSafeAreaInsets();
 
+  const { userInfo } = useBoundStore(
+    useShallow((state) => ({
+      userInfo: state.userInfo,
+    })),
+  );
+
   const goToSearch = () => router.push('/services');
   const goToCategory = (id: string) => router.push({ pathname: '/services', params: { category: id } } as never);
   const goToOrders = () => router.push('/orders');
@@ -81,7 +89,7 @@ export default function HomeScreen() {
           userInitial='AJ'
           topInset={top}
           locationLabel='Home · Indiranagar'
-          greeting='Good morning, Aswick'
+          greeting={`Hi, ${userInfo?.name || 'User'}`}
           searchPlaceholder='Try "AC repair" or "Salon at home"'
           onSearchPress={goToSearch}
           onLocationPress={() => router.push('/address/select-address' as never)}
@@ -116,6 +124,6 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: AppColors.white },
+  screen: { flex: 1, backgroundColor: AppColors.background },
   body: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 32 },
 });

@@ -34,6 +34,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: AppColors.divider,
     paddingVertical: 16,
+    backgroundColor: AppColors.white,
     marginBottom: 16,
   },
   item: { flex: 1, alignItems: 'center' },

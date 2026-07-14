@@ -1,8 +1,9 @@
 import { AppColors } from '@/core/theme/app-colors';
+import { usePermissions } from '@/hooks/usePermission';
 import { router } from 'expo-router';
 import { MapPin } from 'lucide-react-native';
 import React from 'react';
-import { StatusBar } from 'react-native';
+import { Alert, StatusBar } from 'react-native';
 import { PermissionPrompt } from './permisson-prompt';
 
 const benefits = [
@@ -12,31 +13,53 @@ const benefits = [
 ];
 
 export default function LocationPermissionScreen() {
-  const requestPermission = async () => {
-    // Triggers the native OS location permission dialog.
-    // const { status } = await Location.requestForegroundPermissionsAsync();
-    // Unlike notifications, location genuinely affects core functionality
-    // (finding nearby pros, address autofill) — you may want to route a
-    // denial to a different screen than a grant (e.g. straight to manual
-    // address entry) rather than always continuing to the same place.
-    router.replace('/' as never);
+  const { requestLocationPermission, openSettings } = usePermissions();
+
+  const handleAllow = async () => {
+    const result = await requestLocationPermission();
+
+    if (!result.granted && !result.canAskAgain) {
+      Alert.alert(
+        'Location Permission Required',
+        'Location access has been permanently denied. You can enable it from your device settings.',
+        [
+          {
+            text: 'Not Now',
+            style: 'cancel',
+            onPress: () => router.replace('/'),
+          },
+          {
+            text: 'Open Settings',
+            onPress: async () => {
+              await openSettings();
+              router.replace('/');
+            },
+          },
+        ],
+      );
+
+      return;
+    }
+
+    router.replace('/');
   };
 
-  const skip = () => {
-    router.replace('/' as never);
+  const handleSkip = () => {
+    router.replace('/');
   };
 
   return (
     <>
       <StatusBar barStyle='dark-content' backgroundColor={AppColors.white} />
+
       <PermissionPrompt
         Icon={MapPin}
         title='Enable your location'
         description='We use your location to show services and professionals available in your area.'
         benefits={benefits}
         primaryLabel='Allow Location Access'
-        onAllow={requestPermission}
-        onSkip={skip}
+        onAllow={handleAllow}
+        // onSkip={handleSkip}
       />
     </>
   );

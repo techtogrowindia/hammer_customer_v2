@@ -2,6 +2,7 @@ import { AppColors } from '@/core/theme/app-colors';
 import React, { useRef, useState } from 'react';
 import {
   Animated,
+  Image,
   NativeScrollEvent,
   NativeSyntheticEvent,
   StyleSheet,
@@ -14,12 +15,12 @@ import { BannerItem } from '../home.types';
 interface BannerCarouselProps {
   banners: BannerItem[];
   horizontalInset?: number;
-  cardColor?: string;
 }
 
-export function BannerCarousel({ banners, horizontalInset = 20, cardColor = AppColors.primary }: BannerCarouselProps) {
+export function BannerCarousel({ banners, horizontalInset = 20 }: BannerCarouselProps) {
   const { width } = useWindowDimensions();
   const bannerWidth = width - horizontalInset * 2;
+
   const scrollX = useRef(new Animated.Value(0)).current;
   const [bannerIndex, setBannerIndex] = useState(0);
 
@@ -34,32 +35,42 @@ export function BannerCarousel({ banners, horizontalInset = 20, cardColor = AppC
       <Animated.ScrollView
         horizontal
         pagingEnabled
-        showsHorizontalScrollIndicator={false}
         snapToInterval={bannerWidth + 12}
         decelerationRate='fast'
+        showsHorizontalScrollIndicator={false}
+        scrollEventThrottle={16}
         onMomentumScrollEnd={onBannerScrollEnd}
         onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], { useNativeDriver: true })}
-        scrollEventThrottle={16}
         style={[styles.bannerScroll, { marginHorizontal: -horizontalInset }]}
         contentContainerStyle={[styles.bannerContent, { paddingHorizontal: horizontalInset }]}
       >
-        {banners.map((b) => (
-          <View key={b.id} style={[styles.bannerCard, { width: bannerWidth, backgroundColor: cardColor }]}>
-            <View style={styles.bannerDecor} />
-            <View style={styles.bannerTag}>
-              <Text style={[styles.bannerTagText, { color: AppColors.primaryDark }]}>{b.tag}</Text>
+        {banners.map((banner, index) => (
+          <View key={banner.id} style={[styles.bannerCard, { width: bannerWidth }]}>
+            <Image
+              source={{
+                uri: `https://picsum.photos/800/400?random=${index + 20}`,
+              }}
+              style={styles.bannerImage}
+            />
+
+            <View style={styles.overlay} />
+
+            <View style={styles.content}>
+              <View style={styles.bannerTag}>
+                <Text style={styles.bannerTagText}>{banner.tag}</Text>
+              </View>
+
+              <Text style={styles.bannerTitle}>{banner.title}</Text>
+
+              <Text style={styles.bannerSubtitle}>{banner.subtitle}</Text>
             </View>
-            <Text style={styles.bannerTitle}>{b.title}</Text>
-            <Text style={styles.bannerSubtitle}>{b.subtitle}</Text>
           </View>
         ))}
       </Animated.ScrollView>
+
       <View style={styles.dots}>
-        {banners.map((b, i) => (
-          <View
-            key={b.id}
-            style={[styles.dot, bannerIndex === i && [styles.dotActive, { backgroundColor: cardColor }]]}
-          />
+        {banners.map((_, index) => (
+          <View key={index} style={[styles.dot, bannerIndex === index && styles.dotActive]} />
         ))}
       </View>
     </>
@@ -68,48 +79,82 @@ export function BannerCarousel({ banners, horizontalInset = 20, cardColor = AppC
 
 const styles = StyleSheet.create({
   bannerScroll: {},
-  bannerContent: { gap: 12 },
+
+  bannerContent: {
+    gap: 12,
+  },
+
   bannerCard: {
-    height: 134,
+    height: 180,
     borderRadius: 22,
-    padding: 18,
-    justifyContent: 'center',
     overflow: 'hidden',
-    shadowColor: AppColors.primaryDark,
-    shadowOpacity: 0.2,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 3,
   },
-  bannerDecor: {
-    position: 'absolute',
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    top: -55,
-    right: -35,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+
+  bannerImage: {
+    ...StyleSheet.absoluteFillObject,
+    width: '100%',
+    height: '100%',
   },
+
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+  },
+
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: 20,
+  },
+
   bannerTag: {
     alignSelf: 'flex-start',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 10,
-    backgroundColor: AppColors.white,
-    marginBottom: 10,
+    backgroundColor: AppColors.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    marginBottom: 12,
   },
-  bannerTagText: { fontFamily: 'Poppins_600SemiBold', fontSize: 10 },
-  bannerTitle: { fontFamily: 'Poppins_600SemiBold', fontSize: 20, color: AppColors.secondary },
+
+  bannerTagText: {
+    color: AppColors.white,
+    fontFamily: 'Poppins_600SemiBold',
+    fontSize: 10,
+  },
+
+  bannerTitle: {
+    color: AppColors.white,
+    fontSize: 24,
+    fontFamily: 'Poppins_600SemiBold',
+  },
+
   bannerSubtitle: {
-    marginTop: 3,
+    marginTop: 6,
+    color: AppColors.white,
+    opacity: 0.9,
+    fontSize: 13,
     fontFamily: 'Poppins_400Regular',
-    fontSize: 12,
-    color: AppColors.secondaryLight,
-    opacity: 0.85,
   },
-  dots: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: 12, marginBottom: 26 },
-  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: AppColors.divider },
-  dotActive: { width: 18 },
+
+  dots: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 12,
+    marginBottom: 26,
+  },
+
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: AppColors.divider,
+  },
+
+  dotActive: {
+    width: 18,
+    backgroundColor: AppColors.primary,
+  },
 });
 
 export default BannerCarousel;

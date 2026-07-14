@@ -1,8 +1,8 @@
+import { PageHeader } from '@/components/common/header/page-header';
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
-  ArrowLeft,
   Banknote,
   Calendar,
   ChevronRight,
@@ -15,7 +15,6 @@ import {
 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
-import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const font = {
@@ -78,24 +77,7 @@ export default function BookingScreen() {
     <View style={styles.screen}>
       <StatusBar barStyle='light-content' backgroundColor={AppColors.primary} translucent={false} />
 
-      <View style={[styles.hero, { paddingTop: top + 12, paddingBottom: 14 }]}>
-        <View style={styles.heroDecor} />
-
-        <View style={styles.heroTopRow}>
-          <Pressable
-            accessibilityRole='button'
-            onPress={() => router.back()}
-            style={({ pressed }) => [styles.iconBtn, pressed && { opacity: 0.8 }]}
-            hitSlop={8}
-          >
-            <ArrowLeft size={19} color={AppColors.white} strokeWidth={2.25} />
-          </Pressable>
-
-          <Animated.Text style={styles.compactTitle} numberOfLines={1}>
-            Bathroom Deep Cleaning
-          </Animated.Text>
-        </View>
-      </View>
+      <PageHeader topInset={top} title='Bathroom Deep Cleaning' onBack={() => router.back()} />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Selected service summary */}
@@ -228,34 +210,16 @@ export default function BookingScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: AppColors.white },
-
-  headerBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: AppColors.divider,
-  },
-  backBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: AppColors.warningLight,
-  },
-  backBtnPressed: { opacity: 0.8 },
-  headerTitle: { fontFamily: font.semiBold, fontSize: 16, color: AppColors.textPrimary },
+  screen: { flex: 1, backgroundColor: AppColors.background },
 
   scrollContent: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 24 },
 
   serviceSummary: {
     padding: 14,
     borderRadius: 16,
-    backgroundColor: AppColors.warningLight,
+    backgroundColor: AppColors.surface,
+    borderWidth: 1,
+    borderColor: AppColors.border,
     marginBottom: 22,
   },
   serviceSummaryLabel: { fontFamily: font.regular, fontSize: 11, color: AppColors.textSecondary },
@@ -276,8 +240,9 @@ const styles = StyleSheet.create({
     gap: 12,
     padding: 14,
     borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: AppColors.divider,
+    borderWidth: 1,
+    borderColor: AppColors.border,
+    backgroundColor: AppColors.surface,
     marginBottom: 22,
   },
   addressCardPressed: { backgroundColor: AppColors.warningLight },
@@ -299,9 +264,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: AppColors.divider,
-    backgroundColor: AppColors.white,
+    borderWidth: 1,
+    borderColor: AppColors.border,
+    backgroundColor: AppColors.surface,
   },
   dateChipSelected: { backgroundColor: AppColors.primary, borderColor: AppColors.primary },
   dateChipDay: { fontFamily: font.medium, fontSize: 11, color: AppColors.textSecondary },
@@ -315,8 +280,9 @@ const styles = StyleSheet.create({
     gap: 12,
     padding: 13,
     borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: AppColors.divider,
+    borderWidth: 1,
+    borderColor: AppColors.border,
+    backgroundColor: AppColors.surface,
     marginBottom: 10,
   },
   slotRowSelected: { borderColor: AppColors.primary, backgroundColor: AppColors.warningLight },
@@ -326,7 +292,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: AppColors.white,
+    backgroundColor: AppColors.warningLight,
   },
   slotLabel: { fontFamily: font.semiBold, fontSize: 13, color: AppColors.textPrimary },
   slotTime: { marginTop: 2, fontFamily: font.regular, fontSize: 11, color: AppColors.textTertiary },
@@ -345,13 +311,14 @@ const styles = StyleSheet.create({
   priceSummaryCard: {
     padding: 16,
     borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: AppColors.divider,
+    borderWidth: 1,
+    borderColor: AppColors.border,
+    backgroundColor: AppColors.surface,
   },
   priceRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 4 },
   priceRowLabel: { fontFamily: font.regular, fontSize: 13, color: AppColors.textSecondary },
   priceRowValue: { fontFamily: font.medium, fontSize: 13, color: AppColors.textPrimary },
-  priceDivider: { height: 1, backgroundColor: AppColors.divider, marginVertical: 10 },
+  priceDivider: { height: 1, backgroundColor: AppColors.border, marginVertical: 10 },
   priceTotalLabel: { fontFamily: font.semiBold, fontSize: 14, color: AppColors.textPrimary },
   priceTotalValue: { fontFamily: font.bold, fontSize: 16, color: AppColors.primary },
 
@@ -362,9 +329,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingTop: 14,
-    borderTopWidth: 1.5,
-    borderTopColor: AppColors.divider,
-    backgroundColor: AppColors.white,
+    borderTopWidth: 1,
+    borderTopColor: AppColors.border,
+    backgroundColor: AppColors.surface,
   },
   confirmBarLabel: { fontFamily: font.regular, fontSize: 11, color: AppColors.textTertiary },
   confirmBarPrice: { marginTop: 2, fontFamily: font.bold, fontSize: 19, color: AppColors.textPrimary },
@@ -384,39 +351,4 @@ const styles = StyleSheet.create({
   },
   confirmBtnPressed: { backgroundColor: AppColors.primaryDark },
   confirmBtnText: { fontFamily: font.semiBold, fontSize: 14, color: AppColors.white },
-  hero: {
-    backgroundColor: AppColors.primary,
-    paddingHorizontal: 20,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
-    overflow: 'hidden',
-    zIndex: 10,
-  },
-  heroDecor: {
-    position: 'absolute',
-    width: 220,
-    height: 220,
-    borderRadius: 110,
-    top: -90,
-    right: -60,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-  },
-
-  heroTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  compactTitle: {
-    flex: 1,
-    marginHorizontal: 12,
-    fontFamily: font.semiBold,
-    fontSize: 15,
-    color: AppColors.white,
-    textAlign: 'center',
-  },
-  iconBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.16)',
-  },
 });

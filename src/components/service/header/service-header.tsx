@@ -1,6 +1,6 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
-import { Bell, ChevronRight, MapPin } from 'lucide-react-native';
+import { ChevronRight, MapPin } from 'lucide-react-native';
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -41,7 +41,7 @@ export function ServicesHero({
       <View style={[styles.hero, { paddingTop: topInset + 14 }]}>
         <View style={styles.heroDecor} />
 
-        <View style={styles.topRow}>
+        {/* <View style={styles.topRow}>
           <View style={{ flex: 1 }}>
             <Text style={styles.title}>{title}</Text>
             <Text style={styles.subtitle}>{subtitle}</Text>
@@ -56,7 +56,7 @@ export function ServicesHero({
             <Bell size={17} color={AppColors.secondary} strokeWidth={2} />
             {hasUnreadNotification && <View style={styles.bellDot} />}
           </Pressable>
-        </View>
+        </View> */}
       </View>
 
       {/* Floating address card — overlaps hero + body */}
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
   hero: {
     backgroundColor: AppColors.primary,
     paddingHorizontal: 20,
-    paddingBottom: CARD_HEIGHT / 2 + 26,
+    paddingBottom: 32,
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
     overflow: 'hidden',

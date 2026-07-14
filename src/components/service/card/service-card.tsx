@@ -2,7 +2,7 @@ import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
 import { ChevronRight, Clock, Flame, Heart, Star } from 'lucide-react-native';
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 type IconType = typeof Flame;
 
@@ -33,19 +33,19 @@ const TAG_CONFIG = {
   new: { label: 'New', color: '#2E9E5B' },
 };
 
-/**
- * Two fixes from the last pass:
- * 1. `card` had lost `backgroundColor` when the border was added, so
- *    the card was see-through against whatever sits behind the list —
- *    restored `backgroundColor: AppColors.white`, and eased the shadow
- *    slightly since a border + a heavy shadow together double up on
- *    edge definition.
- * 2. The circular plus-only button read as "add to cart," not "see
- *    more" — swapped for a labeled "View" pill with a chevron, so the
- *    action is unambiguous at a glance.
- */
+const serviceImages = [
+  'https://picsum.photos/id/1015/200/200',
+  'https://picsum.photos/id/1025/200/200',
+  'https://picsum.photos/id/1035/200/200',
+  'https://picsum.photos/id/1043/200/200',
+  'https://picsum.photos/id/1050/200/200',
+  'https://picsum.photos/id/1060/200/200',
+];
+
 export function ServiceCard({ service, onPress, isFavorite = false, onToggleFavorite }: ServiceCardProps) {
   const tagConfig = service.tag ? TAG_CONFIG[service.tag] : null;
+
+  const imageUri = serviceImages[parseInt(service.id, 10) % serviceImages.length || 0];
 
   return (
     <Pressable
@@ -62,8 +62,8 @@ export function ServiceCard({ service, onPress, isFavorite = false, onToggleFavo
 
       <Pressable
         accessibilityRole='button'
-        onPress={() => onToggleFavorite?.(service.id)}
         hitSlop={8}
+        onPress={() => onToggleFavorite?.(service.id)}
         style={styles.favoriteBtn}
       >
         <Heart
@@ -75,8 +75,8 @@ export function ServiceCard({ service, onPress, isFavorite = false, onToggleFavo
       </Pressable>
 
       <View style={[styles.topRow, tagConfig && styles.topRowWithTag]}>
-        <View style={styles.iconBlock}>
-          <service.Icon size={26} color={AppColors.primary} strokeWidth={2} />
+        <View style={styles.imageBlock}>
+          <Image source={{ uri: imageUri }} style={styles.image} resizeMode='cover' />
         </View>
 
         <View style={styles.info}>
@@ -86,9 +86,10 @@ export function ServiceCard({ service, onPress, isFavorite = false, onToggleFavo
 
           <View style={styles.metaRow}>
             <View style={styles.ratingChip}>
-              <Star size={10} color={AppColors.white} strokeWidth={2} fill={AppColors.white} />
+              <Star size={10} color={AppColors.white} fill={AppColors.white} strokeWidth={2} />
               <Text style={styles.ratingChipText}>{service.rating}</Text>
             </View>
+
             <Text style={styles.reviews}>{service.reviews} reviews</Text>
           </View>
 
@@ -100,11 +101,13 @@ export function ServiceCard({ service, onPress, isFavorite = false, onToggleFavo
       </View>
 
       <View style={styles.footer}>
-        <View style={styles.priceBlock}>
+        <View>
           <View style={styles.priceRow}>
             <Text style={styles.price}>{service.price}</Text>
+
             {service.originalPrice && <Text style={styles.originalPrice}>{service.originalPrice}</Text>}
           </View>
+
           {service.discountPercent && <Text style={styles.discountText}>{service.discountPercent}% off</Text>}
         </View>
 
@@ -114,6 +117,7 @@ export function ServiceCard({ service, onPress, isFavorite = false, onToggleFavo
           style={({ pressed }) => [styles.viewBtn, pressed && styles.viewBtnPressed]}
         >
           <Text style={styles.viewBtnText}>View</Text>
+
           <ChevronRight size={14} color={AppColors.white} strokeWidth={2.5} />
         </Pressable>
       </View>
@@ -133,10 +137,16 @@ const styles = StyleSheet.create({
     shadowColor: AppColors.primaryDark,
     shadowOpacity: 0.05,
     shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
     elevation: 2,
   },
-  cardPressed: { backgroundColor: AppColors.warningLight },
+
+  cardPressed: {
+    backgroundColor: AppColors.warningLight,
+  },
 
   tagRibbon: {
     position: 'absolute',
@@ -149,7 +159,12 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderBottomRightRadius: 12,
   },
-  tagRibbonText: { fontFamily: 'Poppins_600SemiBold', fontSize: 9, color: AppColors.white },
+
+  tagRibbonText: {
+    fontFamily: 'Poppins_600SemiBold',
+    fontSize: 9,
+    color: AppColors.white,
+  },
 
   favoriteBtn: {
     position: 'absolute',
@@ -161,22 +176,51 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: AppColors.warningLight,
-    zIndex: 1,
+    zIndex: 10,
   },
 
-  topRow: { flexDirection: 'row', gap: 12, marginTop: 6 },
-  topRowWithTag: { marginTop: 22 },
-  iconBlock: {
-    width: 60,
-    height: 60,
+  topRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 6,
+  },
+
+  topRowWithTag: {
+    marginTop: 22,
+  },
+
+  imageBlock: {
+    width: 72,
+    height: 72,
     borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
+    overflow: 'hidden',
     backgroundColor: AppColors.warningLight,
   },
-  info: { flex: 1, justifyContent: 'center' },
-  name: { fontFamily: 'Poppins_600SemiBold', fontSize: 15, color: AppColors.textPrimary, marginBottom: 6 },
-  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 5 },
+
+  image: {
+    width: '100%',
+    height: '100%',
+  },
+
+  info: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+
+  name: {
+    fontFamily: 'Poppins_600SemiBold',
+    fontSize: 15,
+    color: AppColors.textPrimary,
+    marginBottom: 6,
+  },
+
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 5,
+  },
+
   ratingChip: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -186,30 +230,67 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     backgroundColor: AppColors.primary,
   },
-  ratingChipText: { fontFamily: 'Poppins_600SemiBold', fontSize: 10, color: AppColors.white },
-  reviews: { fontFamily: fontTokens.fontFamily.regular, fontSize: 11, color: AppColors.textSecondary },
-  durationRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  duration: { fontFamily: fontTokens.fontFamily.regular, fontSize: 11, color: AppColors.textTertiary },
+
+  ratingChipText: {
+    fontFamily: 'Poppins_600SemiBold',
+    fontSize: 10,
+    color: AppColors.white,
+  },
+
+  reviews: {
+    fontFamily: fontTokens.fontFamily.regular,
+    fontSize: 11,
+    color: AppColors.textSecondary,
+  },
+
+  durationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+
+  duration: {
+    fontFamily: fontTokens.fontFamily.regular,
+    fontSize: 11,
+    color: AppColors.textPrimary,
+  },
 
   footer: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
     justifyContent: 'space-between',
+    alignItems: 'flex-end',
     marginTop: 14,
     paddingTop: 14,
     borderTopWidth: 1,
     borderTopColor: AppColors.divider,
   },
-  priceBlock: {},
-  priceRow: { flexDirection: 'row', alignItems: 'baseline', gap: 6 },
-  price: { fontFamily: 'Poppins_700Bold', fontSize: 17, color: AppColors.textPrimary },
+
+  priceRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 6,
+  },
+
+  price: {
+    fontFamily: 'Poppins_700Bold',
+    fontSize: 17,
+    color: AppColors.textPrimary,
+  },
+
   originalPrice: {
     fontFamily: fontTokens.fontFamily.regular,
     fontSize: 12,
     color: AppColors.textTertiary,
     textDecorationLine: 'line-through',
   },
-  discountText: { marginTop: 2, fontFamily: 'Poppins_600SemiBold', fontSize: 11, color: '#2E9E5B' },
+
+  discountText: {
+    marginTop: 2,
+    fontFamily: 'Poppins_600SemiBold',
+    fontSize: 11,
+    color: '#2E9E5B',
+  },
+
   viewBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -218,14 +299,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 13,
     backgroundColor: AppColors.primary,
-    shadowColor: AppColors.primaryDark,
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
   },
-  viewBtnPressed: { backgroundColor: AppColors.primaryDark },
-  viewBtnText: { fontFamily: 'Poppins_600SemiBold', fontSize: 12.5, color: AppColors.white },
+
+  viewBtnPressed: {
+    backgroundColor: AppColors.primaryDark,
+  },
+
+  viewBtnText: {
+    fontFamily: 'Poppins_600SemiBold',
+    fontSize: 12.5,
+    color: AppColors.white,
+  },
 });
 
 export default ServiceCard;
