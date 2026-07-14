@@ -15,7 +15,7 @@ import {
 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const font = {
   regular: fontTokens.fontFamily.regular,
@@ -191,7 +191,7 @@ export default function BookingScreen() {
       </ScrollView>
 
       {/* Sticky confirm bar */}
-      <View style={[styles.confirmBar, { paddingBottom: 12 }]}>
+      <SafeAreaView edges={['bottom']} style={[styles.confirmBar, { paddingBottom: 12 }]}>
         <View>
           <Text style={styles.confirmBarLabel}>Total</Text>
           <Text style={styles.confirmBarPrice}>₹{total}</Text>
@@ -204,7 +204,7 @@ export default function BookingScreen() {
           <Calendar size={16} color={AppColors.white} strokeWidth={2.25} />
           <Text style={styles.confirmBtnText}>Confirm Booking</Text>
         </Pressable>
-      </View>
+      </SafeAreaView>
     </View>
   );
 }

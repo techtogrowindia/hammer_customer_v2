@@ -6,7 +6,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { ArrowLeft, Award, Check, ChevronRight, Clock, Heart, ShieldCheck, Star } from 'lucide-react-native';
 import React, { useRef, useState } from 'react';
 import { Animated, Pressable, StatusBar, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const font = {
   regular: fontTokens.fontFamily.regular,
@@ -297,7 +297,7 @@ export default function ServiceDetailsScreen() {
       </Animated.ScrollView>
 
       {/* Sticky booking bar */}
-      <View style={[styles.bookingBar, { paddingBottom: 12 }]}>
+      <SafeAreaView edges={['bottom']} style={[styles.bookingBar, { paddingBottom: 12 }]}>
         <View>
           <Text style={styles.bookingBarLabel}>{activePackage.label}</Text>
           <View style={styles.bookingBarPriceRow}>
@@ -316,7 +316,7 @@ export default function ServiceDetailsScreen() {
           <Text style={styles.bookNowBtnText}>Book Now</Text>
           <ChevronRight size={17} color={AppColors.white} strokeWidth={2.25} />
         </Pressable>
-      </View>
+      </SafeAreaView>
     </View>
   );
 }
@@ -495,7 +495,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingTop: 14,
-    backgroundColor: AppColors.background,
+    backgroundColor: AppColors.white,
     borderTopWidth: 1,
     borderTopColor: AppColors.border,
   },

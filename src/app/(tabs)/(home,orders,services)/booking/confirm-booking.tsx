@@ -85,7 +85,7 @@ export default function BookingConfirmationScreen() {
       </ScrollView>
 
       {/* Actions */}
-      <View style={[styles.actions, { paddingBottom: bottom + 16 }]}>
+      <View style={[styles.actions, { paddingBottom: 16 }]}>
         <Pressable
           accessibilityRole='button'
           onPress={goToTracking}
@@ -108,8 +108,8 @@ export default function BookingConfirmationScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: AppColors.white },
-  scrollContent: { paddingHorizontal: 20, paddingTop: 32, paddingBottom: 24 },
+  screen: { flex: 1, backgroundColor: AppColors.background },
+  scrollContent: { paddingHorizontal: 20, paddingTop: 32 },
 
   // Success block
   successBlock: { alignItems: 'center', marginBottom: 28 },
