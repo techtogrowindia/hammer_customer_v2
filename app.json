@@ -7,10 +7,12 @@
     "icon": "./assets/icon.png",
     "scheme": "hammer",
     "userInterfaceStyle": "automatic",
+
     "ios": {
       "bundleIdentifier": "com.hammer.customerapp",
       "icon": "./assets/icon.png"
     },
+
     "android": {
       "package": "com.hammer.customerapp",
       "adaptiveIcon": {
@@ -19,12 +21,28 @@
       },
       "predictiveBackGestureEnabled": false
     },
+
     "web": {
       "output": "static",
       "favicon": "./assets/favicon.png"
     },
+
     "plugins": [
       "expo-router",
+
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FFB500",
+          "image": "./assets/splash-icon.png",
+          "dark": {
+            "backgroundColor": "#FFB500",
+            "image": "./assets/splash-icon-dark.png"
+          },
+          "imageWidth": 630
+        }
+      ],
+
       [
         "expo-notifications",
         {
@@ -33,6 +51,7 @@
           "defaultChannel": "default"
         }
       ],
+
       [
         "react-native-maps",
         {
@@ -40,6 +59,7 @@
           "iosGoogleMapsApiKey": "AIzaSyCEzI6QK-z9pT3aZoEACeRouLVqcV4NM8c"
         }
       ],
+
       [
         "expo-location",
         {
@@ -50,6 +70,7 @@
         }
       ]
     ],
+
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
