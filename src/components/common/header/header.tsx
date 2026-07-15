@@ -1,5 +1,4 @@
 import React, { JSX } from 'react';
-import { ServiceHeader } from './service-header';
 
 import { useHeaderNavigation } from '@/hooks/useHeaderNavigation';
 import { router } from 'expo-router';
@@ -8,9 +7,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { HeaderWithTitle } from './header-with-title';
 import { HomeHeader } from './home-header';
 import { ProfileHeader } from './profile-header';
+import { ServiceHeader } from './service-header';
 
 const Header = () => {
-  const { currentSegmentName, rootTabPath, currentTab } = useHeaderNavigation();
+  const { currentSegmentName, pathname, rootTabPath, currentTab } = useHeaderNavigation();
 
   const handleRouterBack = () => {
     if (router.canGoBack()) {
@@ -21,7 +21,9 @@ const Header = () => {
   };
 
   const segmentHeaders: Record<string, JSX.Element> = {
-    inbox: <HeaderWithTitle title='Your inbox' />,
+    service: <View />,
+    booking: <HeaderWithTitle title='Bathroom deep cleaning' />,
+    'confirm-booking': <View />,
   };
 
   const tabHeaders: Record<string, JSX.Element> = {
@@ -32,6 +34,7 @@ const Header = () => {
 
   console.log('currentSegmentName', currentSegmentName);
   console.log('currentTab', currentTab);
+  console.log('pathname', pathname);
 
   const header: JSX.Element = segmentHeaders[currentSegmentName] ??
     (currentTab ? tabHeaders[currentTab] : undefined) ?? <View />;

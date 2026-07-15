@@ -16,11 +16,13 @@ export default function TabLayout() {
   return (
     <Tabs
       tabBar={(props) => (hideTabBar ? null : <TabBar {...props} />)}
+      detachInactiveScreens
       screenOptions={{
         header: renderHeader,
-        animation: 'fade',
-        lazy: true,
+        headerShown: true,
         freezeOnBlur: true,
+        animation: 'none',
+        lazy: true,
       }}
     >
       <Tabs.Screen name='(home)' options={{ title: 'Home' }} />
