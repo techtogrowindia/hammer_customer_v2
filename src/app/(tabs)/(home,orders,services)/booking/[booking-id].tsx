@@ -1,4 +1,3 @@
-import { PageHeader } from '@/components/common/header/page-header';
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -14,7 +13,7 @@ import {
   Sunset,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const font = {
@@ -75,10 +74,6 @@ export default function BookingScreen() {
 
   return (
     <View style={styles.screen}>
-      <StatusBar barStyle='light-content' backgroundColor={AppColors.primary} translucent={false} />
-
-      <PageHeader topInset={top} title='Bathroom Deep Cleaning' onBack={() => router.back()} />
-
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Selected service summary */}
         <View style={styles.serviceSummary}>

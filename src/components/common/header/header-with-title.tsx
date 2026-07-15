@@ -3,14 +3,14 @@ import { fontTokens } from '@/core/theme/typography';
 import { ArrowLeft } from 'lucide-react-native';
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface HeaderAction {
   icon: React.ReactNode;
   onPress: () => void;
 }
 
-interface PageHeaderProps {
-  topInset: number;
+interface HeaderWithTitleProps {
   title: string;
   onBack?: () => void;
   backgroundColor?: string;
@@ -25,21 +25,22 @@ const font = {
   bold: fontTokens.fontFamily.bold,
 };
 
-export function PageHeader({
-  topInset,
+export function HeaderWithTitle({
   title,
   onBack,
   backgroundColor = AppColors.primary,
   leftIcon,
   rightActions = [],
-}: PageHeaderProps) {
+}: HeaderWithTitleProps) {
+  const { top } = useSafeAreaInsets();
+
   return (
     <View
       style={[
         styles.container,
         {
           backgroundColor,
-          paddingTop: topInset + 12,
+          paddingTop: top + 12,
         },
       ]}
     >
@@ -139,4 +140,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PageHeader;
+export default HeaderWithTitle;

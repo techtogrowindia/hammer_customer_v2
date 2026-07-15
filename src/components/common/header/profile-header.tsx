@@ -1,42 +1,18 @@
-import { IconType } from '@/components/home/home.types';
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
 import { Pencil, ShieldCheck } from 'lucide-react-native';
 import React from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-interface ProfileHeroProps {
-  topInset: number;
-  Icon: IconType;
-  name: string;
-  mobile: string;
-  verified?: boolean;
-  eyebrow?: string;
-  onEditPress?: () => void;
-}
-
-/**
- * A shorter, rounded-bottom hero with the identity block (avatar, name,
- * mobile, verified badge, edit button) pulled out into its own elevated
- * card that straddles the hero/body boundary — mirrors HeroHeader
- * so the Home and Profile screens read as one visual system.
- */
-export function ProfileHero({
-  topInset,
-  Icon,
-  name,
-  mobile,
-  verified = false,
-  eyebrow = 'Your Profile',
-  onEditPress,
-}: ProfileHeroProps) {
+export function ProfileHeader() {
+  const { top } = useSafeAreaInsets();
   return (
     <View style={styles.wrap}>
-      <View style={[styles.hero, { paddingTop: topInset + 14 }]}>
+      <View style={[styles.hero, { paddingTop: top + 14 }]}>
         <View style={styles.heroDecor} />
       </View>
 
-      {/*  identity card — overlaps hero + body */}
       <View style={styles.cardWrap}>
         <View style={styles.card}>
           <View style={styles.avatar}>
@@ -50,11 +26,11 @@ export function ProfileHero({
           </View>
           <View style={styles.info}>
             <Text style={styles.name} numberOfLines={1}>
-              {name}
+              {'ASWICK JOTHI'}
             </Text>
             <View style={styles.badgeRow}>
-              <Text style={styles.mobile}>{mobile}</Text>
-              {verified && (
+              <Text style={styles.mobile}>{'123-456-7890'}</Text>
+              {true && (
                 <View style={styles.verifiedBadge}>
                   <ShieldCheck size={10} color={AppColors.primary} strokeWidth={2.25} />
                   <Text style={styles.verifiedText}>Verified</Text>
@@ -65,7 +41,7 @@ export function ProfileHero({
 
           <Pressable
             accessibilityRole='button'
-            onPress={onEditPress}
+            onPress={() => {}}
             style={({ pressed }) => [styles.editButton, pressed && { opacity: 0.7 }]}
             hitSlop={8}
           >
@@ -163,4 +139,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ProfileHero;
+export default ProfileHeader;

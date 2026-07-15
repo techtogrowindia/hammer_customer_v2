@@ -2,14 +2,12 @@ import { CircleIcon } from '@/components/common/circle-icon/circle-icon';
 import { InfoStrip } from '@/components/home/banner-promo/info-strip';
 import { SectionHeader } from '@/components/home/header/section-header';
 import { ServiceCard, ServiceCardData } from '@/components/service/card/service-card';
-import { ServicesHero } from '@/components/service/header/service-header';
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Hammer, Paintbrush, Plug, Scissors, Search, Shirt, Sparkles, Wrench, Zap } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 const font = {
   regular: fontTokens.fontFamily.regular,
@@ -147,7 +145,6 @@ const services: (ServiceCardData & { category: string })[] = [
 ];
 
 export default function ServicesScreen() {
-  const { top } = useSafeAreaInsets();
   const params = useLocalSearchParams<{ category?: string }>();
   const initialCategory = params.category ?? 'all';
 
@@ -172,72 +169,57 @@ export default function ServicesScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.screen} edges={['bottom']}>
-      <StatusBar barStyle='light-content' backgroundColor={AppColors.primary} translucent={false} />
+    <ScrollView style={styles.screen} showsVerticalScrollIndicator={false}>
+      <View style={styles.body}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chipRow}
+          style={styles.chipScroll}
+        >
+          {categories.map((cat) => {
+            const active = activeCategory === cat.id;
+            const Icon = cat.Icon;
+            return (
+              <Pressable
+                key={cat.id}
+                accessibilityRole='button'
+                onPress={() => setActiveCategory(cat.id)}
+                style={[styles.chip, active && styles.chipActive]}
+              >
+                <Icon size={14} color={active ? AppColors.white : AppColors.textSecondary} strokeWidth={2} />
+                <Text style={[styles.chipLabel, active && styles.chipLabelActive]}>{cat.label}</Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
 
-      <ScrollView showsVerticalScrollIndicator={false} stickyHeaderIndices={[0]}>
-        <ServicesHero
-          topInset={top}
-          title='Services'
-          addressLabel='Home · Indiranagar'
-          addressDetail='123, 1st Main Road, Chennai, Tamilnadu 660038'
-          onChangeAddressPress={() => router.push('/profile/addresses' as never)}
-          onNotificationPress={() => router.push('/notifications' as never)}
-          hasUnreadNotification
+        <SectionHeader
+          title={`${filteredServices.length} service${filteredServices.length !== 1 ? 's' : ''} available`}
         />
 
-        <View style={styles.body}>
-          {/* Category chips */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.chipRow}
-            style={styles.chipScroll}
-          >
-            {categories.map((cat) => {
-              const active = activeCategory === cat.id;
-              const Icon = cat.Icon;
-              return (
-                <Pressable
-                  key={cat.id}
-                  accessibilityRole='button'
-                  onPress={() => setActiveCategory(cat.id)}
-                  style={[styles.chip, active && styles.chipActive]}
-                >
-                  <Icon size={14} color={active ? AppColors.white : AppColors.textSecondary} strokeWidth={2} />
-                  <Text style={[styles.chipLabel, active && styles.chipLabelActive]}>{cat.label}</Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
+        {/* Service cards */}
+        {filteredServices.length === 0 ? (
+          <View style={styles.emptyState}>
+            <CircleIcon Icon={Search} size={72} iconSize={26} />
+            <Text style={styles.emptyTitle}>No services found</Text>
+            <Text style={styles.emptySubtitle}>Try a different category</Text>
+          </View>
+        ) : (
+          filteredServices.map((service) => (
+            <ServiceCard
+              key={service.id}
+              service={service}
+              onPress={goToService}
+              isFavorite={favorites.has(service.id)}
+              onToggleFavorite={toggleFavorite}
+            />
+          ))
+        )}
 
-          <SectionHeader
-            title={`${filteredServices.length} service${filteredServices.length !== 1 ? 's' : ''} available`}
-          />
-
-          {/* Service cards */}
-          {filteredServices.length === 0 ? (
-            <View style={styles.emptyState}>
-              <CircleIcon Icon={Search} size={72} iconSize={26} />
-              <Text style={styles.emptyTitle}>No services found</Text>
-              <Text style={styles.emptySubtitle}>Try a different category</Text>
-            </View>
-          ) : (
-            filteredServices.map((service) => (
-              <ServiceCard
-                key={service.id}
-                service={service}
-                onPress={goToService}
-                isFavorite={favorites.has(service.id)}
-                onToggleFavorite={toggleFavorite}
-              />
-            ))
-          )}
-
-          <InfoStrip text='All professionals are background-verified for your safety' />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        <InfoStrip text='All professionals are background-verified for your safety' />
+      </View>
+    </ScrollView>
   );
 }
 

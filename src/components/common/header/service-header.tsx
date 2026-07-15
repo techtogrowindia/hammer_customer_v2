@@ -3,42 +3,13 @@ import { fontTokens } from '@/core/theme/typography';
 import { ChevronRight, MapPin } from 'lucide-react-native';
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-interface ServicesHeroProps {
-  topInset: number;
-  title: string;
-  subtitle?: string;
-  addressLabel: string;
-  addressDetail: string;
-  onChangeAddressPress?: () => void;
-  onNotificationPress?: () => void;
-  hasUnreadNotification?: boolean;
-}
-
-/**
- * Services tab hero — the floating card now leads with the delivery
- * location (label like "Home", full address underneath, explicit
- * "Change" action on the right) instead of filter pills. This is the
- * pattern most on-demand service apps lead with, since which address
- * you're booking for matters more upfront than a top-rated/nearby
- * sort — and it's something the user genuinely needs to check and
- * correct before browsing, not just a nice-to-have shortcut.
- * A small notification bell sits in the hero's top row for tab parity
- * with Home; nothing else competes with the address card for attention.
- */
-export function ServicesHero({
-  topInset,
-  title,
-  subtitle = 'What do you need help with?',
-  addressLabel,
-  addressDetail,
-  onChangeAddressPress,
-  onNotificationPress,
-  hasUnreadNotification = false,
-}: ServicesHeroProps) {
+export function ServiceHeader() {
+  const { top } = useSafeAreaInsets();
   return (
     <View style={styles.wrap}>
-      <View style={[styles.hero, { paddingTop: topInset + 14 }]}>
+      <View style={[styles.hero, { paddingTop: top + 12 }]}>
         <View style={styles.heroDecor} />
 
         {/* <View style={styles.topRow}>
@@ -63,7 +34,7 @@ export function ServicesHero({
       <View style={styles.cardWrap}>
         <Pressable
           accessibilityRole='button'
-          onPress={onChangeAddressPress}
+          onPress={() => {}}
           style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
         >
           <View style={styles.pinWrap}>
@@ -72,10 +43,10 @@ export function ServicesHero({
 
           <View style={styles.addressText}>
             <Text style={styles.addressLabel} numberOfLines={1}>
-              {addressLabel}
+              {'addressLabel'}
             </Text>
             <Text style={styles.addressDetail} numberOfLines={1}>
-              {addressDetail}
+              {'addressDetail'}
             </Text>
           </View>
 
@@ -180,4 +151,4 @@ const styles = StyleSheet.create({
   changeBtnText: { fontFamily: 'Poppins_600SemiBold', fontSize: 12, color: AppColors.primary },
 });
 
-export default ServicesHero;
+export default ServiceHeader;

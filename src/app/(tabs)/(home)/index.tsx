@@ -3,7 +3,6 @@ import { InfoStrip } from '@/components/home/banner-promo/info-strip';
 import { PromoStrip } from '@/components/home/banner-promo/promo-strip';
 import { BannerCarousel } from '@/components/home/carousel/banner-carousel';
 import { CategoryScroller } from '@/components/home/category/category-scroller';
-import { HeroHeader } from '@/components/home/header/hero-header';
 import { SectionHeader } from '@/components/home/header/section-header';
 import { BannerItem, BookAgainItem, CategoryItem, HowItWorksStep, ServiceItem } from '@/components/home/home.types';
 import { StepRow } from '@/components/home/how-it-works/how-it-works';
@@ -28,8 +27,8 @@ import {
   Zap,
 } from 'lucide-react-native';
 import React from 'react';
-import { ScrollView, StatusBar, StyleSheet, View } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useShallow } from 'zustand/shallow';
 
 const categories: CategoryItem[] = [
@@ -81,45 +80,31 @@ export default function HomeScreen() {
   const goToOrders = () => router.push('/orders');
 
   return (
-    <SafeAreaView style={styles.screen} edges={['bottom']}>
-      <StatusBar barStyle='light-content' backgroundColor={AppColors.primary} translucent={false} />
-
-      <ScrollView showsVerticalScrollIndicator={false} stickyHeaderIndices={[0]}>
-        <HeroHeader
-          userInitial='AJ'
-          topInset={top}
-          locationLabel='Home · Indiranagar'
-          greeting={`Hi, ${userInfo?.name || 'User'}`}
-          searchPlaceholder='Try "AC repair" or "Salon at home"'
-          onSearchPress={goToSearch}
-          onLocationPress={() => router.push('/address/select-address' as never)}
+    <ScrollView style={styles.screen} showsVerticalScrollIndicator={false}>
+      <View style={styles.body}>
+        <PromoStrip
+          Icon={Crown}
+          title='Unlock Membership'
+          subtitle='Priority booking + free cancellations'
+          style={{ marginBottom: 20 }}
         />
 
-        <View style={styles.body}>
-          <PromoStrip
-            Icon={Crown}
-            title='Unlock Membership'
-            subtitle='Priority booking + free cancellations'
-            style={{ marginBottom: 20 }}
-          />
+        <BannerCarousel banners={banners} />
 
-          <BannerCarousel banners={banners} />
+        <SectionHeader title='What are you looking for?' />
+        <CategoryScroller categories={categories} onSelect={goToCategory} />
 
-          <SectionHeader title='What are you looking for?' />
-          <CategoryScroller categories={categories} onSelect={goToCategory} />
+        <BookAgainList items={bookAgain} onSeeAll={goToOrders} onRebook={goToSearch} />
 
-          <BookAgainList items={bookAgain} onSeeAll={goToOrders} onRebook={goToSearch} />
+        <ServiceGrid services={mostBooked} onSelect={goToSearch} onSeeAll={goToSearch} />
 
-          <ServiceGrid services={mostBooked} onSelect={goToSearch} onSeeAll={goToSearch} />
+        <StepRow steps={howItWorks} />
 
-          <StepRow steps={howItWorks} />
+        <CalloutBanner Icon={Gift} title='Refer & Earn ₹150' subtitle='Invite friends, get rewards instantly' />
 
-          <CalloutBanner Icon={Gift} title='Refer & Earn ₹150' subtitle='Invite friends, get rewards instantly' />
-
-          <InfoStrip text='All professionals are background-verified for your safety' />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        <InfoStrip text='All professionals are background-verified for your safety' />
+      </View>
+    </ScrollView>
   );
 }
 

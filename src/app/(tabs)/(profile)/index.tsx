@@ -1,6 +1,5 @@
 import { DestructiveButton } from '@/components/common/button/destructive-button';
 import { CalloutBanner } from '@/components/home/banner-promo/call-out';
-import { ProfileHero } from '@/components/profile/header/header';
 import { MenuGroup } from '@/components/profile/menu/menu-group';
 import { MenuItem, MenuSectionData, StatItem } from '@/components/profile/profile.types';
 import { StatsRow } from '@/components/profile/status/status-row';
@@ -19,11 +18,9 @@ import {
   ShieldCheck,
   Star,
   Ticket,
-  User,
 } from 'lucide-react-native';
 import React from 'react';
-import { Alert, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 // ── Sample content — in a real app this would come from an API/store ──
 const stats: StatItem[] = [
@@ -101,9 +98,6 @@ const sections: MenuSectionData[] = [
 ];
 
 export default function ProfileScreen() {
-  const { top } = useSafeAreaInsets();
-  const user = { name: 'Aswick', mobile: '+91 98765 43210', verified: true };
-
   const handleMenuPress = (item: MenuItem) => {
     if (item.route) router.push(item.route as never);
   };
@@ -116,41 +110,26 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.screen} edges={['bottom']}>
-      <StatusBar barStyle='light-content' backgroundColor={AppColors.primary} translucent={false} />
+    <ScrollView style={styles.screen} showsVerticalScrollIndicator={false}>
+      <View style={styles.body}>
+        <StatsRow stats={stats} />
 
-      {/* stickyHeaderIndices pins the first direct child (the hero) to the
-          top of the ScrollView once the user scrolls past it. */}
-      <ScrollView showsVerticalScrollIndicator={false} stickyHeaderIndices={[0]}>
-        <ProfileHero
-          topInset={top}
-          Icon={User}
-          name={user.name}
-          mobile={user.mobile}
-          verified={user.verified}
-          onEditPress={() => router.push('/profile/complete-profile' as never)}
-        />
+        <CalloutBanner Icon={Gift} title='Refer & Earn ₹150' subtitle='Invite friends, get rewards instantly' />
 
-        <View style={styles.body}>
-          <StatsRow stats={stats} />
+        {sections.map((section) => (
+          <MenuGroup key={section.id} section={section} onItemPress={handleMenuPress} />
+        ))}
 
-          <CalloutBanner Icon={Gift} title='Refer & Earn ₹150' subtitle='Invite friends, get rewards instantly' />
+        <DestructiveButton label='Log Out' onPress={handleLogout} />
 
-          {sections.map((section) => (
-            <MenuGroup key={section.id} section={section} onItemPress={handleMenuPress} />
-          ))}
-
-          <DestructiveButton label='Log Out' onPress={handleLogout} />
-
-          <Text style={styles.versionText}>App version 1.0.0</Text>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        <Text style={styles.versionText}>App version 1.0.0</Text>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: AppColors.background },
+  screen: { backgroundColor: AppColors.background },
   body: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 36 },
   versionText: {
     marginTop: 20,

@@ -3,57 +3,27 @@ import { fontTokens } from '@/core/theme/typography';
 import { Bell, ChevronDown, MapPin, Search } from 'lucide-react-native';
 import React from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-interface HeroHeaderProps {
-  topInset: number;
-  userInitial: string;
-  locationLabel: string;
-  greeting: string;
-  searchPlaceholder: string;
-  onAvatarPress?: () => void;
-  onLocationPress?: () => void;
-  onNotificationPress?: () => void;
-  onSearchPress?: () => void;
-  onFilterPress?: () => void;
-  hasUnreadNotification?: boolean;
-}
+export function HomeHeader() {
+  const { top } = useSafeAreaInsets();
 
-/**
- * A more compact hero where the search bar is its own elevated card that
- * straddles the boundary between the colored hero and the white body below —
- * rather than living fully inside the hero. Greeting + avatar sit up top,
- * location is a standalone pill, and there's an optional filter button
- * docked to the search card.
- */
-export function HeroHeader({
-  topInset,
-  userInitial,
-  locationLabel,
-  greeting,
-  searchPlaceholder,
-  onAvatarPress,
-  onLocationPress,
-  onNotificationPress,
-  onSearchPress,
-  onFilterPress,
-  hasUnreadNotification = true,
-}: HeroHeaderProps) {
   return (
     <View style={styles.wrap}>
-      <View style={[styles.hero, { paddingTop: topInset + 14 }]}>
+      <View style={[styles.hero, { paddingTop: top + 14 }]}>
         <View style={styles.heroDecor} />
 
         <View style={styles.topRow}>
-          <Pressable accessibilityRole='button' onPress={onAvatarPress} style={styles.avatar} hitSlop={4}>
+          <Pressable accessibilityRole='button' onPress={() => {}} style={styles.avatar} hitSlop={4}>
             <Image source={{ uri: 'https://i.pravatar.cc/150?img=12' }} style={styles.avatarImage} resizeMode='cover' />
           </Pressable>
 
           <View style={styles.greetingWrap}>
-            <Text style={styles.greeting}>{greeting}</Text>
-            <Pressable accessibilityRole='button' onPress={onLocationPress} style={styles.locationPill} hitSlop={6}>
+            <Text style={styles.greeting}>Hi, User</Text>
+            <Pressable accessibilityRole='button' onPress={() => {}} style={styles.locationPill} hitSlop={6}>
               <MapPin size={11} color={AppColors.primaryDark} strokeWidth={2.25} />
               <Text style={styles.locationText} numberOfLines={1}>
-                {locationLabel}
+                Home · Indiranagar
               </Text>
               <ChevronDown size={11} color={AppColors.primaryDark} strokeWidth={2.25} />
             </Pressable>
@@ -61,12 +31,12 @@ export function HeroHeader({
 
           <Pressable
             accessibilityRole='button'
-            onPress={onNotificationPress}
+            onPress={() => {}}
             style={({ pressed }) => [styles.bellButton, pressed && { opacity: 0.8 }]}
             hitSlop={8}
           >
             <Bell size={18} color={AppColors.secondary} strokeWidth={2} />
-            {hasUnreadNotification && <View style={styles.bellDot} />}
+            <View style={styles.bellDot} />
           </Pressable>
         </View>
       </View>
@@ -75,12 +45,12 @@ export function HeroHeader({
       <View style={styles.searchCardWrap}>
         <Pressable
           accessibilityRole='button'
-          onPress={onSearchPress}
+          onPress={() => {}}
           style={({ pressed }) => [styles.searchCard, pressed && styles.searchCardPressed]}
         >
           <Search size={17} color={AppColors.textTertiary} strokeWidth={2} />
           <Text style={styles.searchPlaceholder} numberOfLines={1}>
-            {searchPlaceholder}
+            Search for products
           </Text>
           {/* <View style={styles.divider} />
           <Pressable
@@ -202,4 +172,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HeroHeader;
+export default HomeHeader;
