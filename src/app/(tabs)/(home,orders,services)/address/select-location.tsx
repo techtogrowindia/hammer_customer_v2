@@ -1,5 +1,6 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
+import { usePermissions } from '@/hooks/usePermission';
 import { router } from 'expo-router';
 import { Check, Crosshair, MapPin, Search, X } from 'lucide-react-native';
 import React, { useCallback, useRef, useState } from 'react';
@@ -162,11 +163,43 @@ export default function SelectLocationScreen() {
     }
   };
 
-  const useCurrentLocation = () => {
-    // TODO: wire up expo-location (`npx expo install expo-location`) —
-    // request foreground permission, getCurrentPositionAsync, then
-    // mapRef.current?.animateToRegion({ latitude, longitude, ... }).
-  };
+  const { getCurrentAddress } = usePermissions();
+
+  const useCurrentLocation = useCallback(async () => {
+    try {
+      const result = await getCurrentAddress();
+
+      if (!result) return;
+
+      const nextRegion: Region = {
+        latitude: result.latitude,
+        longitude: result.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      };
+
+      mapRef.current?.animateToRegion(nextRegion, 500);
+      setRegion(nextRegion);
+
+      setPinnedAddress({
+        street: [result.address?.street, result.address?.streetNumber].filter(Boolean).join(' ') || '',
+        city: result.address?.city || result.address?.district || '',
+        pincode: result.address?.postalCode || '',
+        formattedAddress: [
+          result.address?.name,
+          result.address?.street,
+          result.address?.city,
+          result.address?.region,
+          result.address?.postalCode,
+          result.address?.country,
+        ]
+          .filter(Boolean)
+          .join(', '),
+      });
+    } catch (error) {
+      console.error('Failed to get current location:', error);
+    }
+  }, [getCurrentAddress]);
 
   const confirmLocation = () => {
     router.push({

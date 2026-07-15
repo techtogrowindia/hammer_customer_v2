@@ -9,6 +9,16 @@ export interface PermissionResult {
   canAskAgain: boolean;
 }
 
+export interface CurrentLocation {
+  latitude: number;
+  longitude: number;
+  accuracy: number | null;
+  altitude: number | null;
+  heading: number | null;
+  speed: number | null;
+  timestamp: number;
+}
+
 export function usePermissions() {
   const requestNotificationPermission = useCallback(async (): Promise<PermissionResult> => {
     if (!Device.isDevice) {
@@ -60,7 +70,7 @@ export function usePermissions() {
     };
   }, []);
 
-  const getNotificationPermission = useCallback(async () => {
+  const getNotificationPermission = useCallback(async (): Promise<PermissionResult> => {
     const { status, canAskAgain } = await Notifications.getPermissionsAsync();
 
     return {
@@ -69,7 +79,7 @@ export function usePermissions() {
     };
   }, []);
 
-  const getLocationPermission = useCallback(async () => {
+  const getLocationPermission = useCallback(async (): Promise<PermissionResult> => {
     const { status, canAskAgain } = await Location.getForegroundPermissionsAsync();
 
     return {
@@ -77,6 +87,57 @@ export function usePermissions() {
       canAskAgain,
     };
   }, []);
+
+  /**
+   * Returns current latitude & longitude
+   */
+  const getCurrentLocation = useCallback(async (): Promise<CurrentLocation> => {
+    const permission = await requestLocationPermission();
+
+    if (!permission.granted) {
+      throw new Error('Location permission denied');
+    }
+
+    const location = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.High,
+    });
+
+    return {
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+      accuracy: location.coords.accuracy,
+      altitude: location.coords.altitude,
+      heading: location.coords.heading,
+      speed: location.coords.speed,
+      timestamp: location.timestamp,
+    };
+  }, [requestLocationPermission]);
+
+  /**
+   * Returns current location with address
+   */
+  const getCurrentAddress = useCallback(async () => {
+    const permission = await requestLocationPermission();
+
+    if (!permission.granted) {
+      throw new Error('Location permission denied');
+    }
+
+    const location = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.High,
+    });
+
+    const addresses = await Location.reverseGeocodeAsync({
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+    });
+
+    return {
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+      address: addresses[0] ?? null,
+    };
+  }, [requestLocationPermission]);
 
   const requestAllPermissions = useCallback(async () => {
     const [notification, location] = await Promise.all([requestNotificationPermission(), requestLocationPermission()]);
@@ -98,6 +159,9 @@ export function usePermissions() {
 
     getNotificationPermission,
     getLocationPermission,
+
+    getCurrentLocation,
+    getCurrentAddress,
 
     openSettings,
   };
