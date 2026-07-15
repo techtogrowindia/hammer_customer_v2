@@ -1,9 +1,9 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, Briefcase, Crosshair, Home, MapPin, Search } from 'lucide-react-native';
+import { Briefcase, ChevronRight, Home, MapPin } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Pressable, ScrollView, StatusBar, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const font = {
@@ -21,73 +21,65 @@ const labelOptions: LabelOption[] = [
   { id: 'other', label: 'Other', Icon: MapPin },
 ];
 
+type RouteParams = {
+  id?: string;
+  lat?: string;
+  lng?: string;
+  street?: string;
+  city?: string;
+  pincode?: string;
+  formattedAddress?: string;
+};
+
 export default function AddAddressScreen() {
   const { top, bottom } = useSafeAreaInsets();
-  const params = useLocalSearchParams<{ id?: string }>();
+  const params = useLocalSearchParams<RouteParams>();
   const isEditing = Boolean(params.id);
 
-  const [query, setQuery] = useState('');
+  // Pre-filled from SelectLocationScreen's Places result where available —
+  // still editable, since Google's parsing isn't always exact for Indian
+  // addresses (e.g. apartment/floor numbers never come from Places).
   const [selectedLabel, setSelectedLabel] = useState<'home' | 'work' | 'other'>('home');
   const [customLabel, setCustomLabel] = useState('');
   const [houseNo, setHouseNo] = useState('');
-  const [street, setStreet] = useState('');
+  const [street, setStreet] = useState(params.street ?? '');
   const [landmark, setLandmark] = useState('');
-  const [city, setCity] = useState('');
-  const [pincode, setPincode] = useState('');
+  const [city, setCity] = useState(params.city ?? '');
+  const [pincode, setPincode] = useState(params.pincode ?? '');
 
-  const useCurrentLocation = () => {
-    // Would trigger expo-location + reverse geocoding, then prefill the
-    // fields below with the resolved address.
+  const hasLocation = Boolean(params.lat && params.lng);
+
+  const changeLocation = () => {
+    router.back();
   };
 
   const saveAddress = () => {
-    router.back();
+    // TODO: persist { houseNo, street, landmark, city, pincode, label,
+    // lat: params.lat, lng: params.lng } to the backend/store here.
+    router.dismissAll();
   };
 
   return (
     <View style={styles.screen}>
-      <StatusBar barStyle='light-content' backgroundColor={AppColors.primary} translucent={false} />
-
-      <View style={[styles.hero, { paddingTop: top + 12 }]}>
-        <View style={styles.heroDecor} />
-        <View style={styles.heroTopRow}>
-          <Pressable
-            accessibilityRole='button'
-            onPress={() => router.back()}
-            style={({ pressed }) => [styles.backBtn, pressed && { opacity: 0.8 }]}
-            hitSlop={8}
-          >
-            <ArrowLeft size={19} color={AppColors.white} strokeWidth={2.25} />
-          </Pressable>
-          <Text style={styles.headerTitle}>{isEditing ? 'Edit Address' : 'Add New Address'}</Text>
-          <View style={{ width: 38 }} />
-        </View>
-      </View>
-
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Search + GPS detection live here, not on the select screen */}
-        <View style={styles.searchBar}>
-          <Search size={17} color={AppColors.textTertiary} strokeWidth={2} />
-          <TextInput
-            value={query}
-            onChangeText={setQuery}
-            placeholder='Search for area, street name...'
-            placeholderTextColor={AppColors.textTertiary}
-            style={styles.searchInput}
-          />
-        </View>
-
+        <Text style={styles.sectionLabel}>Location</Text>
         <Pressable
           accessibilityRole='button'
-          onPress={useCurrentLocation}
-          style={({ pressed }) => [styles.currentLocationRow, pressed && { backgroundColor: AppColors.warningLight }]}
+          onPress={changeLocation}
+          style={({ pressed }) => [styles.locationCard, pressed && { backgroundColor: AppColors.warningLight }]}
         >
-          <View style={styles.currentLocationIconWrap}>
-            <Crosshair size={17} color={AppColors.primary} strokeWidth={2.25} />
+          <View style={styles.locationIconWrap}>
+            <MapPin size={17} color={AppColors.primary} strokeWidth={2.25} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.currentLocationText}>Use current location</Text>
-            <Text style={styles.currentLocationSubtext}>Detect using GPS</Text>
+            <Text style={styles.locationLabel}>{hasLocation ? 'Pinned location' : 'No location selected'}</Text>
+            <Text style={styles.locationValue} numberOfLines={2}>
+              {params.formattedAddress || 'Tap to pick a location on the map'}
+            </Text>
+          </View>
+          <View style={styles.changeChip}>
+            <Text style={styles.changeChipText}>Change</Text>
+            <ChevronRight size={14} color={AppColors.primary} strokeWidth={2.25} />
           </View>
         </Pressable>
 
@@ -185,7 +177,7 @@ export default function AddAddressScreen() {
         )}
       </ScrollView>
 
-      <View style={[styles.footer, { paddingBottom: 12 }]}>
+      <View style={[styles.footer, { paddingBottom: bottom + 12 }]}>
         <Pressable
           accessibilityRole='button'
           onPress={saveAddress}
@@ -199,60 +191,25 @@ export default function AddAddressScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: AppColors.white },
-
-  hero: {
-    backgroundColor: AppColors.primary,
-    paddingHorizontal: 20,
-    paddingBottom: 18,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
-    overflow: 'hidden',
-  },
-  heroDecor: {
-    position: 'absolute',
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    top: -70,
-    right: -50,
-    // backgroundColor: 'rgba(255,255,255,0.06)',
-  },
-  heroTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  backBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.16)',
-  },
-  headerTitle: { fontFamily: font.semiBold, fontSize: 16, color: AppColors.white },
+  screen: { flex: 1, backgroundColor: AppColors.background },
 
   scrollContent: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 24 },
 
-  searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    height: 50,
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    borderWidth: 1.5,
-    borderColor: AppColors.divider,
-    marginBottom: 12,
-  },
-  searchInput: { flex: 1, fontFamily: font.medium, fontSize: 13, color: AppColors.textPrimary },
+  sectionLabel: { marginBottom: 12, fontFamily: font.semiBold, fontSize: 13, color: AppColors.textPrimary },
 
-  currentLocationRow: {
+  // Location summary card
+  locationCard: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    padding: 12,
-    borderRadius: 14,
-    marginBottom: 24,
+    padding: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: AppColors.border,
+    backgroundColor: AppColors.surface,
+    marginBottom: 22,
   },
-  currentLocationIconWrap: {
+  locationIconWrap: {
     width: 38,
     height: 38,
     borderRadius: 12,
@@ -260,10 +217,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: AppColors.warningLight,
   },
-  currentLocationText: { fontFamily: font.semiBold, fontSize: 13, color: AppColors.primary },
-  currentLocationSubtext: { marginTop: 2, fontFamily: font.regular, fontSize: 11, color: AppColors.textTertiary },
-
-  sectionLabel: { marginBottom: 12, fontFamily: font.semiBold, fontSize: 13, color: AppColors.textPrimary },
+  locationLabel: { fontFamily: font.regular, fontSize: 11, color: AppColors.textTertiary },
+  locationValue: { marginTop: 3, fontFamily: font.semiBold, fontSize: 13, color: AppColors.textPrimary },
+  changeChip: { flexDirection: 'row', alignItems: 'center', gap: 2 },
+  changeChipText: { fontFamily: font.semiBold, fontSize: 12, color: AppColors.primary },
 
   formGroup: { marginBottom: 14 },
   formRow: { flexDirection: 'row', gap: 12 },
@@ -272,8 +229,9 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 12,
     paddingHorizontal: 14,
-    borderWidth: 1.5,
-    borderColor: AppColors.divider,
+    borderWidth: 1,
+    borderColor: AppColors.border,
+    backgroundColor: AppColors.surface,
     fontFamily: font.medium,
     fontSize: 13,
     color: AppColors.textPrimary,
@@ -288,8 +246,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: AppColors.divider,
+    borderWidth: 1,
+    borderColor: AppColors.border,
+    backgroundColor: AppColors.surface,
   },
   labelChipSelected: { backgroundColor: AppColors.primary, borderColor: AppColors.primary },
   labelChipText: { fontFamily: font.medium, fontSize: 12, color: AppColors.textSecondary },
@@ -298,8 +257,9 @@ const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: 20,
     paddingTop: 12,
-    borderTopWidth: 1.5,
-    borderTopColor: AppColors.divider,
+    borderTopWidth: 1,
+    borderTopColor: AppColors.border,
+    backgroundColor: AppColors.surface,
   },
   saveBtn: {
     alignItems: 'center',

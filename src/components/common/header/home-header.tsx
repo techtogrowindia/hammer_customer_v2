@@ -1,5 +1,6 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
+import { router } from 'expo-router';
 import { Bell, ChevronDown, MapPin, Search } from 'lucide-react-native';
 import React from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -20,7 +21,14 @@ export function HomeHeader() {
 
           <View style={styles.greetingWrap}>
             <Text style={styles.greeting}>Hi, User</Text>
-            <Pressable accessibilityRole='button' onPress={() => {}} style={styles.locationPill} hitSlop={6}>
+            <Pressable
+              accessibilityRole='button'
+              onPress={() => {
+                router.push('/(tabs)/(home)/address/select-address');
+              }}
+              style={styles.locationPill}
+              hitSlop={6}
+            >
               <MapPin size={11} color={AppColors.primaryDark} strokeWidth={2.25} />
               <Text style={styles.locationText} numberOfLines={1}>
                 Home · Indiranagar

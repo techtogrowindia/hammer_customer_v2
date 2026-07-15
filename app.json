@@ -34,6 +34,13 @@
         }
       ],
       [
+        "react-native-maps",
+        {
+          "androidGoogleMapsApiKey": "AIzaSyCEzI6QK-z9pT3aZoEACeRouLVqcV4NM8c",
+          "iosGoogleMapsApiKey": "AIzaSyCEzI6QK-z9pT3aZoEACeRouLVqcV4NM8c"
+        }
+      ],
+      [
         "expo-location",
         {
           "locationAlwaysAndWhenInUsePermission": "Allow Hammer to access your location.",

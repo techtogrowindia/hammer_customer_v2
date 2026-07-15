@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     borderRadius: 48,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: AppColors.warningLight,
+    backgroundColor: AppColors.surface,
     marginBottom: 20,
   },
   checkCircle: {
@@ -149,8 +149,9 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 12,
     borderWidth: 1.5,
-    borderColor: AppColors.divider,
+    borderColor: AppColors.border,
     borderStyle: 'dashed',
+    backgroundColor: AppColors.surface,
   },
   bookingIdLabel: { fontFamily: font.regular, fontSize: 11, color: AppColors.textTertiary },
   bookingIdValue: { fontFamily: font.semiBold, fontSize: 12, color: AppColors.textPrimary },
@@ -158,8 +159,9 @@ const styles = StyleSheet.create({
   // Summary card
   summaryCard: {
     borderRadius: 18,
-    borderWidth: 1.5,
-    borderColor: AppColors.divider,
+    borderWidth: 1,
+    borderColor: AppColors.border,
+    backgroundColor: AppColors.surface,
     overflow: 'hidden',
     marginBottom: 16,
   },
@@ -185,8 +187,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 14,
     gap: 10,
-    borderTopWidth: 1.5,
-    borderTopColor: AppColors.divider,
+    borderTopWidth: 1,
+    borderTopColor: AppColors.border,
+    backgroundColor: AppColors.surface,
   },
   primaryBtn: {
     flexDirection: 'row',

@@ -10,7 +10,7 @@ export const unstable_settings = {
 export default function TabLayout() {
   const segments = useSegments();
 
-  const hideTabBar = segments.includes('service') || segments.includes('booking');
+  const hideTabBar = segments.includes('service') || segments.includes('booking') || segments.includes('address');
   const renderHeader = useCallback(() => <Header />, []);
 
   return (

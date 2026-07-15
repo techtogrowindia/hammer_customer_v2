@@ -1,6 +1,5 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
-import { router } from 'expo-router';
 import { ArrowLeft } from 'lucide-react-native';
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -50,9 +49,7 @@ export function HeaderWithTitle({
       <View style={styles.row}>
         <Pressable
           accessibilityRole='button'
-          onPress={() => {
-            router.back();
-          }}
+          onPress={onBack}
           hitSlop={8}
           style={({ pressed }) => [styles.iconButton, pressed && styles.iconPressed]}
         >
