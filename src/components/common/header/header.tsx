@@ -1,5 +1,6 @@
 import React, { JSX } from 'react';
 
+import { AppColors } from '@/core/theme/app-colors';
 import { useHeaderNavigation } from '@/hooks/useHeaderNavigation';
 import { router } from 'expo-router';
 import { View } from 'react-native';
@@ -43,7 +44,11 @@ const Header = () => {
     (currentTab ? tabHeaders[currentTab] : undefined) ?? <View />;
 
   return (
-    <SafeAreaView edges={[]} testID={`header-${currentTab}-container`}>
+    <SafeAreaView
+      style={{ backgroundColor: AppColors.background }}
+      edges={[]}
+      testID={`header-${currentTab}-container`}
+    >
       {header}
     </SafeAreaView>
   );

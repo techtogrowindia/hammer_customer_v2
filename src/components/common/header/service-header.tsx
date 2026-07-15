@@ -1,5 +1,6 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
+import { router } from 'expo-router';
 import { ChevronRight, MapPin } from 'lucide-react-native';
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -34,7 +35,9 @@ export function ServiceHeader() {
       <View style={styles.cardWrap}>
         <Pressable
           accessibilityRole='button'
-          onPress={() => {}}
+          onPress={() => {
+            router.push('/(tabs)/(services)/address/select-address');
+          }}
           style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
         >
           <View style={styles.pinWrap}>
@@ -43,10 +46,10 @@ export function ServiceHeader() {
 
           <View style={styles.addressText}>
             <Text style={styles.addressLabel} numberOfLines={1}>
-              {'addressLabel'}
+              {'Home - Indiranagar'}
             </Text>
             <Text style={styles.addressDetail} numberOfLines={1}>
-              {'addressDetail'}
+              {'123, 1st Main Road, Indiranagar, Chennai 660038'}
             </Text>
           </View>
 
@@ -63,7 +66,7 @@ export function ServiceHeader() {
 const CARD_HEIGHT = 68;
 
 const styles = StyleSheet.create({
-  wrap: { marginBottom: CARD_HEIGHT / 2 + 8 },
+  wrap: { marginBottom: CARD_HEIGHT / 2 + 8, backgroundColor: AppColors.background },
   hero: {
     backgroundColor: AppColors.primary,
     paddingHorizontal: 20,

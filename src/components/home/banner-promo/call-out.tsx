@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: AppColors.white,
+    backgroundColor: AppColors.background,
   },
   notchBottom: {
     position: 'absolute',
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: AppColors.white,
+    backgroundColor: AppColors.background,
   },
   rightZone: {
     flex: 1,
