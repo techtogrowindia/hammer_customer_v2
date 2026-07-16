@@ -2,13 +2,11 @@ import { DestructiveButton } from '@/components/common/button/destructive-button
 import { CalloutBanner } from '@/components/home/banner-promo/call-out';
 import { MenuGroup } from '@/components/profile/menu/menu-group';
 import { MenuItem, MenuSectionData, StatItem } from '@/components/profile/profile.types';
-import { StatsRow } from '@/components/profile/status/status-row';
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
 import { router } from 'expo-router';
 import {
   Bell,
-  CreditCard,
   FileText,
   Gift,
   Heart,
@@ -48,13 +46,13 @@ const sections: MenuSectionData[] = [
         Icon: MapPin,
         route: '/profile/addresses',
       },
-      {
-        id: 'payments',
-        label: 'Payment Methods',
-        subtitle: 'Cards, UPI & wallets',
-        Icon: CreditCard,
-        route: '/profile/payments',
-      },
+      // {
+      //   id: 'payments',
+      //   label: 'Payment Methods',
+      //   subtitle: 'Cards, UPI & wallets',
+      //   Icon: CreditCard,
+      //   route: '/profile/payments',
+      // },
       {
         id: 'favorites',
         label: 'Favorites',
@@ -112,7 +110,7 @@ export default function ProfileScreen() {
   return (
     <ScrollView style={styles.screen} showsVerticalScrollIndicator={false}>
       <View style={styles.body}>
-        <StatsRow stats={stats} />
+        {/* <StatsRow stats={stats} /> */}
 
         <CalloutBanner Icon={Gift} title='Refer & Earn ₹150' subtitle='Invite friends, get rewards instantly' />
 

@@ -1,6 +1,6 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
-import { ChevronRight, Clock, Flame, Heart, Star } from 'lucide-react-native';
+import { ChevronRight, Flame, Heart } from 'lucide-react-native';
 import React from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -10,12 +10,6 @@ export interface ServiceCardData {
   id: string;
   name: string;
   category: string;
-  price: string;
-  originalPrice?: string;
-  discountPercent?: number;
-  rating: string;
-  reviews: string;
-  duration: string;
   tag?: 'bestseller' | 'trending' | 'new';
   Icon: IconType;
 }
@@ -83,40 +77,16 @@ export function ServiceCard({ service, onPress, isFavorite = false, onToggleFavo
           <Text style={styles.name} numberOfLines={1}>
             {service.name}
           </Text>
-
-          <View style={styles.metaRow}>
-            <View style={styles.ratingChip}>
-              <Star size={10} color={AppColors.white} fill={AppColors.white} strokeWidth={2} />
-              <Text style={styles.ratingChipText}>{service.rating}</Text>
-            </View>
-
-            <Text style={styles.reviews}>{service.reviews} reviews</Text>
-          </View>
-
-          <View style={styles.durationRow}>
-            <Clock size={11} color={AppColors.textTertiary} strokeWidth={2} />
-            <Text style={styles.duration}>{service.duration}</Text>
-          </View>
         </View>
       </View>
 
       <View style={styles.footer}>
-        <View>
-          <View style={styles.priceRow}>
-            <Text style={styles.price}>{service.price}</Text>
-
-            {service.originalPrice && <Text style={styles.originalPrice}>{service.originalPrice}</Text>}
-          </View>
-
-          {service.discountPercent && <Text style={styles.discountText}>{service.discountPercent}% off</Text>}
-        </View>
-
         <Pressable
           accessibilityRole='button'
           onPress={() => onPress(service.id)}
           style={({ pressed }) => [styles.viewBtn, pressed && styles.viewBtnPressed]}
         >
-          <Text style={styles.viewBtnText}>View</Text>
+          <Text style={styles.viewBtnText}>Book Service</Text>
 
           <ChevronRight size={14} color={AppColors.white} strokeWidth={2.5} />
         </Pressable>

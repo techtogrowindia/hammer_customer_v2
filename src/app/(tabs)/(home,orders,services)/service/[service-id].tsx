@@ -1,10 +1,9 @@
-import { CircleIcon } from '@/components/common/circle-icon/circle-icon';
 import { SectionHeader } from '@/components/home/header/section-header';
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, Award, Check, ChevronRight, Clock, Heart, ShieldCheck, Star } from 'lucide-react-native';
-import React, { useRef, useState } from 'react';
+import { ArrowLeft, Award, Check, ChevronRight, Clock, Heart, ShieldCheck } from 'lucide-react-native';
+import { useRef, useState } from 'react';
 import { Animated, Pressable, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -19,14 +18,10 @@ const font = {
 // in via useLocalSearchParams / a services data lookup keyed by params.id).
 const SERVICE_IMAGE_URL = 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&h=600&fit=crop';
 
-type Package = {
-  id: string;
-  label: string;
-  price: string;
-  originalPrice?: string;
-  duration: string;
-  description: string;
-};
+// TODO: replace with the actual service description (data lookup keyed by
+// params.id), same as SERVICE_IMAGE_URL above.
+const SERVICE_DESCRIPTION =
+  'Our bathroom deep cleaning service covers every surface — tiles, fixtures, grout, mirrors, and drains — using professional-grade, eco-friendly products. Our trained and background-verified professionals bring their own equipment, so there is nothing for you to arrange. Ideal for move-ins, festival prep, or a seasonal reset, this service leaves your bathroom looking and feeling brand new, backed by a 48-hour re-service guarantee if anything falls short.';
 
 type Review = {
   id: string;
@@ -36,24 +31,6 @@ type Review = {
   comment: string;
 };
 
-const packages: Package[] = [
-  {
-    id: 'basic',
-    label: 'Basic Clean',
-    price: '₹349',
-    duration: '2 hrs',
-    description: 'Sweeping, mopping, dusting & bathroom clean',
-  },
-  {
-    id: 'deep',
-    label: 'Deep Clean',
-    price: '₹599',
-    originalPrice: '₹749',
-    duration: '3.5 hrs',
-    description: 'Everything in Basic + scrubbing, tile & fixture polish',
-  },
-];
-
 const includedItems = [
   'Professional carries own equipment',
   'Eco-friendly cleaning products',
@@ -61,48 +38,21 @@ const includedItems = [
   '48-hour re-service guarantee',
 ];
 
-const reviews: Review[] = [
-  {
-    id: 'r1',
-    name: 'Priya S.',
-    rating: 5,
-    date: '2 days ago',
-    comment: 'Very thorough job, bathroom looks brand new. Will book again.',
-  },
-  {
-    id: 'r2',
-    name: 'Karthik R.',
-    rating: 4,
-    date: '1 week ago',
-    comment: 'Good service, arrived slightly late but did great work.',
-  },
-  {
-    id: 'r3',
-    name: 'Divya M.',
-    rating: 5,
-    date: '2 weeks ago',
-    comment: 'Professional and quick. Highly recommend the deep clean package.',
-  },
-];
-
 const HERO_MAX_HEIGHT = 180;
 const HERO_MIN_HEIGHT = 64;
 const COLLAPSE_RANGE = HERO_MAX_HEIGHT - HERO_MIN_HEIGHT;
+const DESCRIPTION_COLLAPSED_LINES = 3;
 
 export default function ServiceDetailsScreen() {
   const { top, bottom } = useSafeAreaInsets();
   const params = useLocalSearchParams<{ id?: string }>();
 
-  const [selectedPackage, setSelectedPackage] = useState('deep');
   const [isFavorite, setIsFavorite] = useState(false);
+  const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const scrollY = useRef(new Animated.Value(0)).current;
 
-  const activePackage = packages.find((p) => p.id === selectedPackage) ?? packages[0];
-
   const goToBooking = () => {
-    router.push({ pathname: '/booking/12', params: { id: params.id ?? '', package: selectedPackage } } as never);
-    // ^ this now correctly matches the booking screen you just built,
-    // which reads `package` via useLocalSearchParams to look up price/label
+    router.push({ pathname: '/booking/12', params: { id: params.id ?? '' } } as never);
   };
 
   // Hero shrinks from HERO_MAX_HEIGHT to HERO_MIN_HEIGHT (both plus safe-area
@@ -187,54 +137,32 @@ export default function ServiceDetailsScreen() {
         onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: false })}
       >
         <View style={styles.body}>
-          {/* Title block */}
           <View style={styles.titleBlock}>
             <View style={styles.categoryTag}>
               <Text style={styles.categoryTagText}>Cleaning</Text>
             </View>
             <Text style={styles.title}>Bathroom Deep Cleaning</Text>
-
-            <View style={styles.metaRow}>
-              <View style={styles.ratingChip}>
-                <Star size={11} color={AppColors.white} strokeWidth={2} fill={AppColors.white} />
-                <Text style={styles.ratingChipText}>4.8</Text>
-              </View>
-              <Text style={styles.metaText}>2.1k reviews</Text>
-              <Text style={styles.metaDot}>·</Text>
-              <Clock size={12} color={AppColors.textTertiary} strokeWidth={2} />
-              <Text style={styles.metaText}>{activePackage.duration}</Text>
-            </View>
           </View>
 
-          {/* Package selector */}
-          <SectionHeader title='Select a package' />
-          {packages.map((pkg) => {
-            const selected = pkg.id === selectedPackage;
-            return (
-              <Pressable
-                key={pkg.id}
-                accessibilityRole='button'
-                onPress={() => setSelectedPackage(pkg.id)}
-                style={[styles.packageCard, selected && styles.packageCardSelected]}
-              >
-                <View style={styles.radioOuter}>{selected && <View style={styles.radioInner} />}</View>
+          {/* Description */}
+          <SectionHeader title='Description' />
+          <View style={styles.descriptionCard}>
+            <Text
+              style={styles.descriptionText}
+              numberOfLines={descriptionExpanded ? undefined : DESCRIPTION_COLLAPSED_LINES}
+            >
+              {SERVICE_DESCRIPTION}
+            </Text>
+            <Pressable
+              accessibilityRole='button'
+              onPress={() => setDescriptionExpanded((v) => !v)}
+              hitSlop={6}
+              style={styles.readMoreBtn}
+            >
+              <Text style={styles.readMoreText}>{descriptionExpanded ? 'Read less' : 'Read more'}</Text>
+            </Pressable>
+          </View>
 
-                <View style={{ flex: 1 }}>
-                  <View style={styles.packageHeaderRow}>
-                    <Text style={styles.packageLabel}>{pkg.label}</Text>
-                    <View style={styles.packagePriceRow}>
-                      <Text style={styles.packagePrice}>{pkg.price}</Text>
-                      {pkg.originalPrice && <Text style={styles.packageOriginalPrice}>{pkg.originalPrice}</Text>}
-                    </View>
-                  </View>
-                  <Text style={styles.packageDescription}>{pkg.description}</Text>
-                  <Text style={styles.packageDuration}>{pkg.duration}</Text>
-                </View>
-              </Pressable>
-            );
-          })}
-
-          {/* What's included */}
           <SectionHeader title="What's included" />
           <View style={styles.includedCard}>
             {includedItems.map((item, index) => (
@@ -267,47 +195,10 @@ export default function ServiceDetailsScreen() {
               <Text style={styles.trustText}>On-time service</Text>
             </View>
           </View>
-
-          {/* Reviews */}
-          <SectionHeader title='Customer reviews' actionLabel='See all' onActionPress={() => {}} />
-          {reviews.map((review, index) => (
-            <View key={review.id} style={[styles.reviewCard, index !== reviews.length - 1 && { marginBottom: 12 }]}>
-              <View style={styles.reviewHeader}>
-                <CircleIcon Icon={Star} size={36} iconSize={14} />
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.reviewName}>{review.name}</Text>
-                  <Text style={styles.reviewDate}>{review.date}</Text>
-                </View>
-                <View style={styles.reviewStars}>
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
-                      key={i}
-                      size={11}
-                      color={i < review.rating ? AppColors.primary : AppColors.border}
-                      fill={i < review.rating ? AppColors.primary : AppColors.border}
-                      strokeWidth={0}
-                    />
-                  ))}
-                </View>
-              </View>
-              <Text style={styles.reviewComment}>{review.comment}</Text>
-            </View>
-          ))}
         </View>
       </Animated.ScrollView>
 
-      {/* Sticky booking bar */}
-      <SafeAreaView edges={['bottom']} style={[styles.bookingBar, { paddingBottom: 12 }]}>
-        <View>
-          <Text style={styles.bookingBarLabel}>{activePackage.label}</Text>
-          <View style={styles.bookingBarPriceRow}>
-            <Text style={styles.bookingBarPrice}>{activePackage.price}</Text>
-            {activePackage.originalPrice && (
-              <Text style={styles.bookingBarOriginalPrice}>{activePackage.originalPrice}</Text>
-            )}
-          </View>
-        </View>
-
+      <SafeAreaView edges={['bottom']} style={styles.bookingBar}>
         <Pressable
           accessibilityRole='button'
           onPress={goToBooking}
@@ -332,10 +223,6 @@ const styles = StyleSheet.create({
   },
   heroOverlay: {
     ...StyleSheet.absoluteFillObject,
-    // Was accidentally `${AppColors.primaryDark}01` (~0.4% opacity, basically
-    // invisible) — that left the photo untinted with poor icon/text contrast.
-    // A navy (secondary) tint at ~30% both fixes contrast and ties the hero
-    // back to the brand's secondary color instead of relying on primary alone.
     backgroundColor: `${AppColors.secondary}4D`,
   },
 
@@ -376,61 +263,21 @@ const styles = StyleSheet.create({
   },
   categoryTagText: { fontFamily: font.semiBold, fontSize: 11, color: AppColors.primaryDark },
   title: { fontFamily: font.bold, fontSize: 21, color: AppColors.textPrimary },
-  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 8 },
-  ratingChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    paddingHorizontal: 7,
-    paddingVertical: 3,
-    borderRadius: 7,
-    backgroundColor: AppColors.primary,
-  },
-  ratingChipText: { fontFamily: font.semiBold, fontSize: 11, color: AppColors.white },
-  metaText: { fontFamily: font.regular, fontSize: 12, color: AppColors.textSecondary },
-  metaDot: { fontSize: 12, color: AppColors.textTertiary },
 
-  // Package selector — unselected border now uses a neutral (AppColors.border)
-  // instead of primaryLight, which read as "half-selected" since it's a
-  // saturated brand gold rather than a neutral gray.
-  packageCard: {
-    flexDirection: 'row',
-    gap: 12,
+  // Description
+  descriptionCard: {
     padding: 14,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: AppColors.border,
     backgroundColor: AppColors.surface,
-    marginBottom: 10,
+    marginBottom: 24,
   },
-  packageCardSelected: { borderColor: AppColors.primary, borderWidth: 1.5, backgroundColor: AppColors.white },
-  radioOuter: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: AppColors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 2,
-  },
-  radioInner: { width: 10, height: 10, borderRadius: 5, backgroundColor: AppColors.primary },
-  packageHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  packageLabel: { fontFamily: font.semiBold, fontSize: 14, color: AppColors.textPrimary },
-  packagePriceRow: { flexDirection: 'row', alignItems: 'baseline', gap: 5 },
-  packagePrice: { fontFamily: font.bold, fontSize: 15, color: AppColors.textPrimary },
-  packageOriginalPrice: {
-    fontFamily: font.regular,
-    fontSize: 11,
-    color: AppColors.textTertiary,
-    textDecorationLine: 'line-through',
-  },
-  packageDescription: { marginTop: 4, fontFamily: font.regular, fontSize: 12, color: AppColors.textSecondary },
-  packageDuration: { marginTop: 6, fontFamily: font.medium, fontSize: 11, color: AppColors.textTertiary },
+  descriptionText: { fontFamily: font.regular, fontSize: 13, lineHeight: 20, color: AppColors.textSecondary },
+  readMoreBtn: { marginTop: 8, alignSelf: 'flex-start' },
+  readMoreText: { fontFamily: font.semiBold, fontSize: 12.5, color: AppColors.primary },
 
-  // Included — was borderColor: divider with no background, which blended
-  // into the cream page background (#fff5d6 border on #fff9ee page). Now a
-  // real surface card with a neutral border so it visually separates.
+  // Included
   includedCard: {
     borderRadius: 16,
     borderWidth: 1,
@@ -451,9 +298,7 @@ const styles = StyleSheet.create({
   },
   includedText: { flex: 1, fontFamily: font.regular, fontSize: 12.5, color: AppColors.textPrimary },
 
-  // Trust — warningLight (#FFFBEB) was nearly identical to the page
-  // background (#fff9ee), so the strip had no visible separation. Now a
-  // surface card with a border, same treatment as the cards above it.
+  // Trust
   trustRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -468,52 +313,22 @@ const styles = StyleSheet.create({
   trustText: { fontFamily: font.medium, fontSize: 10.5, color: AppColors.textSecondary, textAlign: 'center' },
   trustDivider: { width: 1, height: 28, backgroundColor: AppColors.divider },
 
-  // Reviews — same background/border fix as includedCard/trustRow
-  reviewCard: {
-    padding: 14,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: AppColors.border,
-    backgroundColor: AppColors.surface,
-  },
-  reviewHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  reviewName: { fontFamily: font.semiBold, fontSize: 12.5, color: AppColors.textPrimary },
-  reviewDate: { marginTop: 1, fontFamily: font.regular, fontSize: 10.5, color: AppColors.textTertiary },
-  reviewStars: { flexDirection: 'row', gap: 2 },
-  reviewComment: {
-    marginTop: 10,
-    fontFamily: font.regular,
-    fontSize: 12.5,
-    lineHeight: 18,
-    color: AppColors.textSecondary,
-  },
-
-  // Sticky booking bar
+  // Sticky booking bar — single full-width CTA, so no space-between/flex
+  // tricks needed; the button itself stretches to fill the bar.
   bookingBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingTop: 14,
-    backgroundColor: AppColors.white,
+    paddingBottom: 12,
+    backgroundColor: AppColors.surface,
     borderTopWidth: 1,
     borderTopColor: AppColors.border,
-  },
-  bookingBarLabel: { fontFamily: font.regular, fontSize: 11, color: AppColors.textTertiary },
-  bookingBarPriceRow: { flexDirection: 'row', alignItems: 'baseline', gap: 6, marginTop: 2 },
-  bookingBarPrice: { fontFamily: font.bold, fontSize: 19, color: AppColors.textPrimary },
-  bookingBarOriginalPrice: {
-    fontFamily: font.regular,
-    fontSize: 12,
-    color: AppColors.textTertiary,
-    textDecorationLine: 'line-through',
   },
   bookNowBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 22,
-    paddingVertical: 13,
+    justifyContent: 'center',
+    gap: 6,
+    height: 52,
     borderRadius: 14,
     backgroundColor: AppColors.primary,
     shadowColor: AppColors.primaryDark,
