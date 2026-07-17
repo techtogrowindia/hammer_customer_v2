@@ -77,7 +77,7 @@ export default function OnboardingScreen() {
   const goNext = () => {
     if (isLastSlide) {
       setHasOnBoardCompleted(true);
-      goToPermissionScreen();
+      goToOtp();
       return;
     }
 

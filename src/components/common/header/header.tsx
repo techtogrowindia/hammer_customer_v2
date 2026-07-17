@@ -7,6 +7,7 @@ import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { HeaderWithTitle } from './header-with-title';
 import { HomeHeader } from './home-header';
+import { OrderHeader } from './order-header';
 import { ProfileHeader } from './profile-header';
 import { ServiceHeader } from './service-header';
 
@@ -34,6 +35,7 @@ const Header = () => {
     '(home)': <HomeHeader />,
     '(profile)': <ProfileHeader />,
     '(services)': <ServiceHeader />,
+    '(orders)': <OrderHeader />,
   };
 
   console.log('currentSegmentName', currentSegmentName);

@@ -1,6 +1,5 @@
 import { CircleIcon } from '@/components/common/circle-icon/circle-icon';
 import { InfoStrip } from '@/components/home/banner-promo/info-strip';
-import { SectionHeader } from '@/components/home/header/section-header';
 import { ServiceCard, ServiceCardData } from '@/components/service/card/service-card';
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
@@ -194,11 +193,11 @@ export default function ServicesScreen() {
           })}
         </ScrollView>
 
-        <SectionHeader
+        {/* <SectionHeader
           title={`${filteredServices.length} service${filteredServices.length !== 1 ? 's' : ''} available`}
-        />
+        /> */}
 
-        {/* Service cards */}
+        {/* Service cards — 2-up grid */}
         {filteredServices.length === 0 ? (
           <View style={styles.emptyState}>
             <CircleIcon Icon={Search} size={72} iconSize={26} />
@@ -206,15 +205,17 @@ export default function ServicesScreen() {
             <Text style={styles.emptySubtitle}>Try a different category</Text>
           </View>
         ) : (
-          filteredServices.map((service) => (
-            <ServiceCard
-              key={service.id}
-              service={service}
-              onPress={goToService}
-              isFavorite={favorites.has(service.id)}
-              onToggleFavorite={toggleFavorite}
-            />
-          ))
+          <View style={styles.grid}>
+            {filteredServices.map((service) => (
+              <ServiceCard
+                key={service.id}
+                service={service}
+                onPress={goToService}
+                isFavorite={favorites.has(service.id)}
+                onToggleFavorite={toggleFavorite}
+              />
+            ))}
+          </View>
         )}
 
         <InfoStrip text='All professionals are background-verified for your safety' />
@@ -243,6 +244,14 @@ const styles = StyleSheet.create({
   chipActive: { backgroundColor: AppColors.primary, borderColor: AppColors.primary },
   chipLabel: { fontFamily: font.medium, fontSize: 12, color: AppColors.textSecondary },
   chipLabelActive: { color: AppColors.white },
+
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    rowGap: 12,
+    marginBottom: 24,
+  },
 
   emptyState: { alignItems: 'center', paddingVertical: 56 },
   emptyTitle: { marginTop: 16, fontFamily: font.bold, fontSize: 18, color: AppColors.textPrimary },

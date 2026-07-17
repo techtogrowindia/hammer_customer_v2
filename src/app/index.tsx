@@ -34,8 +34,8 @@ export default function Index() {
     ? '/(tabs)/(home)'
     : !hasOnBoardCompleted
       ? '/onboard'
-      : !hasLocationPermission
-        ? '/(auth)/permission/location'
+      // : !hasLocationPermission
+      //   ? '/(auth)/permission/location'
         : '/otp/generate-otp';
 
   return <Redirect href={redirectTo} />;

@@ -1,3 +1,4 @@
+import { Spacer } from '@/components/common/spacer/Spacer';
 import { SectionHeader } from '@/components/home/header/section-header';
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
@@ -196,6 +197,7 @@ export default function ServiceDetailsScreen() {
             </View>
           </View>
         </View>
+        <Spacer size={200} />
       </Animated.ScrollView>
 
       <SafeAreaView edges={['bottom']} style={styles.bookingBar}>

@@ -1,6 +1,5 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
-import { Star } from 'lucide-react-native';
 import React from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SectionHeader } from '../header/section-header';
@@ -29,7 +28,7 @@ export function ServiceGrid({
 
   return (
     <>
-      <SectionHeader title={title} actionLabel={actionLabel} onActionPress={onSeeAll} />
+      <SectionHeader title={title} onActionPress={onSeeAll} />
 
       <View style={styles.grid}>
         {services.map((service, index) => (
@@ -48,10 +47,10 @@ export function ServiceGrid({
                 resizeMode='cover'
               />
 
-              <View style={styles.ratingBadge}>
+              {/* <View style={styles.ratingBadge}>
                 <Star size={9} color={AppColors.white} fill={AppColors.white} strokeWidth={2} />
                 <Text style={styles.ratingBadgeText}>{service.rating}</Text>
-              </View>
+              </View> */}
             </View>
 
             <View style={styles.body}>
@@ -63,7 +62,7 @@ export function ServiceGrid({
                 {service.bookings}
               </Text>
 
-              <Text style={styles.price}>{service.price}</Text>
+              {/* <Text style={styles.price}>{service.price}</Text> */}
             </View>
           </Pressable>
         ))}

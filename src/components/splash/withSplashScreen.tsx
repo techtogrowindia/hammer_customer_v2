@@ -7,22 +7,20 @@ import {
 } from '@expo-google-fonts/poppins';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import { ReactNode, useCallback, useEffect, useState } from 'react';
-import { Dimensions, View } from 'react-native';
+import { ReactNode, useEffect, useState } from 'react';
+import { View } from 'react-native';
 import LottieLoader from '../common/lottie/LottieLoader';
 
-const { width, height } = Dimensions.get('window');
-
-const SPLASH_DELAY = 6000;
-
 SplashScreen.preventAutoHideAsync().catch(() => {});
+
+const SPLASH_DELAY = 3000;
 
 type Props = {
   children: ReactNode;
 };
 
-export const WithSplashScreen = ({ children }: Props) => {
-  const [isReady, setIsReady] = useState(false);
+export function WithSplashScreen({ children }: Props) {
+  const [showApp, setShowApp] = useState(false);
 
   const [fontsLoaded] = useFonts({
     Poppins_300Light,
@@ -40,17 +38,11 @@ export const WithSplashScreen = ({ children }: Props) => {
     const prepare = async () => {
       try {
         await new Promise((resolve) => setTimeout(resolve, SPLASH_DELAY));
-
+      } finally {
         await SplashScreen.hideAsync();
 
         if (mounted) {
-          setIsReady(true);
-        }
-      } catch (error) {
-        console.warn('Splash initialization failed:', error);
-
-        if (mounted) {
-          setIsReady(true);
+          setShowApp(true);
         }
       }
     };
@@ -62,19 +54,12 @@ export const WithSplashScreen = ({ children }: Props) => {
     };
   }, [fontsLoaded]);
 
-  const onLayoutRootView = useCallback(async () => {
-    if (fontsLoaded) {
-      await SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
-
-  if (!fontsLoaded || !isReady) {
+  if (!showApp) {
     return (
       <View
-        onLayout={onLayoutRootView}
         style={{
           flex: 1,
-          // backgroundColor: '#ED8E24',
+          backgroundColor: '#FFB500',
           justifyContent: 'center',
           alignItems: 'center',
         }}
@@ -91,4 +76,4 @@ export const WithSplashScreen = ({ children }: Props) => {
   }
 
   return <>{children}</>;
-};
+}

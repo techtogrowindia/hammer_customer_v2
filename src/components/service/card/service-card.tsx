@@ -1,6 +1,6 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
-import { ChevronRight, Flame, Heart } from 'lucide-react-native';
+import { ArrowRight, Flame, Heart } from 'lucide-react-native';
 import React from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -10,8 +10,15 @@ export interface ServiceCardData {
   id: string;
   name: string;
   category: string;
+  description?: string;
   tag?: 'bestseller' | 'trending' | 'new';
   Icon: IconType;
+  price?: string;
+  originalPrice?: string;
+  discountPercent?: number;
+  rating?: string;
+  reviews?: string;
+  duration?: string;
 }
 
 interface ServiceCardProps {
@@ -19,77 +26,85 @@ interface ServiceCardProps {
   onPress: (id: string) => void;
   isFavorite?: boolean;
   onToggleFavorite?: (id: string) => void;
+  width?: string | number;
 }
 
 const TAG_CONFIG = {
-  bestseller: { label: 'Bestseller', color: AppColors.primary },
-  trending: { label: 'Trending', color: '#E8622C' },
-  new: { label: 'New', color: '#2E9E5B' },
+  bestseller: { label: 'Bestseller', color: AppColors.error },
+  trending: { label: 'Trending', color: AppColors.info },
+  new: { label: 'New', color: AppColors.success },
 };
 
-const serviceImages = [
-  'https://picsum.photos/id/1015/200/200',
-  'https://picsum.photos/id/1025/200/200',
-  'https://picsum.photos/id/1035/200/200',
-  'https://picsum.photos/id/1043/200/200',
-  'https://picsum.photos/id/1050/200/200',
-  'https://picsum.photos/id/1060/200/200',
-];
+const CATEGORY_IMAGES: Record<string, string> = {
+  cleaning: 'https://loremflickr.com/400/300/bathroom',
+  electrical: 'https://loremflickr.com/400/300/electrician,wiring',
+  plumbing: 'https://loremflickr.com/400/300/plumber,pipe',
+  repair: 'https://loremflickr.com/400/300/appliance,repair',
+  painting: 'https://loremflickr.com/400/300/housepainting,paintroller',
+  salon: 'https://loremflickr.com/400/300/haircut,barber',
+  laundry: 'https://loremflickr.com/400/300/laundry,ironing',
+  power: 'https://loremflickr.com/400/300/generator,powertools',
+};
+const DEFAULT_IMAGE = 'https://loremflickr.com/400/300/homeservice,handyman';
 
-export function ServiceCard({ service, onPress, isFavorite = false, onToggleFavorite }: ServiceCardProps) {
+export function ServiceCard({
+  service,
+  onPress,
+  isFavorite = false,
+  onToggleFavorite,
+  width = '48%',
+}: ServiceCardProps) {
   const tagConfig = service.tag ? TAG_CONFIG[service.tag] : null;
-
-  const imageUri = serviceImages[parseInt(service.id, 10) % serviceImages.length || 0];
+  const imageUri = CATEGORY_IMAGES[service.category] ?? DEFAULT_IMAGE;
+  const { Icon } = service;
 
   return (
     <Pressable
       accessibilityRole='button'
       onPress={() => onPress(service.id)}
-      style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+      style={({ pressed }) => [styles.card, { width }, pressed && styles.cardPressed]}
     >
-      {tagConfig && (
-        <View style={[styles.tagRibbon, { backgroundColor: tagConfig.color }]}>
-          <Flame size={10} color={AppColors.white} strokeWidth={2.5} />
-          <Text style={styles.tagRibbonText}>{tagConfig.label}</Text>
-        </View>
-      )}
+      <View style={styles.imageContainer}>
+        <Image source={{ uri: imageUri }} style={styles.image} resizeMode='cover' />
 
-      <Pressable
-        accessibilityRole='button'
-        hitSlop={8}
-        onPress={() => onToggleFavorite?.(service.id)}
-        style={styles.favoriteBtn}
-      >
-        <Heart
-          size={16}
-          color={isFavorite ? AppColors.error : AppColors.textTertiary}
-          fill={isFavorite ? AppColors.error : 'transparent'}
-          strokeWidth={2}
-        />
-      </Pressable>
+        {tagConfig && (
+          <View style={[styles.tagBadge, { backgroundColor: tagConfig.color }]}>
+            <Text style={styles.tagBadgeText}>{tagConfig.label}</Text>
+          </View>
+        )}
 
-      <View style={[styles.topRow, tagConfig && styles.topRowWithTag]}>
-        <View style={styles.imageBlock}>
-          <Image source={{ uri: imageUri }} style={styles.image} resizeMode='cover' />
-        </View>
-
-        <View style={styles.info}>
-          <Text style={styles.name} numberOfLines={1}>
-            {service.name}
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.footer}>
         <Pressable
           accessibilityRole='button'
-          onPress={() => onPress(service.id)}
-          style={({ pressed }) => [styles.viewBtn, pressed && styles.viewBtnPressed]}
+          hitSlop={8}
+          onPress={() => onToggleFavorite?.(service.id)}
+          style={styles.favoriteBtn}
         >
-          <Text style={styles.viewBtnText}>Book Service</Text>
-
-          <ChevronRight size={14} color={AppColors.white} strokeWidth={2.5} />
+          <Heart
+            size={14}
+            color={isFavorite ? AppColors.error : AppColors.white}
+            fill={isFavorite ? AppColors.error : 'transparent'}
+            strokeWidth={2}
+          />
         </Pressable>
+      </View>
+
+      <View style={styles.body}>
+        {/* <View style={styles.iconWrap}>
+          <Icon size={16} color={AppColors.primary} strokeWidth={2.25} />
+        </View> */}
+
+        <Text style={styles.name} numberOfLines={1}>
+          {service.name}
+        </Text>
+
+        <Text style={styles.description} numberOfLines={1}>
+          {service.description ?? 'Verified & background-checked pros'}
+        </Text>
+
+        <View style={styles.bookBtn}>
+          <Text style={styles.bookBtnText}>Book</Text>
+          <ArrowRight size={12} color={AppColors.white} strokeWidth={2.5} />
+        </View>
       </View>
     </Pressable>
   );
@@ -97,73 +112,20 @@ export function ServiceCard({ service, onPress, isFavorite = false, onToggleFavo
 
 const styles = StyleSheet.create({
   card: {
-    padding: 16,
-    borderRadius: 22,
+    borderRadius: 16,
     backgroundColor: AppColors.white,
-    borderWidth: 1.5,
-    borderColor: AppColors.border,
-    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: AppColors.divider,
     overflow: 'hidden',
-    shadowColor: AppColors.primaryDark,
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    elevation: 2,
   },
 
   cardPressed: {
-    backgroundColor: AppColors.warningLight,
+    opacity: 0.92,
   },
 
-  tagRibbon: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderBottomRightRadius: 12,
-  },
-
-  tagRibbonText: {
-    fontFamily: 'Poppins_600SemiBold',
-    fontSize: 9,
-    color: AppColors.white,
-  },
-
-  favoriteBtn: {
-    position: 'absolute',
-    top: 14,
-    right: 14,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: AppColors.warningLight,
-    zIndex: 10,
-  },
-
-  topRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 6,
-  },
-
-  topRowWithTag: {
-    marginTop: 22,
-  },
-
-  imageBlock: {
-    width: 72,
-    height: 72,
-    borderRadius: 16,
-    overflow: 'hidden',
+  imageContainer: {
+    height: 100,
+    position: 'relative',
     backgroundColor: AppColors.warningLight,
   },
 
@@ -172,112 +134,76 @@ const styles = StyleSheet.create({
     height: '100%',
   },
 
-  info: {
-    flex: 1,
+  tagBadge: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    backgroundColor: 'rgba(255,255,255,0.94)',
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+
+  tagBadgeText: {
+    fontFamily: 'Poppins_600SemiBold',
+    fontSize: 8.5,
+    color: AppColors.white,
+  },
+
+  favoriteBtn: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.35)',
+  },
+
+  body: {
+    padding: 12,
+  },
+
+  iconWrap: {
+    width: 30,
+    height: 30,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: AppColors.warningLight,
+    marginBottom: 8,
   },
 
   name: {
     fontFamily: 'Poppins_600SemiBold',
-    fontSize: 15,
+    fontSize: 13,
     color: AppColors.textPrimary,
-    marginBottom: 6,
   },
 
-  metaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 5,
-  },
-
-  ratingChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-    backgroundColor: AppColors.primary,
-  },
-
-  ratingChipText: {
-    fontFamily: 'Poppins_600SemiBold',
-    fontSize: 10,
-    color: AppColors.white,
-  },
-
-  reviews: {
+  description: {
+    marginTop: 2,
     fontFamily: fontTokens.fontFamily.regular,
     fontSize: 11,
     color: AppColors.textSecondary,
   },
 
-  durationRow: {
+  bookBtn: {
+    alignSelf: 'flex-start',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-  },
-
-  duration: {
-    fontFamily: fontTokens.fontFamily.regular,
-    fontSize: 11,
-    color: AppColors.textPrimary,
-  },
-
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    marginTop: 14,
-    paddingTop: 14,
-    borderTopWidth: 1,
-    borderTopColor: AppColors.divider,
-  },
-
-  priceRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 6,
-  },
-
-  price: {
-    fontFamily: 'Poppins_700Bold',
-    fontSize: 17,
-    color: AppColors.textPrimary,
-  },
-
-  originalPrice: {
-    fontFamily: fontTokens.fontFamily.regular,
-    fontSize: 12,
-    color: AppColors.textTertiary,
-    textDecorationLine: 'line-through',
-  },
-
-  discountText: {
-    marginTop: 2,
-    fontFamily: 'Poppins_600SemiBold',
-    fontSize: 11,
-    color: '#2E9E5B',
-  },
-
-  viewBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    height: 38,
-    paddingHorizontal: 16,
-    borderRadius: 13,
+    marginTop: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 8,
     backgroundColor: AppColors.primary,
   },
 
-  viewBtnPressed: {
-    backgroundColor: AppColors.primaryDark,
-  },
-
-  viewBtnText: {
+  bookBtnText: {
     fontFamily: 'Poppins_600SemiBold',
-    fontSize: 12.5,
+    fontSize: 11,
     color: AppColors.white,
   },
 });
