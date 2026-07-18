@@ -65,9 +65,7 @@ export default function BookingConfirmationScreen() {
           </View>
 
           <Text style={styles.successTitle}>Booking Confirmed!</Text>
-          <Text style={styles.successSubtitle}>
-            Your professional has been notified and will arrive at the scheduled time.
-          </Text>
+          <Text style={styles.successSubtitle}>Our service professional will be in touch with you shortly </Text>
 
           <View style={styles.bookingIdChip}>
             <Text style={styles.bookingIdLabel}>Booking ID</Text>
