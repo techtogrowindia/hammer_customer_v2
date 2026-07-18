@@ -1,3 +1,4 @@
+import { AppColors } from '@/core/theme/app-colors';
 import {
   Poppins_300Light,
   Poppins_400Regular,
@@ -59,7 +60,7 @@ export function WithSplashScreen({ children }: Props) {
       <View
         style={{
           flex: 1,
-          backgroundColor: '#FFB500',
+          backgroundColor: AppColors.white,
           justifyContent: 'center',
           alignItems: 'center',
         }}

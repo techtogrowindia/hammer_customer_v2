@@ -7,6 +7,8 @@ import React, { useRef, useState } from 'react';
 import {
   Animated,
   FlatList,
+  Image,
+  Linking,
   NativeScrollEvent,
   NativeSyntheticEvent,
   Pressable,
@@ -25,8 +27,8 @@ type Slide = {
   description: string;
   variant: 'setup' | 'booking' | 'tracking';
   Icon: typeof Wrench;
+  image: string;
 };
-
 const slides: Slide[] = [
   {
     id: 'setup',
@@ -34,6 +36,7 @@ const slides: Slide[] = [
     description: 'Choose repair, cleaning, plumbing, electrical, and more from one simple place.',
     variant: 'setup',
     Icon: Wrench,
+    image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=900',
   },
   {
     id: 'booking',
@@ -41,6 +44,7 @@ const slides: Slide[] = [
     description: 'Get clear updates about your professional, schedule, and service status.',
     variant: 'booking',
     Icon: CalendarCheck2,
+    image: 'https://images.unsplash.com/photo-1556740749-887f6717d7e4?w=900',
   },
   {
     id: 'tracking',
@@ -48,6 +52,7 @@ const slides: Slide[] = [
     description: 'Track visits, compare trusted providers, and keep your home running smoothly.',
     variant: 'tracking',
     Icon: ClipboardList,
+    image: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=900',
   },
 ];
 
@@ -88,7 +93,13 @@ export default function OnboardingScreen() {
     const nextIndex = Math.round(event.nativeEvent.contentOffset.x / width);
     setCurrentIndex(nextIndex);
   };
+  const openPrivacyPolicy = () => {
+    Linking.openURL('https://privacy-policy-hammer.vercel.app/');
+  };
 
+  const openTerms = () => {
+    Linking.openURL('https://hammerapp.in/terms');
+  };
   return (
     <SafeAreaView style={styles.screen}>
       <StatusBar barStyle='dark-content' backgroundColor={AppColors.white} />
@@ -131,8 +142,16 @@ export default function OnboardingScreen() {
           <Text style={styles.primaryButtonText}>{isLastSlide ? 'Get Started' : 'Next'}</Text>
           <ArrowRight size={18} color={AppColors.white} strokeWidth={2.25} />
         </Pressable>
-
-        <Text style={styles.terms}>By continuing, you agree to our Terms & Privacy Policy</Text>
+        <Text style={styles.terms}>
+          By continuing, you agree to our{' '}
+          <Text style={styles.link} onPress={openTerms}>
+            Terms
+          </Text>{' '}
+          &{' '}
+          <Text style={styles.link} onPress={openPrivacyPolicy}>
+            Privacy Policy
+          </Text>
+        </Text>
       </View>
     </SafeAreaView>
   );
@@ -196,18 +215,9 @@ function OnboardSlide({
 
   return (
     <View style={[styles.slide, { width }]}>
-      <View style={styles.mockupStage}>
-        {/* <Animated.View style={[styles.mockupMotion, mockupStyle]}>
-          <View style={styles.ringOuter}>
-            <View style={styles.ringInner}>
-              <Icon size={56} color={AppColors.primary} strokeWidth={1.75} />
-            </View>
-            <View style={[styles.orbitDot, styles.orbitDotTop]}>
-              <Sparkles size={16} color={AppColors.primary} strokeWidth={2} />
-            </View>
-          </View>
-        </Animated.View> */}
-      </View>
+      <Animated.View style={[styles.mockupStage, mockupStyle]}>
+        <Image source={{ uri: item.image }} style={styles.onboardingImage} resizeMode='cover' />
+      </Animated.View>
 
       <Animated.View style={[styles.copyWrap, textStyle]}>
         <Text style={styles.title}>{item.title}</Text>
@@ -395,5 +405,14 @@ const styles = StyleSheet.create({
     lineHeight: 13,
     color: AppColors.textTertiary,
     textAlign: 'center',
+  },
+  onboardingImage: {
+    width: '100%',
+    height: '100%',
+  },
+  link: {
+    color: AppColors.primary,
+    fontFamily: font.medium,
+    textDecorationLine: 'underline',
   },
 });

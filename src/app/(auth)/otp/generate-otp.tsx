@@ -7,7 +7,7 @@ import { useAuthApisHelper } from '@/hooks/useAuthApisHelper';
 import { Formik, FormikProps } from 'formik';
 import { Lock, MessageCircle, Smartphone, Sparkles } from 'lucide-react-native';
 import React, { useRef } from 'react';
-import { KeyboardAvoidingView, Platform, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Linking, Platform, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Yup from 'yup';
 
@@ -36,6 +36,14 @@ export default function GenerateOtpScreen() {
 
   const handleSendOtp = async (values: MobileFormValues) => {
     await sendOTP({ mobileNumber: values.mobile, isFromReSend: false });
+  };
+
+  const openPrivacyPolicy = () => {
+    Linking.openURL('https://privacy-policy-hammer.vercel.app/');
+  };
+
+  const openTerms = () => {
+    Linking.openURL('https://hammerapp.in/terms');
   };
 
   return (
@@ -99,7 +107,19 @@ export default function GenerateOtpScreen() {
                   onPress: handleSubmit,
                   disabled: !(isValid && dirty) || isSubmitting,
                 }}
-                footerText='By continuing, you agree to our Terms & Privacy Policy.'
+                footerText={
+                  <Text style={styles.footerText}>
+                    By continuing, you agree to our{' '}
+                    <Text style={styles.footerLink} onPress={openTerms}>
+                      Terms
+                    </Text>{' '}
+                    &{' '}
+                    <Text style={styles.footerLink} onPress={openPrivacyPolicy}>
+                      Privacy Policy
+                    </Text>
+                    .
+                  </Text>
+                }
               />
             </>
           )}
@@ -136,6 +156,20 @@ const styles = StyleSheet.create({
     fontFamily: font.semiBold,
     fontSize: 15,
     color: AppColors.textPrimary,
+  },
+  footerText: {
+    fontFamily: font.regular,
+    fontSize: 12,
+    marginTop: 8,
+    lineHeight: 18,
+    color: AppColors.textTertiary,
+    textAlign: 'center',
+  },
+
+  footerLink: {
+    color: AppColors.primary,
+    fontFamily: font.medium,
+    textDecorationLine: 'underline',
   },
   inputDivider: {
     width: 1,

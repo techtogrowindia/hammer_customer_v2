@@ -5,7 +5,7 @@ import { useBoundStore } from '@/store/boundStore';
 import { router } from 'expo-router';
 import { Bell, Clock3, Sparkles, SprayCan } from 'lucide-react-native';
 import React from 'react';
-import { Pressable, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useShallow } from 'zustand/shallow';
 
@@ -22,9 +22,13 @@ export default function ComingSoonScreen() {
     await clearUserInfo();
     router.replace('/(auth)/otp/generate-otp');
   };
-
-  const notifyMe = () => {};
-
+  const notifyMe = async () => {
+    try {
+      await Linking.openURL('mailto:hammerhfs@gmail.com');
+    } catch (error) {
+      console.error('Failed to open mail app:', error);
+    }
+  };
   return (
     <SafeAreaView style={styles.screen}>
       <StatusBar barStyle='dark-content' backgroundColor={AppColors.white} />
@@ -55,13 +59,13 @@ export default function ComingSoonScreen() {
       </View>
 
       <View style={styles.footer}>
-        {/* <Pressable
+        <Pressable
           accessibilityRole='button'
           onPress={notifyMe}
           style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]}
         >
-          <Text style={styles.primaryButtonText}>Notify Me</Text>
-        </Pressable> */}
+          <Text style={styles.primaryButtonText}>Conatct Us</Text>
+        </Pressable>
 
         <Pressable accessibilityRole='button' onPress={goHome} hitSlop={8} style={styles.secondaryAction}>
           <Text style={styles.secondaryActionText}>Log out</Text>

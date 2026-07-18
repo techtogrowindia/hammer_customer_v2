@@ -1,6 +1,6 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { ActivityIndicator, Keyboard, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -20,7 +20,7 @@ export interface FooterButton {
 interface PrimaryFooterProps {
   primaryButton: FooterButton;
   secondaryButton?: FooterButton;
-  footerText?: string;
+  footerText?: ReactNode;
   children?: React.ReactNode;
   containerStyle?: View['props']['style'];
 }
@@ -84,13 +84,17 @@ export default function PrimaryFooter({
       ]}
     >
       {children}
-
       <View style={styles.buttonRow}>
         {secondaryButton && renderButton(secondaryButton)}
         {renderButton(primaryButton)}
       </View>
-
-      {footerText ? <Text style={styles.footerText}>{footerText}</Text> : null}
+      {footerText ? (
+        typeof footerText === 'string' ? (
+          <Text style={styles.footerText}>{footerText}</Text>
+        ) : (
+          footerText
+        )
+      ) : null}
     </View>
   );
 }

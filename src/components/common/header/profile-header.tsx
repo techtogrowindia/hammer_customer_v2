@@ -29,7 +29,7 @@ export function ProfileHeader() {
               {'ASWICK JOTHI'}
             </Text>
             <View style={styles.badgeRow}>
-              <Text style={styles.mobile}>{'123-456-7890'}</Text>
+              <Text style={styles.mobile}>{'987-654-3210'}</Text>
               {true && (
                 <View style={styles.verifiedBadge}>
                   <ShieldCheck size={10} color={AppColors.primary} strokeWidth={2.25} />

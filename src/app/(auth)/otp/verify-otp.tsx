@@ -4,7 +4,7 @@ import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
 import { useAuthApisHelper } from '@/hooks/useAuthApisHelper';
 import { router, useLocalSearchParams } from 'expo-router';
-import { CheckCircle2, KeyRound, Smartphone, Sparkles } from 'lucide-react-native';
+import { ArrowLeft, CheckCircle2, KeyRound, Smartphone, Sparkles } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -81,7 +81,7 @@ export default function VerifyOtpScreen() {
         onPress={goBack}
         style={({ pressed }) => [styles.backButton, pressed && styles.backButtonPressed]}
       >
-        <Text style={styles.backIcon}>{'\u2190'}</Text>
+        <ArrowLeft size={19} color={AppColors.primary} strokeWidth={2.25} />
       </Pressable>
 
       <View style={styles.content}>
