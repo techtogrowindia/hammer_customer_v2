@@ -1,5 +1,6 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
+import { router } from 'expo-router';
 import { Pencil, ShieldCheck } from 'lucide-react-native';
 import React from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -41,7 +42,9 @@ export function ProfileHeader() {
 
           <Pressable
             accessibilityRole='button'
-            onPress={() => {}}
+            onPress={() => {
+              router.push('/(tabs)/(profile)/edit-profile');
+            }}
             style={({ pressed }) => [styles.editButton, pressed && { opacity: 0.7 }]}
             hitSlop={8}
           >

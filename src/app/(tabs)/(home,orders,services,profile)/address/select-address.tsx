@@ -3,7 +3,7 @@ import { fontTokens } from '@/core/theme/typography';
 import { router } from 'expo-router';
 import { Briefcase, Check, Home, MapPin, Pencil, Plus, Trash2 } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const font = {
@@ -17,19 +17,54 @@ type SavedAddress = {
   id: string;
   label: string;
   type: 'home' | 'work' | 'other';
-  detail: string;
+  houseNo: string;
+  street: string;
+  landmark?: string;
+  city: string;
+  pincode: string;
 };
 
 const TYPE_ICON = { home: Home, work: Briefcase, other: MapPin };
 
-const savedAddresses: SavedAddress[] = [
-  { id: 'a1', label: 'Home', type: 'home', detail: '123, 1st Main Road, Indiranagar, Chennai 660038' },
-  { id: 'a2', label: 'Work', type: 'work', detail: 'Tower B, 4th Floor, DLF IT Park, Chennai 600096' },
-  { id: 'a3', label: "Mom's place", type: 'other', detail: '45, Lake View Street, Adyar, Chennai 600020' },
+const buildDetail = (addr: SavedAddress) =>
+  [addr.houseNo, addr.street, addr.landmark && `near ${addr.landmark}`, addr.city, addr.pincode]
+    .filter(Boolean)
+    .join(', ');
+
+const INITIAL_ADDRESSES: SavedAddress[] = [
+  {
+    id: 'a1',
+    label: 'Home',
+    type: 'home',
+    houseNo: '123',
+    street: '1st Main Road, Indiranagar',
+    city: 'Chennai',
+    pincode: '600038',
+  },
+  {
+    id: 'a2',
+    label: 'Work',
+    type: 'work',
+    houseNo: 'Tower B, 4th Floor',
+    street: 'DLF IT Park',
+    city: 'Chennai',
+    pincode: '600096',
+  },
+  {
+    id: 'a3',
+    label: "Mom's place",
+    type: 'other',
+    houseNo: '45',
+    street: 'Lake View Street',
+    landmark: 'Adyar Signal',
+    city: 'Chennai',
+    pincode: '600020',
+  },
 ];
 
 export default function SelectAddressScreen() {
   const { bottom } = useSafeAreaInsets();
+  const [addresses, setAddresses] = useState(INITIAL_ADDRESSES);
   const [selectedId, setSelectedId] = useState('a1');
 
   const selectAddress = (id: string) => {
@@ -37,11 +72,43 @@ export default function SelectAddressScreen() {
     router.back();
   };
 
+  const editAddress = (addr: SavedAddress) => {
+    router.push({
+      pathname: '/address/add-address',
+      params: {
+        id: addr.id,
+        label: addr.label,
+        type: addr.type,
+        houseNo: addr.houseNo,
+        street: addr.street,
+        landmark: addr.landmark ?? '',
+        city: addr.city,
+        pincode: addr.pincode,
+      },
+    } as never);
+  };
+
+  const deleteAddress = (addr: SavedAddress) => {
+    Alert.alert('Delete address', `Remove "${addr.label}" from your saved addresses?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => {
+          setAddresses((prev) => prev.filter((a) => a.id !== addr.id));
+          if (selectedId === addr.id) {
+            setSelectedId((prev) => addresses.find((a) => a.id !== addr.id)?.id ?? prev);
+          }
+        },
+      },
+    ]);
+  };
+
   return (
     <View style={styles.screen}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <Text style={styles.sectionLabel}>Saved addresses</Text>
-        {savedAddresses.map((addr) => {
+        {addresses.map((addr) => {
           const selected = selectedId === addr.id;
           const TypeIcon = TYPE_ICON[addr.type];
           return (
@@ -49,7 +116,11 @@ export default function SelectAddressScreen() {
               key={addr.id}
               accessibilityRole='button'
               onPress={() => selectAddress(addr.id)}
-              style={[styles.addressCard, selected && styles.addressCardSelected]}
+              style={({ pressed }) => [
+                styles.addressCard,
+                selected && styles.addressCardSelected,
+                pressed && !selected && styles.addressCardPressed,
+              ]}
             >
               <View style={styles.addressTopRow}>
                 <View style={[styles.addressIconWrap, selected && styles.addressIconWrapSelected]}>
@@ -59,7 +130,7 @@ export default function SelectAddressScreen() {
                 <View style={{ flex: 1 }}>
                   <Text style={styles.addressLabel}>{addr.label}</Text>
                   <Text style={styles.addressDetail} numberOfLines={2}>
-                    {addr.detail}
+                    {buildDetail(addr)}
                   </Text>
                 </View>
 
@@ -74,13 +145,24 @@ export default function SelectAddressScreen() {
                 <Pressable
                   accessibilityRole='button'
                   hitSlop={8}
-                  style={styles.actionBtn}
-                  onPress={() => router.push({ pathname: '/address/add-address', params: { id: addr.id } } as never)}
+                  style={({ pressed }) => [styles.actionBtn, pressed && styles.actionBtnPressed]}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    editAddress(addr);
+                  }}
                 >
                   <Pencil size={13} color={AppColors.textSecondary} strokeWidth={2} />
                   <Text style={styles.actionBtnText}>Edit</Text>
                 </Pressable>
-                <Pressable accessibilityRole='button' hitSlop={8} style={styles.actionBtn}>
+                <Pressable
+                  accessibilityRole='button'
+                  hitSlop={8}
+                  style={({ pressed }) => [styles.actionBtn, pressed && styles.actionBtnPressed]}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    deleteAddress(addr);
+                  }}
+                >
                   <Trash2 size={13} color={AppColors.error} strokeWidth={2} />
                   <Text style={[styles.actionBtnText, { color: AppColors.error }]}>Delete</Text>
                 </Pressable>
@@ -88,6 +170,13 @@ export default function SelectAddressScreen() {
             </Pressable>
           );
         })}
+
+        {addresses.length === 0 && (
+          <View style={styles.emptyState}>
+            <MapPin size={22} color={AppColors.textTertiary} strokeWidth={1.75} />
+            <Text style={styles.emptyStateText}>No saved addresses yet</Text>
+          </View>
+        )}
       </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: bottom + 12 }]}>
@@ -119,6 +208,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   addressCardSelected: { borderColor: AppColors.primary, backgroundColor: AppColors.warningLight },
+  addressCardPressed: { backgroundColor: AppColors.background },
   addressTopRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   addressIconWrap: {
     width: 38,
@@ -156,7 +246,11 @@ const styles = StyleSheet.create({
     borderTopColor: AppColors.divider,
   },
   actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 2 },
+  actionBtnPressed: { opacity: 0.55 },
   actionBtnText: { fontFamily: font.medium, fontSize: 12, color: AppColors.textSecondary },
+
+  emptyState: { alignItems: 'center', gap: 8, paddingVertical: 40 },
+  emptyStateText: { fontFamily: font.medium, fontSize: 13, color: AppColors.textTertiary },
 
   footer: {
     paddingHorizontal: 20,

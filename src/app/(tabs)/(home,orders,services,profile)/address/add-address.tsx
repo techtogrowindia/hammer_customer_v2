@@ -21,6 +21,8 @@ const labelOptions: LabelOption[] = [
   { id: 'other', label: 'Other', Icon: MapPin },
 ];
 
+const KNOWN_LABELS = ['home', 'work', 'other'] as const;
+
 type RouteParams = {
   id?: string;
   lat?: string;
@@ -29,6 +31,11 @@ type RouteParams = {
   city?: string;
   pincode?: string;
   formattedAddress?: string;
+  // Edit-flow params, passed from select-address.tsx's Edit action
+  label?: string;
+  type?: 'home' | 'work' | 'other';
+  houseNo?: string;
+  landmark?: string;
 };
 
 export default function AddAddressScreen() {
@@ -36,26 +43,31 @@ export default function AddAddressScreen() {
   const params = useLocalSearchParams<RouteParams>();
   const isEditing = Boolean(params.id);
 
-  // Pre-filled from SelectLocationScreen's Places result where available —
-  // still editable, since Google's parsing isn't always exact for Indian
-  // addresses (e.g. apartment/floor numbers never come from Places).
-  const [selectedLabel, setSelectedLabel] = useState<'home' | 'work' | 'other'>('home');
-  const [customLabel, setCustomLabel] = useState('');
-  const [houseNo, setHouseNo] = useState('');
+  const initialType: 'home' | 'work' | 'other' =
+    params.type && (KNOWN_LABELS as readonly string[]).includes(params.type) ? params.type : 'home';
+
+  const [selectedLabel, setSelectedLabel] = useState<'home' | 'work' | 'other'>(initialType);
+  const [customLabel, setCustomLabel] = useState(initialType === 'other' ? (params.label ?? '') : '');
+  const [houseNo, setHouseNo] = useState(params.houseNo ?? '');
   const [street, setStreet] = useState(params.street ?? '');
-  const [landmark, setLandmark] = useState('');
+  const [landmark, setLandmark] = useState(params.landmark ?? '');
   const [city, setCity] = useState(params.city ?? '');
   const [pincode, setPincode] = useState(params.pincode ?? '');
 
   const hasLocation = Boolean(params.lat && params.lng);
+  const existingAddressLine = [params.houseNo, params.street, params.city, params.pincode].filter(Boolean).join(', ');
+  const locationLabelText = hasLocation ? 'Pinned location' : isEditing ? 'Saved location' : 'No location selected';
+  const locationValueText = params.formattedAddress || existingAddressLine || 'Tap to pick a location on the map';
 
   const changeLocation = () => {
     router.back();
   };
 
   const saveAddress = () => {
-    // TODO: persist { houseNo, street, landmark, city, pincode, label,
-    // lat: params.lat, lng: params.lng } to the backend/store here.
+    // TODO: persist { id: params.id (update) or undefined (create), houseNo,
+    // street, landmark, city, pincode, label: selectedLabel === 'other' ?
+    // customLabel : selectedLabel's display name, lat: params.lat, lng:
+    // params.lng } to the backend/store here.
     router.dismissAll();
   };
 
@@ -72,9 +84,9 @@ export default function AddAddressScreen() {
             <MapPin size={17} color={AppColors.primary} strokeWidth={2.25} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.locationLabel}>{hasLocation ? 'Pinned location' : 'No location selected'}</Text>
+            <Text style={styles.locationLabel}>{locationLabelText}</Text>
             <Text style={styles.locationValue} numberOfLines={2}>
-              {params.formattedAddress || 'Tap to pick a location on the map'}
+              {locationValueText}
             </Text>
           </View>
           <View style={styles.changeChip}>
@@ -197,7 +209,6 @@ const styles = StyleSheet.create({
 
   sectionLabel: { marginBottom: 12, fontFamily: font.semiBold, fontSize: 13, color: AppColors.textPrimary },
 
-  // Location summary card
   locationCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -237,7 +248,6 @@ const styles = StyleSheet.create({
     color: AppColors.textPrimary,
   },
 
-  // Label chips
   labelRow: { flexDirection: 'row', gap: 8 },
   labelChip: {
     flexDirection: 'row',

@@ -39,7 +39,9 @@ export function HomeHeader() {
 
           <Pressable
             accessibilityRole='button'
-            onPress={() => {}}
+            onPress={() => {
+              router.push('/(tabs)/(home)/notification');
+            }}
             style={({ pressed }) => [styles.bellButton, pressed && { opacity: 0.8 }]}
             hitSlop={8}
           >
@@ -60,8 +62,8 @@ export function HomeHeader() {
           <Text style={styles.searchPlaceholder} numberOfLines={1}>
             Search for products
           </Text>
-          {/* <View style={styles.divider} />
-          <Pressable
+          {/* <View style={styles.divider} /> */}
+          {/* <Pressable
             accessibilityRole='button'
             onPress={onFilterPress}
             hitSlop={8}
@@ -79,10 +81,12 @@ const SEARCH_CARD_HEIGHT = 56;
 
 const styles = StyleSheet.create({
   wrap: { marginBottom: SEARCH_CARD_HEIGHT / 2 + 8 },
+  // wrap: { marginBottom: 16 },
   hero: {
     backgroundColor: AppColors.primary,
     paddingHorizontal: 20,
     paddingBottom: SEARCH_CARD_HEIGHT / 2 + 22,
+    // paddingBottom: SEARCH_CARD_HEIGHT / 2,
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
     overflow: 'hidden',

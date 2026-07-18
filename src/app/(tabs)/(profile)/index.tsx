@@ -64,7 +64,7 @@ const sections: MenuSectionData[] = [
         label: 'Notifications',
         subtitle: 'Reminders & updates',
         Icon: Bell,
-        route: '/profile/notifications',
+        route: '/(tabs)/(profile)/notification',
       },
       { id: 'settings', label: 'Settings', subtitle: 'App preferences', Icon: Settings, route: '/profile/settings' },
     ],

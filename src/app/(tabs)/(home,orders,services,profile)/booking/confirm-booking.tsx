@@ -1,6 +1,8 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
+import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import {
   CalendarClock,
   CalendarDays,
@@ -9,12 +11,15 @@ import {
   ImageUp,
   MapPin,
   MicVocal,
+  Pause,
+  Play,
   Share2,
   Sparkles,
   SquareDashedText,
+  Video as VideoIcon,
 } from 'lucide-react-native';
 import React from 'react';
-import { Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Image as RNImage, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const font = {
@@ -24,24 +29,103 @@ const font = {
   bold: fontTokens.fontFamily.bold,
 };
 
-const summaryRows = [
-  { id: 'service', label: 'Service', value: 'Bathroom Deep Cleaning', Icon: Sparkles },
-  { id: 'when', label: 'When', value: 'Immediate', Icon: CalendarClock },
-  { id: 'datetime', label: 'Date & time', value: 'Today, 12:00 – 3:00 PM', Icon: CalendarDays },
-  { id: 'address', label: 'Address', value: 'Home · 123, 1st Main Road, Indiranagar', Icon: MapPin },
-  {
-    id: 'description',
-    label: 'Description',
-    value: 'I need a thorough cleaning of my bathroom.',
-    Icon: SquareDashedText,
-  },
-  { id: 'Medias', label: 'Medias', value: '', Icon: ImageUp },
-  { id: 'Voice Note', label: 'Voice Note', value: '', Icon: MicVocal },
-];
+type MediaItem = { id: string; uri: string; type: 'image' | 'video' };
+type VoiceNote = { id: string; uri: string; durationSeconds: number };
+
+const formatDuration = (seconds: number) => {
+  const totalSeconds = Math.floor(seconds || 0);
+  const minutes = Math.floor(totalSeconds / 60);
+  const secs = totalSeconds % 60;
+  return `${minutes}:${secs.toString().padStart(2, '0')}`;
+};
+
+const safeParse = <T,>(value: string | undefined, fallback: T): T => {
+  if (!value) return fallback;
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return fallback;
+  }
+};
+
+// Same paused-first-frame video thumbnail as the booking screen.
+function VideoThumb({ uri }: { uri: string }) {
+  const player = useVideoPlayer(uri, (p) => {
+    p.pause();
+  });
+  return <VideoView player={player} style={styles.mediaThumb} contentFit='cover' nativeControls={false} />;
+}
+
+function VoiceNoteRow({ note, index }: { note: VoiceNote; index: number }) {
+  const player = useAudioPlayer(note.uri);
+  const status = useAudioPlayerStatus(player);
+
+  const toggle = () => {
+    if (status.playing) {
+      player.pause();
+    } else {
+      if (status.didJustFinish) player.seekTo(0);
+      player.play();
+    }
+  };
+
+  const progress = note.durationSeconds ? Math.min(100, ((status.currentTime ?? 0) / note.durationSeconds) * 100) : 0;
+
+  return (
+    <View style={styles.voiceNoteRow}>
+      <Pressable accessibilityRole='button' onPress={toggle} style={styles.voiceNotePlayBtn} hitSlop={6}>
+        {status.playing ? (
+          <Pause size={13} color={AppColors.white} strokeWidth={2.25} />
+        ) : (
+          <Play size={13} color={AppColors.white} strokeWidth={2.25} />
+        )}
+      </Pressable>
+      <View style={{ flex: 1 }}>
+        <Text style={styles.voiceNoteTitle}>Voice note {index + 1}</Text>
+        <View style={styles.voiceNoteTrack}>
+          <View style={[styles.voiceNoteProgress, { width: `${progress}%` }]} />
+        </View>
+      </View>
+      <Text style={styles.voiceNoteDuration}>
+        {formatDuration(status.playing || status.currentTime ? status.currentTime : note.durationSeconds)}
+      </Text>
+    </View>
+  );
+}
 
 export default function BookingConfirmationScreen() {
-  const params = useLocalSearchParams<{ id?: string }>();
+  const params = useLocalSearchParams<{
+    id?: string;
+    issueText?: string;
+    timing?: string;
+    media?: string;
+    voiceNotes?: string;
+  }>();
+
   const bookingId = params.id ? `BK-${params.id.toUpperCase()}` : 'BK-8834521';
+  const media = safeParse<MediaItem[]>(params.media, []);
+  const voiceNotes = safeParse<VoiceNote[]>(params.voiceNotes, []);
+
+  // Only the fields that make sense as single-line rows live here now —
+  // Medias and Voice Note get their own sections below since they need
+  // real visual previews, not a text value.
+  const summaryRows = [
+    { id: 'service', label: 'Service', value: 'Bathroom Deep Cleaning', Icon: Sparkles },
+    {
+      id: 'when',
+      label: 'When',
+      value: params.timing === 'later' ? 'Scheduled' : 'Immediate',
+      Icon: CalendarClock,
+    },
+    { id: 'datetime', label: 'Date & time', value: 'Today, 12:00 – 3:00 PM', Icon: CalendarDays },
+    { id: 'address', label: 'Address', value: 'Home · 123, 1st Main Road, Indiranagar', Icon: MapPin },
+    {
+      id: 'description',
+      label: 'Description',
+      value: params.issueText?.trim() || 'No description provided',
+      Icon: SquareDashedText,
+    },
+  ];
 
   const goToTracking = () => {
     router.push({ pathname: '/orders/[id]', params: { id: params.id ?? '' } } as never);
@@ -65,7 +149,7 @@ export default function BookingConfirmationScreen() {
           </View>
 
           <Text style={styles.successTitle}>Booking Confirmed!</Text>
-          <Text style={styles.successSubtitle}>Our service professional will be in touch with you shortly </Text>
+          <Text style={styles.successSubtitle}>Our service professional will be in touch with you shortly</Text>
 
           <View style={styles.bookingIdChip}>
             <Text style={styles.bookingIdLabel}>Booking ID</Text>
@@ -91,6 +175,53 @@ export default function BookingConfirmationScreen() {
               </View>
             </View>
           ))}
+        </View>
+
+        {/* Media attachments */}
+        <View style={styles.card}>
+          <View style={styles.cardHeaderRow}>
+            <ImageUp size={15} color={AppColors.primary} strokeWidth={2.25} />
+            <Text style={styles.sectionLabel}>Photos & videos</Text>
+          </View>
+
+          {media.length > 0 ? (
+            <View style={styles.mediaGrid}>
+              {media.map((item) => (
+                <View key={item.id} style={styles.mediaThumbWrap}>
+                  {item.type === 'image' ? (
+                    <RNImage source={{ uri: item.uri }} style={styles.mediaThumb} resizeMode='cover' />
+                  ) : (
+                    <View style={styles.mediaThumb}>
+                      <VideoThumb uri={item.uri} />
+                      <View style={styles.videoBadge} pointerEvents='none'>
+                        <VideoIcon size={12} color={AppColors.white} strokeWidth={2.25} />
+                      </View>
+                    </View>
+                  )}
+                </View>
+              ))}
+            </View>
+          ) : (
+            <Text style={styles.emptyText}>No photos or videos attached</Text>
+          )}
+        </View>
+
+        {/* Voice notes */}
+        <View style={styles.card}>
+          <View style={styles.cardHeaderRow}>
+            <MicVocal size={15} color={AppColors.primary} strokeWidth={2.25} />
+            <Text style={styles.sectionLabel}>Voice notes</Text>
+          </View>
+
+          {voiceNotes.length > 0 ? (
+            <View style={styles.voiceNoteList}>
+              {voiceNotes.map((note, index) => (
+                <VoiceNoteRow key={note.id} note={note} index={index} />
+              ))}
+            </View>
+          ) : (
+            <Text style={styles.emptyText}>No voice note recorded</Text>
+          )}
         </View>
 
         {/* Share */}
@@ -125,7 +256,7 @@ export default function BookingConfirmationScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: AppColors.background },
-  scrollContent: { paddingHorizontal: 20, paddingTop: 32 },
+  scrollContent: { paddingHorizontal: 20, paddingTop: 32, paddingBottom: 8 },
 
   // Success block
   successBlock: { alignItems: 'center', marginBottom: 28 },
@@ -193,6 +324,62 @@ const styles = StyleSheet.create({
   },
   summaryLabel: { fontFamily: font.regular, fontSize: 11, color: AppColors.textTertiary },
   summaryValue: { marginTop: 3, fontFamily: font.semiBold, fontSize: 13, color: AppColors.textPrimary },
+
+  // Media / voice note cards (mirrors the booking screen's card style)
+  card: {
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: AppColors.border,
+    backgroundColor: AppColors.surface,
+    marginBottom: 16,
+  },
+  cardHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 },
+  sectionLabel: { fontFamily: font.semiBold, fontSize: 13, color: AppColors.textPrimary },
+  emptyText: { fontFamily: font.regular, fontSize: 12, color: AppColors.textTertiary },
+
+  mediaGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  mediaThumbWrap: { width: 72, height: 72, borderRadius: 12 },
+  mediaThumb: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: AppColors.secondary,
+  },
+  videoBadge: {
+    position: 'absolute',
+    bottom: 5,
+    left: 5,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+
+  voiceNoteList: { gap: 10 },
+  voiceNoteRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    padding: 10,
+    borderRadius: 12,
+    backgroundColor: AppColors.background,
+  },
+  voiceNotePlayBtn: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: AppColors.primary,
+  },
+  voiceNoteTitle: { fontFamily: font.medium, fontSize: 12, color: AppColors.textPrimary, marginBottom: 6 },
+  voiceNoteTrack: { height: 4, borderRadius: 2, backgroundColor: AppColors.border, overflow: 'hidden' },
+  voiceNoteProgress: { height: '100%', backgroundColor: AppColors.primary },
+  voiceNoteDuration: { fontFamily: font.medium, fontSize: 11, color: AppColors.textSecondary, minWidth: 34 },
 
   // Share row
   shareRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, paddingVertical: 10 },

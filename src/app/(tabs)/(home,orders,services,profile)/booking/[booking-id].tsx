@@ -1,6 +1,7 @@
 import { CameraCaptureModal } from '@/components/common/camera/camera-capture-modal';
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
+import { authClient } from '@/data/api/api-client';
 import {
   AudioModule,
   RecordingPresets,
@@ -43,12 +44,69 @@ type VoiceNote = { id: string; uri: string; durationSeconds: number };
 type ServiceTiming = 'immediate' | 'later';
 
 const genId = () => `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+const UPLOAD_ENDPOINT = '/uploads';
+const BOOKING_ENDPOINT = '/customer/bookings';
 
 const formatDuration = (seconds: number) => {
   const totalSeconds = Math.floor(seconds);
   const minutes = Math.floor(totalSeconds / 60);
   const secs = totalSeconds % 60;
   return `${minutes}:${secs.toString().padStart(2, '0')}`;
+};
+
+const getFileName = (uri: string, fallbackPrefix: string, fallbackExtension: string) => {
+  const rawName = uri.split('/').pop()?.split('?')[0];
+  return rawName && rawName.includes('.') ? rawName : `${fallbackPrefix}-${genId()}.${fallbackExtension}`;
+};
+
+const getMimeType = (uri: string, fallbackType: string) => {
+  const extension = uri.split('?')[0].split('.').pop()?.toLowerCase();
+
+  switch (extension) {
+    case 'jpg':
+    case 'jpeg':
+      return 'image/jpeg';
+    case 'png':
+      return 'image/png';
+    case 'gif':
+      return 'image/gif';
+    case 'webp':
+      return 'image/webp';
+    case 'mp4':
+      return 'video/mp4';
+    case 'mov':
+      return 'video/quicktime';
+    case 'webm':
+      return 'video/webm';
+    case 'm4a':
+      return 'audio/mp4';
+    case 'aac':
+      return 'audio/aac';
+    case 'wav':
+      return 'audio/wav';
+    default:
+      return fallbackType;
+  }
+};
+
+const extractUploadedFile = (data: unknown) => {
+  if (!data || typeof data !== 'object') return data;
+
+  const record = data as Record<string, unknown>;
+  const nested = record.data && typeof record.data === 'object' ? (record.data as Record<string, unknown>) : null;
+  return (
+    nested?.url ??
+    nested?.file_url ??
+    nested?.fileUrl ??
+    nested?.path ??
+    nested?.id ??
+    record.url ??
+    record.file_url ??
+    record.fileUrl ??
+    record.path ??
+    record.id ??
+    data
+  );
 };
 
 // Real paused-first-frame video thumbnail via expo-video, rather than a
@@ -77,6 +135,7 @@ export default function BookingScreen() {
   const [voiceNotes, setVoiceNotes] = useState<VoiceNote[]>([]);
 
   const [timing, setTiming] = useState<ServiceTiming>('immediate');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Single current address, shared with SelectAddressScreen via the store —
   // that screen writes the pick, this screen just reads + displays it.
@@ -170,14 +229,80 @@ export default function BookingScreen() {
   };
   const hasErrors = Boolean(errors.media || errors.voice);
 
-  const bookService = () => {
-    if (hasErrors) {
-      setShowValidation(true);
-      return;
-    }
-    // TODO: upload media + voice notes, then submit the booking payload
-    // (issueText, media, voiceNotes, timing, selectedAddress) to the backend.
-    router.push({ pathname: '/booking/confirm-booking' as never, params: { id: params.id ?? '' } as never });
+  const uploadFile = async ({
+    uri,
+    type,
+    durationSeconds,
+  }: {
+    uri: string;
+    type: 'image' | 'video' | 'voice';
+    durationSeconds?: number;
+  }) => {
+    const formData = new FormData();
+    const fallbackExtension = type === 'image' ? 'jpg' : type === 'video' ? 'mp4' : 'm4a';
+    const fallbackMimeType = type === 'image' ? 'image/jpeg' : type === 'video' ? 'video/mp4' : 'audio/mp4';
+
+    formData.append('file', {
+      uri,
+      name: getFileName(uri, type, fallbackExtension),
+      type: getMimeType(uri, fallbackMimeType),
+    } as unknown as Blob);
+    formData.append('type', type);
+    if (typeof durationSeconds === 'number') formData.append('duration_seconds', String(durationSeconds));
+
+    const response = await authClient.post(UPLOAD_ENDPOINT, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+
+    return extractUploadedFile(response.data);
+  };
+
+  const bookService = async () => {
+    // if (isSubmitting) return;
+    // if (hasErrors) {
+    //   setShowValidation(true);
+    //   return;
+    // }
+
+    // setIsSubmitting(true);
+
+    // try {
+    //   const [uploadedMedia, uploadedVoiceNotes] = await Promise.all([
+    //     Promise.all(media.map((item) => uploadFile({ uri: item.uri, type: item.type }))),
+    //     Promise.all(
+    //       voiceNotes.map((note) =>
+    //         uploadFile({ uri: note.uri, type: 'voice', durationSeconds: note.durationSeconds }),
+    //       ),
+    //     ),
+    //   ]);
+
+    //   const response = await authClient.post(BOOKING_ENDPOINT, {
+    //     service_id: params.id ?? '',
+    //     issue_text: issueText.trim(),
+    //     media: uploadedMedia,
+    //     voice_notes: uploadedVoiceNotes.map((file, index) => ({
+    //       file,
+    //       duration_seconds: voiceNotes[index].durationSeconds,
+    //     })),
+    //     timing,
+    //     selected_address: {
+    //       label: 'Home - India',
+    //       detail: '203 0303',
+    //     },
+    //   });
+
+    //   const submittedBooking = response.data?.data ?? response.data;
+    //   const submittedBookingId = submittedBooking?.id ?? submittedBooking?.booking_id ?? params.id ?? '';
+
+    router.push({
+      pathname: '/booking/confirm-booking' as never,
+      params: { id: String('BK-8834521') } as never,
+    });
+    // } catch {
+    // //   Alert.alert('Booking failed', 'We could not submit your booking. Please try again.');
+    // } finally {
+    // //   setIsSubmitting(false);
+    // }
   };
 
   return (
