@@ -1,10 +1,21 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Calendar, Check, Clock, CreditCard, MapPin, Share2, Sparkles } from 'lucide-react-native';
+import {
+  CalendarClock,
+  CalendarDays,
+  Check,
+  Clock,
+  ImageUp,
+  MapPin,
+  MicVocal,
+  Share2,
+  Sparkles,
+  SquareDashedText,
+} from 'lucide-react-native';
 import React from 'react';
 import { Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const font = {
   regular: fontTokens.fontFamily.regular,
@@ -15,13 +26,20 @@ const font = {
 
 const summaryRows = [
   { id: 'service', label: 'Service', value: 'Bathroom Deep Cleaning', Icon: Sparkles },
-  { id: 'datetime', label: 'Date & time', value: 'Today, 12:00 – 3:00 PM', Icon: Calendar },
+  { id: 'when', label: 'When', value: 'Immediate', Icon: CalendarClock },
+  { id: 'datetime', label: 'Date & time', value: 'Today, 12:00 – 3:00 PM', Icon: CalendarDays },
   { id: 'address', label: 'Address', value: 'Home · 123, 1st Main Road, Indiranagar', Icon: MapPin },
-  { id: 'payment', label: 'Payment', value: 'UPI · ₹628 paid', Icon: CreditCard },
+  {
+    id: 'description',
+    label: 'Description',
+    value: 'I need a thorough cleaning of my bathroom.',
+    Icon: SquareDashedText,
+  },
+  { id: 'Medias', label: 'Medias', value: '', Icon: ImageUp },
+  { id: 'Voice Note', label: 'Voice Note', value: '', Icon: MicVocal },
 ];
 
 export default function BookingConfirmationScreen() {
-  const { bottom } = useSafeAreaInsets();
   const params = useLocalSearchParams<{ id?: string }>();
   const bookingId = params.id ? `BK-${params.id.toUpperCase()}` : 'BK-8834521';
 
