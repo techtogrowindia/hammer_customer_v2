@@ -61,7 +61,7 @@ function VideoThumb({ uri }: { uri: string }) {
 }
 
 export default function BookingScreen() {
-  const { bottom } = useSafeAreaInsets();
+  const { top, bottom } = useSafeAreaInsets();
   const params = useLocalSearchParams<{ id?: string }>();
 
   const [issueText, setIssueText] = useState('');
@@ -183,10 +183,7 @@ export default function BookingScreen() {
   return (
     <View style={styles.screen}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        <View style={styles.pageHeader}>
-          <Text style={styles.pageTitle}>Book a service</Text>
-          <Text style={styles.pageSubtitle}>Add details and we'll connect you with a verified professional.</Text>
-        </View>
+        <Text style={styles.pageSubtitle}>Add details and we'll connect you with a verified professional.</Text>
 
         <View style={styles.card}>
           <Text style={styles.sectionLabel}>Explain the issue</Text>
@@ -261,7 +258,7 @@ export default function BookingScreen() {
         <View style={styles.card}>
           <View style={styles.sectionLabelRow}>
             <Text style={styles.sectionLabel}>Voice note</Text>
-            <Text style={styles.requiredBadge}>*</Text>
+            <Text style={styles.requiredMark}>*</Text>
           </View>
 
           <View style={styles.voiceRow}>
@@ -330,7 +327,7 @@ export default function BookingScreen() {
                 style={({ pressed }) => [styles.addClipBtn, pressed && styles.addClipBtnPressed]}
               >
                 <Plus size={15} color={AppColors.white} strokeWidth={2.5} />
-                <Text style={styles.addClipBtnText}>Add</Text>
+                <Text style={styles.addClipBtnText}>Add this voice</Text>
               </Pressable>
             </View>
           )}
@@ -354,58 +351,62 @@ export default function BookingScreen() {
           {showValidation && errors.voice && <Text style={styles.errorText}>{errors.voice}</Text>}
         </View>
 
-        <Text style={styles.sectionLabel}>When do you need the service?</Text>
-        <View style={styles.timingRow}>
-          <Pressable
-            accessibilityRole='button'
-            onPress={() => setTiming('immediate')}
-            style={styles.timingOption}
-            hitSlop={6}
-          >
-            <View style={[styles.radioOuter, timing === 'immediate' && styles.radioOuterSelected]}>
-              {timing === 'immediate' && <View style={styles.radioInner} />}
-            </View>
-            <Text style={styles.timingLabel}>Immediate</Text>
-          </Pressable>
-          <Pressable
-            accessibilityRole='button'
-            onPress={() => setTiming('later')}
-            style={styles.timingOption}
-            hitSlop={6}
-          >
-            <View style={[styles.radioOuter, timing === 'later' && styles.radioOuterSelected]}>
-              {timing === 'later' && <View style={styles.radioInner} />}
-            </View>
-            <Text style={styles.timingLabel}>Later</Text>
-          </Pressable>
+        <View style={styles.card}>
+          <Text style={styles.sectionLabel}>When do you need the service?</Text>
+          <View style={styles.timingRow}>
+            <Pressable
+              accessibilityRole='button'
+              onPress={() => setTiming('immediate')}
+              style={styles.timingOption}
+              hitSlop={6}
+            >
+              <View style={[styles.radioOuter, timing === 'immediate' && styles.radioOuterSelected]}>
+                {timing === 'immediate' && <View style={styles.radioInner} />}
+              </View>
+              <Text style={styles.timingLabel}>Immediate</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole='button'
+              onPress={() => setTiming('later')}
+              style={styles.timingOption}
+              hitSlop={6}
+            >
+              <View style={[styles.radioOuter, timing === 'later' && styles.radioOuterSelected]}>
+                {timing === 'later' && <View style={styles.radioInner} />}
+              </View>
+              <Text style={styles.timingLabel}>Later</Text>
+            </Pressable>
+          </View>
         </View>
 
         {/* Service address — shows the current default/selected address only;
             picking a different one happens on its own screen rather than
             duplicating a full address list + manual entry form here. */}
-        <Text style={styles.sectionLabel}>Service address</Text>
-        <Pressable
-          accessibilityRole='button'
-          onPress={() => router.push('/address/select-address' as never)}
-          style={({ pressed }) => [styles.addressCard, pressed && styles.addressCardPressed]}
-        >
-          <View style={styles.addressIconWrap}>
-            <MapPin size={17} color={AppColors.primary} strokeWidth={2.25} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.addressLabel} numberOfLines={1}>
-              {'Home - India'}
-            </Text>
-            <Text style={styles.addressDetail} numberOfLines={1}>
-              {'203 0303'}
-              {/* {[selectedAddress.line2, selectedAddress.city, selectedAddress.pincode].filter(Boolean).join(', ')} */}
-            </Text>
-          </View>
-          <View style={styles.changeRow}>
-            <Text style={styles.changeText}>Change</Text>
-            <ChevronRight size={16} color={AppColors.textTertiary} strokeWidth={2} />
-          </View>
-        </Pressable>
+        <View style={styles.card}>
+          <Text style={styles.sectionLabel}>Service address</Text>
+          <Pressable
+            accessibilityRole='button'
+            onPress={() => router.push('/address/select-address' as never)}
+            style={({ pressed }) => [styles.addressRow, pressed && { backgroundColor: AppColors.warningLight }]}
+          >
+            <View style={styles.addressIconWrap}>
+              <MapPin size={17} color={AppColors.primary} strokeWidth={2.25} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.addressLabel} numberOfLines={1}>
+                {'Home - India'}
+              </Text>
+              <Text style={styles.addressDetail} numberOfLines={1}>
+                {'203 0303'}
+                {/* {[selectedAddress.line2, selectedAddress.city, selectedAddress.pincode].filter(Boolean).join(', ')} */}
+              </Text>
+            </View>
+            <View style={styles.changeRow}>
+              <Text style={styles.changeText}>Change</Text>
+              <ChevronRight size={16} color={AppColors.textTertiary} strokeWidth={2} />
+            </View>
+          </Pressable>
+        </View>
       </ScrollView>
 
       <SafeAreaView edges={['bottom']} style={[styles.footer, { paddingBottom: 12 }]}>
@@ -426,11 +427,10 @@ export default function BookingScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: AppColors.background },
-  scrollContent: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 24 },
 
-  pageHeader: { marginBottom: 20 },
-  pageTitle: { fontFamily: font.bold, fontSize: 24, color: AppColors.textPrimary },
-  pageSubtitle: { marginTop: 6, fontFamily: font.regular, fontSize: 13, color: AppColors.textSecondary },
+  scrollContent: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 24 },
+
+  pageSubtitle: { marginBottom: 16, fontFamily: font.regular, fontSize: 13, color: AppColors.textSecondary },
 
   card: {
     padding: 16,
@@ -439,12 +439,12 @@ const styles = StyleSheet.create({
     borderColor: AppColors.border,
     backgroundColor: AppColors.surface,
     marginBottom: 16,
+    gap: 8,
   },
 
   sectionLabel: { fontFamily: font.semiBold, fontSize: 13, color: AppColors.textPrimary },
   sectionLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 4 },
   requiredMark: { fontFamily: font.semiBold, fontSize: 13, color: AppColors.error },
-  requiredBadge: { fontFamily: font.semiBold, fontSize: 11, color: AppColors.error },
   // Plain block-level helper text (Images/Videos section). textAlignVertical
   // only has an effect on TextInput, not Text — dropped, it was a no-op here.
   helperText: { fontFamily: font.regular, fontSize: 11.5, color: AppColors.textTertiary, marginBottom: 10 },
@@ -584,7 +584,7 @@ const styles = StyleSheet.create({
   errorText: { marginTop: 8, fontFamily: font.medium, fontSize: 11, color: AppColors.error },
 
   // Timing
-  timingRow: { flexDirection: 'row', gap: 24, marginVertical: 20 },
+  timingRow: { flexDirection: 'row', gap: 24, marginTop: 12 },
   timingOption: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   radioOuter: {
     width: 20,
@@ -599,18 +599,15 @@ const styles = StyleSheet.create({
   radioInner: { width: 10, height: 10, borderRadius: 5, backgroundColor: AppColors.primary },
   timingLabel: { fontFamily: font.medium, fontSize: 13, color: AppColors.textPrimary },
 
-  // Service address card
-  addressCard: {
+  // Service address row (sits inside the shared `card` style, so it no
+  // longer redeclares its own border/radius/background)
+  addressRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    padding: 14,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: AppColors.border,
-    backgroundColor: AppColors.surface,
+    padding: 10,
+    borderRadius: 12,
   },
-  addressCardPressed: { backgroundColor: AppColors.warningLight },
   addressIconWrap: {
     width: 38,
     height: 38,

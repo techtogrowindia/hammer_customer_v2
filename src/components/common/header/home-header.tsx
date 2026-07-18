@@ -43,7 +43,7 @@ export function HomeHeader() {
             style={({ pressed }) => [styles.bellButton, pressed && { opacity: 0.8 }]}
             hitSlop={8}
           >
-            <Bell size={18} color={AppColors.secondary} strokeWidth={2} />
+            <Bell size={18} color={AppColors.infoLight} strokeWidth={2} />
             <View style={styles.bellDot} />
           </Pressable>
         </View>

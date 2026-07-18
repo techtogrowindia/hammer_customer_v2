@@ -186,7 +186,7 @@ export default function ServicesScreen() {
                 onPress={() => setActiveCategory(cat.id)}
                 style={[styles.chip, active && styles.chipActive]}
               >
-                <Icon size={14} color={active ? AppColors.white : AppColors.textSecondary} strokeWidth={2} />
+                {/* <Icon size={14} color={active ? AppColors.white : AppColors.textSecondary} strokeWidth={2} /> */}
                 <Text style={[styles.chipLabel, active && styles.chipLabelActive]}>{cat.label}</Text>
               </Pressable>
             );
@@ -228,22 +228,19 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: AppColors.background },
   body: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 32 },
 
-  chipScroll: { flexGrow: 0 },
-  chipRow: { paddingVertical: 4, marginBottom: 20, gap: 8 },
+  chipScroll: { flexGrow: 0, marginBottom: 16 },
+  chipRow: { gap: 8, paddingRight: 8 },
   chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 7,
+    borderRadius: 18,
+    backgroundColor: AppColors.white,
     borderWidth: 1.5,
     borderColor: AppColors.divider,
-    backgroundColor: AppColors.white,
   },
   chipActive: { backgroundColor: AppColors.primary, borderColor: AppColors.primary },
-  chipLabel: { fontFamily: font.medium, fontSize: 12, color: AppColors.textSecondary },
-  chipLabelActive: { color: AppColors.white },
+  chipLabel: { fontFamily: font.medium, fontSize: 12.5, color: AppColors.textSecondary },
+  chipLabelActive: { fontFamily: font.semiBold, color: AppColors.white },
 
   grid: {
     flexDirection: 'row',

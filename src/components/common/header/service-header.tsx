@@ -10,7 +10,7 @@ export function ServiceHeader() {
   const { top } = useSafeAreaInsets();
   return (
     <View style={styles.wrap}>
-      <View style={[styles.hero, { paddingTop: top + 12 }]}>
+      <View style={[styles.hero, { paddingTop: top + 24 }]}>
         <View style={styles.heroDecor} />
 
         {/* <View style={styles.topRow}>
@@ -63,7 +63,7 @@ export function ServiceHeader() {
   );
 }
 
-const CARD_HEIGHT = 68;
+const CARD_HEIGHT = 78;
 
 const styles = StyleSheet.create({
   wrap: { marginBottom: CARD_HEIGHT / 2 + 8, backgroundColor: AppColors.background },

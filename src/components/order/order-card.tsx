@@ -1,8 +1,8 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
-import { CheckCircle2, ChevronRight, Clock, Hourglass, XCircle } from 'lucide-react-native';
-import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { ChevronRight } from 'lucide-react-native';
+import React, { useState } from 'react';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 const font = {
   regular: fontTokens.fontFamily.regular,
@@ -19,6 +19,7 @@ export interface OrderCardData {
   date: string;
   time: string;
   status: OrderStatus;
+  imageUrl?: string;
 }
 
 interface OrderCardProps {
@@ -26,55 +27,64 @@ interface OrderCardProps {
   onViewOrder: (id: string) => void;
 }
 
-// Tied to the actual theme tokens, same as before, plus an icon per status
-// for the circle that now stands in for ProfileHeader's avatar slot.
-const STATUS_CONFIG: Record<OrderStatus, { label: string; bg: string; text: string; Icon: typeof Clock }> = {
-  completed: { label: 'Completed', bg: AppColors.successLight, text: AppColors.success, Icon: CheckCircle2 },
-  ongoing: { label: 'Ongoing', bg: AppColors.warningLight, text: AppColors.primaryDark, Icon: Clock },
-  pending: { label: 'Pending', bg: AppColors.shimmer, text: AppColors.textSecondary, Icon: Hourglass },
-  cancelled: { label: 'Cancelled', bg: AppColors.errorLight, text: AppColors.error, Icon: XCircle },
+const STATUS_CONFIG: Record<OrderStatus, { label: string; color: string }> = {
+  completed: { label: 'Completed', color: AppColors.success },
+  ongoing: { label: 'Ongoing', color: AppColors.primaryDark },
+  pending: { label: 'Pending', color: AppColors.textSecondary },
+  cancelled: { label: 'Cancelled', color: AppColors.error },
 };
 
 /**
- * Order row built on the same skeleton as HomeHeader's avatar+greeting row
- * and ProfileHeader's avatar+info card: a circular icon slot on the left
- * (status-colored, standing in for the avatar), title + a badge-row of meta
- * text and a status pill in the middle (mirrors ProfileHeader's
- * mobile-number + verified-badge row), and a trailing circular action
- * button on the right (mirrors ProfileHeader's edit button).
+ * Three-column row: image | title/date/view-more | status. Status sits in
+ * its own fixed-width column, vertically centered against the full card
+ * height (not tied to the title line or the image), so it reads as an
+ * independent piece of information rather than a label stuck onto
+ * something else.
  */
 export function OrderCard({ order, onViewOrder }: OrderCardProps) {
+  const [imageFailed, setImageFailed] = useState(false);
   const statusConfig = STATUS_CONFIG[order.status];
-  const StatusIcon = statusConfig.Icon;
 
   return (
-    <Pressable
-      accessibilityRole='button'
-      onPress={() => onViewOrder(order.id)}
-      style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
-    >
-      <View style={[styles.iconWrap, { backgroundColor: statusConfig.bg }]}>
-        <StatusIcon size={22} color={statusConfig.text} strokeWidth={2} />
-      </View>
+    <View style={styles.card}>
+      {order.imageUrl && !imageFailed ? (
+        <Image
+          source={{ uri: order.imageUrl }}
+          style={styles.image}
+          resizeMode='cover'
+          onError={() => setImageFailed(true)}
+        />
+      ) : (
+        <View style={[styles.image, styles.imageFallback]}>
+          <Text style={styles.imageFallbackText}>{order.title.charAt(0)}</Text>
+        </View>
+      )}
 
-      <View style={styles.info}>
+      <View style={styles.body}>
         <Text style={styles.title} numberOfLines={1}>
           {order.title}
         </Text>
-        <View style={styles.badgeRow}>
-          <Text style={styles.meta} numberOfLines={1}>
-            {order.date} · {order.time}
-          </Text>
-          <View style={[styles.statusBadge, { backgroundColor: statusConfig.bg }]}>
-            <Text style={[styles.statusText, { color: statusConfig.text }]}>{statusConfig.label}</Text>
-          </View>
-        </View>
+        <Text style={styles.datetime} numberOfLines={1}>
+          {order.date} · {order.time}
+        </Text>
+
+        <Pressable
+          accessibilityRole='button'
+          onPress={() => onViewOrder(order.id)}
+          style={({ pressed }) => [styles.viewMoreBtn, pressed && styles.viewMoreBtnPressed]}
+        >
+          <Text style={styles.viewMoreText}>View more</Text>
+          <ChevronRight size={13} color={AppColors.primary} strokeWidth={2.5} />
+        </Pressable>
       </View>
 
-      <View style={styles.chevronBtn}>
-        <ChevronRight size={16} color={AppColors.textTertiary} strokeWidth={2.25} />
+      <View style={styles.statusCol}>
+        <View style={[styles.statusDot, { backgroundColor: statusConfig.color }]} />
+        <Text style={[styles.statusText, { color: statusConfig.color }]} numberOfLines={1}>
+          {statusConfig.label}
+        </Text>
       </View>
-    </Pressable>
+    </View>
   );
 }
 
@@ -83,48 +93,45 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    backgroundColor: AppColors.surface,
+    borderRadius: 18,
+    padding: 10,
+    backgroundColor: AppColors.white,
+    borderWidth: 1.5,
+    borderColor: AppColors.divider,
     marginBottom: 12,
-    // Same language as the header cards (shadowColor/radius/offset) but
-    // toned down — that heavier shadow is meant for a single floating card
-    // overlapping two background colors; repeated at full strength down a
-    // whole list it reads as noisy and costs more to render per row.
-    shadowColor: AppColors.primaryDark,
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
-  },
-  cardPressed: { backgroundColor: AppColors.warningLight },
-
-  iconWrap: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: AppColors.background,
   },
 
-  info: { flex: 1 },
-  title: { fontFamily: font.semiBold, fontSize: 14.5, color: AppColors.textPrimary },
-  badgeRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 5 },
-  meta: { flex: 1, fontFamily: font.regular, fontSize: 12, color: AppColors.textSecondary },
-  statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
-  statusText: { fontFamily: font.medium, fontSize: 10, letterSpacing: 0.2 },
-
-  chevronBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
+  image: {
+    width: 68,
+    height: 68,
+    borderRadius: 14,
     backgroundColor: AppColors.warningLight,
   },
+  imageFallback: { alignItems: 'center', justifyContent: 'center' },
+  imageFallbackText: { fontFamily: font.semiBold, fontSize: 22, color: AppColors.textTertiary },
+
+  body: { flex: 1, gap: 4 },
+  title: { fontFamily: font.semiBold, fontSize: 14.5, color: AppColors.textPrimary },
+  datetime: { fontFamily: font.regular, fontSize: 11.5, color: AppColors.textSecondary },
+
+  viewMoreBtn: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    marginTop: 6,
+  },
+  viewMoreBtnPressed: { opacity: 0.6 },
+  viewMoreText: { fontFamily: font.semiBold, fontSize: 12, color: AppColors.primary },
+
+  statusCol: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+    width: 56,
+  },
+  statusDot: { width: 8, height: 8, borderRadius: 4 },
+  statusText: { fontFamily: font.medium, fontSize: 9.5, textAlign: 'center' },
 });
 
 export default OrderCard;
