@@ -23,7 +23,8 @@ const Header = () => {
   };
 
   const segmentHeaders: Record<string, JSX.Element> = {
-    service: <View />,
+    'service-details': <View />,
+    'service-item': <HeaderWithTitle title='Plumbing' onBack={handleRouterBack} />,
     booking: <HeaderWithTitle title='Bathroom deep cleaning' onBack={handleRouterBack} />,
     notification: <HeaderWithTitle title='Notifications' onBack={handleRouterBack} />,
     'confirm-booking': <View />,

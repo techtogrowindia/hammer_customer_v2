@@ -75,9 +75,10 @@ export default function HomeScreen() {
     })),
   );
 
-  const goToSearch = () => router.push('/services');
-  const goToCategory = (id: string) => router.push({ pathname: '/services', params: { category: id } } as never);
-  const goToOrders = () => router.push('/orders');
+  const goToItemDetails = () => router.push('/(tabs)/(home)/service/service-details/12');
+  const goToCategory = (id: string) =>
+    router.push({ pathname: '/(tabs)/(home)/service/service-item/12', params: { category: id } } as never);
+  const goToOrders = () => router.push('/(tabs)/(orders)');
 
   return (
     <ScrollView style={styles.screen} showsVerticalScrollIndicator={false}>
@@ -91,12 +92,16 @@ export default function HomeScreen() {
 
         <BannerCarousel banners={banners} />
 
-        <SectionHeader title='What are you looking for?' />
+        <SectionHeader
+          title='What are you looking for?'
+          actionLabel='See all'
+          onActionPress={() => router.push('/(tabs)/(services)')}
+        />
         <CategoryScroller categories={categories} onSelect={goToCategory} />
 
-        <BookAgainList items={bookAgain} onSeeAll={goToOrders} onRebook={goToSearch} />
+        <BookAgainList items={bookAgain} onSeeAll={goToOrders} onRebook={goToItemDetails} />
 
-        <ServiceGrid services={mostBooked} onSelect={goToSearch} onSeeAll={goToSearch} />
+        <ServiceGrid services={mostBooked} onSelect={goToOrders} onSeeAll={goToItemDetails} />
 
         <StepRow steps={howItWorks} />
 

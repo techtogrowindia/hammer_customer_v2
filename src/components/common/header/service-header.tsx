@@ -6,55 +6,78 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export function ServiceHeader() {
+const font = {
+  regular: fontTokens.fontFamily.regular,
+  medium: fontTokens.fontFamily.medium,
+  semiBold: 'Poppins_600SemiBold',
+  bold: fontTokens.fontFamily.bold,
+};
+
+type Address = {
+  label: string;
+  detail: string;
+};
+
+interface ServiceHeaderProps {
+  address?: Address;
+  onChangeAddress?: () => void;
+}
+
+const CARD_HEIGHT = 78;
+
+export function ServiceHeader({ address, onChangeAddress }: ServiceHeaderProps) {
   const { top } = useSafeAreaInsets();
+
+  const handlePress = () => {
+    if (onChangeAddress) {
+      onChangeAddress();
+      return;
+    }
+    router.push('/(tabs)/(services)/address/select-address');
+  };
+
   return (
     <View style={styles.wrap}>
       <View style={[styles.hero, { paddingTop: top + 24 }]}>
         <View style={styles.heroDecor} />
-
-        {/* <View style={styles.topRow}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.title}>{title}</Text>
-            <Text style={styles.subtitle}>{subtitle}</Text>
-          </View>
-
-          <Pressable
-            accessibilityRole='button'
-            onPress={onNotificationPress}
-            style={({ pressed }) => [styles.bellButton, pressed && { opacity: 0.8 }]}
-            hitSlop={8}
-          >
-            <Bell size={17} color={AppColors.secondary} strokeWidth={2} />
-            {hasUnreadNotification && <View style={styles.bellDot} />}
-          </Pressable>
-        </View> */}
+        <View style={styles.heroDecorSmall} />
       </View>
 
       {/* Floating address card — overlaps hero + body */}
       <View style={styles.cardWrap}>
         <Pressable
           accessibilityRole='button'
-          onPress={() => {
-            router.push('/(tabs)/(services)/address/select-address');
-          }}
+          onPress={handlePress}
           style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
         >
           <View style={styles.pinWrap}>
-            <MapPin size={18} color={AppColors.primary} strokeWidth={2.25} />
+            <MapPin size={18} color={AppColors.primary} strokeWidth={2.25} opacity={address ? 1 : 0.6} />
           </View>
 
           <View style={styles.addressText}>
-            <Text style={styles.addressLabel} numberOfLines={1}>
-              {'Home - Indiranagar'}
-            </Text>
-            <Text style={styles.addressDetail} numberOfLines={1}>
-              {'123, 1st Main Road, Indiranagar, Chennai 660038'}
-            </Text>
+            {address ? (
+              <>
+                <Text style={styles.addressLabel} numberOfLines={1}>
+                  {address.label}
+                </Text>
+                <Text style={styles.addressDetail} numberOfLines={1}>
+                  {address.detail}
+                </Text>
+              </>
+            ) : (
+              <>
+                <Text style={styles.addressLabel} numberOfLines={1}>
+                  Add your address
+                </Text>
+                <Text style={styles.addressDetail} numberOfLines={1}>
+                  So we can show services available near you
+                </Text>
+              </>
+            )}
           </View>
 
           <View style={styles.changeBtn}>
-            <Text style={styles.changeBtnText}>Change</Text>
+            <Text style={styles.changeBtnText}>{address ? 'Change' : 'Add'}</Text>
             <ChevronRight size={14} color={AppColors.primary} strokeWidth={2.25} />
           </View>
         </Pressable>
@@ -62,8 +85,6 @@ export function ServiceHeader() {
     </View>
   );
 }
-
-const CARD_HEIGHT = 78;
 
 const styles = StyleSheet.create({
   wrap: { marginBottom: CARD_HEIGHT / 2 + 8, backgroundColor: AppColors.background },
@@ -82,34 +103,16 @@ const styles = StyleSheet.create({
     borderRadius: 90,
     top: -70,
     right: -50,
+    backgroundColor: 'rgba(255,255,255,0.08)',
   },
-
-  topRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-  title: { fontFamily: 'Poppins_600SemiBold', fontSize: 22, color: AppColors.textPrimary },
-  subtitle: {
-    marginTop: 4,
-    fontFamily: fontTokens.fontFamily.regular,
-    fontSize: 12,
-    color: AppColors.textSecondary,
-  },
-  bellButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.16)',
-  },
-  bellDot: {
+  heroDecorSmall: {
     position: 'absolute',
-    top: 7,
-    right: 8,
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    backgroundColor: AppColors.error,
-    borderWidth: 1.5,
-    borderColor: AppColors.primary,
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    bottom: -40,
+    left: -30,
+    backgroundColor: 'rgba(255,255,255,0.06)',
   },
 
   // Floating card
@@ -143,15 +146,15 @@ const styles = StyleSheet.create({
     backgroundColor: AppColors.warningLight,
   },
   addressText: { flex: 1 },
-  addressLabel: { fontFamily: 'Poppins_600SemiBold', fontSize: 13, color: AppColors.textPrimary },
+  addressLabel: { fontFamily: font.semiBold, fontSize: 13, color: AppColors.textPrimary },
   addressDetail: {
     marginTop: 2,
-    fontFamily: fontTokens.fontFamily.regular,
+    fontFamily: font.regular,
     fontSize: 11,
     color: AppColors.textTertiary,
   },
   changeBtn: { flexDirection: 'row', alignItems: 'center', gap: 1 },
-  changeBtnText: { fontFamily: 'Poppins_600SemiBold', fontSize: 12, color: AppColors.primary },
+  changeBtnText: { fontFamily: font.semiBold, fontSize: 12, color: AppColors.primary },
 });
 
 export default ServiceHeader;

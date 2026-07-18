@@ -71,7 +71,7 @@ export default function OrderHistoryScreen() {
   const { top } = useSafeAreaInsets();
 
   const viewOrder = (orderId: string) => {
-    router.push({ pathname: '/(tabs)/(orders)/order-details', params: { id: orderId } } as never);
+    router.push({ pathname: '/order/[id]', params: { id: orderId } } as never);
   };
 
   const visibleOrders = useMemo(

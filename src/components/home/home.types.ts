@@ -5,7 +5,7 @@ export type IconType = LucideIcon;
 export interface CategoryItem {
   id: string;
   label: string;
-  Icon: IconType;
+  Icon?: IconType;
 }
 
 export interface BannerItem {
