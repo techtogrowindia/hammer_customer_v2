@@ -1,10 +1,15 @@
+import AppLoader from '@/components/common/loader/app-loader';
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
+import { Address } from '@/domain/models/address/get-address-reponse';
+import { useAddressApisHelper } from '@/hooks/useAddressApisHelper';
+import { useBoundStore } from '@/store/boundStore';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Briefcase, ChevronRight, Home, MapPin } from 'lucide-react-native';
+import { ChevronRight, MapPin } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useShallow } from 'zustand/shallow';
 
 const font = {
   regular: fontTokens.fontFamily.regular,
@@ -12,16 +17,6 @@ const font = {
   semiBold: 'Poppins_600SemiBold',
   bold: fontTokens.fontFamily.bold,
 };
-
-type LabelOption = { id: 'home' | 'work' | 'other'; label: string; Icon: typeof Home };
-
-const labelOptions: LabelOption[] = [
-  { id: 'home', label: 'Home', Icon: Home },
-  { id: 'work', label: 'Work', Icon: Briefcase },
-  { id: 'other', label: 'Other', Icon: MapPin },
-];
-
-const KNOWN_LABELS = ['home', 'work', 'other'] as const;
 
 type RouteParams = {
   id?: string;
@@ -31,24 +26,28 @@ type RouteParams = {
   city?: string;
   pincode?: string;
   formattedAddress?: string;
-  // Edit-flow params, passed from select-address.tsx's Edit action
+  addressLine1?: string;
+  addressLine2?: string;
   label?: string;
-  type?: 'home' | 'work' | 'other';
   houseNo?: string;
   landmark?: string;
+  state?: string;
+  country?: string;
 };
 
 export default function AddAddressScreen() {
-  const { top, bottom } = useSafeAreaInsets();
+  const { bottom } = useSafeAreaInsets();
   const params = useLocalSearchParams<RouteParams>();
+
+  console.log('AddAddressScreen params:', params);
+
   const isEditing = Boolean(params.id);
 
-  const initialType: 'home' | 'work' | 'other' =
-    params.type && (KNOWN_LABELS as readonly string[]).includes(params.type) ? params.type : 'home';
+  const isAddressLoading = useBoundStore(useShallow((state) => state.showAddressModuleLoader));
 
-  const [selectedLabel, setSelectedLabel] = useState<'home' | 'work' | 'other'>(initialType);
-  const [customLabel, setCustomLabel] = useState(initialType === 'other' ? (params.label ?? '') : '');
-  const [houseNo, setHouseNo] = useState(params.houseNo ?? '');
+  const { addAddress, editAddress } = useAddressApisHelper();
+
+  const [houseNo, setHouseNo] = useState(params.houseNo ?? params.addressLine1 ?? '');
   const [street, setStreet] = useState(params.street ?? '');
   const [landmark, setLandmark] = useState(params.landmark ?? '');
   const [city, setCity] = useState(params.city ?? '');
@@ -64,15 +63,47 @@ export default function AddAddressScreen() {
   };
 
   const saveAddress = () => {
-    // TODO: persist { id: params.id (update) or undefined (create), houseNo,
-    // street, landmark, city, pincode, label: selectedLabel === 'other' ?
-    // customLabel : selectedLabel's display name, lat: params.lat, lng:
-    // params.lng } to the backend/store here.
-    router.dismissAll();
+    if (!hasLocation) {
+      alert('Please select a location on the map before saving the address.');
+      return;
+    }
+
+    if (!houseNo || !street || !city || !pincode) {
+      alert('Please fill in all required address fields.');
+      return;
+    }
+
+    if (isEditing) {
+      const addressData: Address = {
+        ...(isEditing && params.id ? { id: Number(params.id) } : {}),
+        address_line_1: houseNo,
+        address_line_2: landmark ? `${street}, ${landmark}` : street,
+        city,
+        pincode,
+        state: params.state ?? '',
+        country: params.country ?? 'India',
+        latitude: params.lat ? parseFloat(params.lat) : 0,
+        longitude: params.lng ? parseFloat(params.lng) : 0,
+      };
+      editAddress(addressData);
+    } else {
+      const addressData: Address = {
+        address_line_1: houseNo,
+        address_line_2: landmark ? `${street}, ${landmark}` : street,
+        city,
+        pincode,
+        state: params.state ?? '',
+        country: params.country ?? 'India',
+        latitude: params.lat ? parseFloat(params.lat) : 0,
+        longitude: params.lng ? parseFloat(params.lng) : 0,
+      };
+      addAddress(addressData);
+    }
   };
 
   return (
     <View style={styles.screen}>
+      <AppLoader visible={isAddressLoading} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <Text style={styles.sectionLabel}>Location</Text>
         <Pressable
@@ -95,7 +126,6 @@ export default function AddAddressScreen() {
           </View>
         </Pressable>
 
-        {/* Manual address form */}
         <Text style={styles.sectionLabel}>Address details</Text>
 
         <View style={styles.formGroup}>
@@ -120,7 +150,7 @@ export default function AddAddressScreen() {
           />
         </View>
 
-        <View style={styles.formGroup}>
+        {/* <View style={styles.formGroup}>
           <Text style={styles.fieldLabel}>Landmark (optional)</Text>
           <TextInput
             value={landmark}
@@ -129,7 +159,7 @@ export default function AddAddressScreen() {
             placeholderTextColor={AppColors.textTertiary}
             style={styles.fieldInput}
           />
-        </View>
+        </View> */}
 
         <View style={styles.formRow}>
           <View style={[styles.formGroup, { flex: 1 }]}>
@@ -155,38 +185,6 @@ export default function AddAddressScreen() {
             />
           </View>
         </View>
-
-        {/* Save as label */}
-        <Text style={styles.sectionLabel}>Save address as</Text>
-        <View style={styles.labelRow}>
-          {labelOptions.map((opt) => {
-            const selected = selectedLabel === opt.id;
-            return (
-              <Pressable
-                key={opt.id}
-                accessibilityRole='button'
-                onPress={() => setSelectedLabel(opt.id)}
-                style={[styles.labelChip, selected && styles.labelChipSelected]}
-              >
-                <opt.Icon size={14} color={selected ? AppColors.white : AppColors.textSecondary} strokeWidth={2.25} />
-                <Text style={[styles.labelChipText, selected && styles.labelChipTextSelected]}>{opt.label}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
-
-        {selectedLabel === 'other' && (
-          <View style={[styles.formGroup, { marginTop: 12 }]}>
-            <Text style={styles.fieldLabel}>Custom label</Text>
-            <TextInput
-              value={customLabel}
-              onChangeText={setCustomLabel}
-              placeholder="e.g. Mom's place"
-              placeholderTextColor={AppColors.textTertiary}
-              style={styles.fieldInput}
-            />
-          </View>
-        )}
       </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: bottom + 12 }]}>

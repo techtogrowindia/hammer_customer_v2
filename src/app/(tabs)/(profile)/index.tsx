@@ -4,6 +4,7 @@ import { MenuGroup } from '@/components/profile/menu/menu-group';
 import { MenuItem, MenuSectionData, StatItem } from '@/components/profile/profile.types';
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
+import { useBoundStore } from '@/store/boundStore';
 import { router } from 'expo-router';
 import {
   Bell,
@@ -19,6 +20,7 @@ import {
 } from 'lucide-react-native';
 import React from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useShallow } from 'zustand/shallow';
 
 // ── Sample content — in a real app this would come from an API/store ──
 const stats: StatItem[] = [
@@ -89,6 +91,7 @@ const sections: MenuSectionData[] = [
 ];
 
 export default function ProfileScreen() {
+  const clearUserInfo = useBoundStore(useShallow((state) => state.clearUserInfo));
   const handleMenuPress = (item: MenuItem) => {
     if (item.route) router.push(item.route as never);
   };
@@ -96,7 +99,15 @@ export default function ProfileScreen() {
   const handleLogout = () => {
     Alert.alert('Log out', 'Are you sure you want to log out?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Log out', style: 'destructive', onPress: () => router.replace('/') },
+      {
+        text: 'Log out',
+        style: 'destructive',
+        onPress: () => {
+          clearUserInfo();
+          router.dismissAll();
+          router.replace('/(auth)/otp/generate-otp');
+        },
+      },
     ]);
   };
 

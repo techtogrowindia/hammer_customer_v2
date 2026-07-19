@@ -35,6 +35,8 @@ type AddressComponents = {
   city: string;
   pincode: string;
   formattedAddress: string;
+  state: string;
+  addressLine1: string;
 };
 
 const genSessionToken = () =>
@@ -45,14 +47,18 @@ const genSessionToken = () =>
 // practical equivalent for Indian addresses.
 function parseAddressComponents(components: any[], formattedAddress: string): AddressComponents {
   const find = (type: string) => components.find((c) => c.types.includes(type))?.long_name ?? '';
-
   const route = find('route');
   const sublocality = find('sublocality_level_1') || find('sublocality');
   const street = [route, sublocality].filter(Boolean).join(', ');
   const city = find('locality') || find('administrative_area_level_2');
   const pincode = find('postal_code');
+  const state = find('administrative_area_level_1');
 
-  return { street, city, pincode, formattedAddress };
+  const premise = find('premise');
+  const neighborhood = find('neighborhood');
+  const addressLine1 = [premise, neighborhood].filter(Boolean).join(', ');
+
+  return { street, city, pincode, formattedAddress, state, addressLine1 };
 }
 
 export default function SelectLocationScreen() {
@@ -114,10 +120,6 @@ export default function SelectLocationScreen() {
           )}&components=country:in&key=${GOOGLE_PLACES_API_KEY}&sessiontoken=${sessionToken.current}`,
         );
         const data = await res.json();
-        // Google returns HTTP 200 even on auth/config errors — the real
-        // failure reason is in `status` (e.g. REQUEST_DENIED, OVER_QUERY_LIMIT)
-        // and `error_message`, not in the HTTP status code. Logging the raw
-        // Response object (as before) never surfaces this.
         if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
           console.warn('Places Autocomplete error:', data.status, data.error_message);
         }
@@ -184,7 +186,9 @@ export default function SelectLocationScreen() {
       setPinnedAddress({
         street: [result.address?.street, result.address?.streetNumber].filter(Boolean).join(' ') || '',
         city: result.address?.city || result.address?.district || '',
+        state: result.address?.region || '',
         pincode: result.address?.postalCode || '',
+        addressLine1: [result?.address?.streetNumber].filter(Boolean).join(', '),
         formattedAddress: [
           result.address?.name,
           result.address?.street,
@@ -211,6 +215,9 @@ export default function SelectLocationScreen() {
         city: pinnedAddress?.city ?? '',
         pincode: pinnedAddress?.pincode ?? '',
         formattedAddress: pinnedAddress?.formattedAddress ?? '',
+        country: 'India',
+        state: pinnedAddress?.state ?? '',
+        addressLine1: pinnedAddress?.addressLine1 ?? '',
       },
     } as never);
   };

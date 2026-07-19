@@ -1,25 +1,27 @@
+import { useBoundStore } from '@/store/boundStore';
 import { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
-const getAccessToken = async (): Promise<string | null> => {
-  // return await SecureStore.getItemAsync('accessToken');
+const getAccessToken = async ({ isAuth = false }: { isAuth?: boolean } = {}): Promise<string | null> => {
+  if (!isAuth) {
+    console.log('getAccessToken', useBoundStore.getState().userToken);
+    return useBoundStore.getState().userToken;
+  }
   return '12345678';
 };
 
 type InterceptorOptions = {
-  withBearerToken?: boolean;
+  isAuth?: boolean;
 };
 
 export const setupInterceptors = (api: AxiosInstance, options: InterceptorOptions = {}) => {
-  const { withBearerToken = false } = options;
+  const { isAuth = false } = options;
 
   api.interceptors.request.use(
     async (config: InternalAxiosRequestConfig): Promise<InternalAxiosRequestConfig> => {
-      if (withBearerToken) {
-        const token = await getAccessToken();
+      const token = await getAccessToken({ isAuth });
 
-        if (token) {
-          config.headers['Authorization'] = `Bearer ${token}`;
-        }
+      if (token) {
+        config.headers['Authorization'] = `Bearer ${token}`;
       }
 
       console.log('➡️', config.method?.toUpperCase(), config.url);

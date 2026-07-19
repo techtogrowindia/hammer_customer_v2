@@ -4,15 +4,23 @@ import { StateCreator } from 'zustand';
 export type UserSliceType = {
   userInfo: VerifyOtpData | null;
   isLoggedIn: boolean;
+  userToken: string | null;
 
   updateUserInfo: (user: VerifyOtpData) => void;
   setIsLoggedIn: (flag: boolean) => void;
+  setUserToken: (token: string | null) => void;
   clearUserInfo: () => void;
 };
 
 export const createUserSlice: StateCreator<UserSliceType> = (set) => ({
   userInfo: null,
   isLoggedIn: false,
+  userToken: null,
+
+  setUserToken: (token) =>
+    set({
+      userToken: token,
+    }),
 
   setIsLoggedIn: (flag) =>
     set({
@@ -28,5 +36,6 @@ export const createUserSlice: StateCreator<UserSliceType> = (set) => ({
     set({
       userInfo: null,
       isLoggedIn: false,
+      userToken: null,
     }),
 });

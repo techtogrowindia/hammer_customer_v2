@@ -3,7 +3,7 @@ import { setupInterceptors } from './api-interceptor';
 
 const BASE_URL = 'https://hammerapp.in/api';
 
-const createApiClient = (withBearerToken = false): AxiosInstance => {
+const createApiClient = (isAuth = false): AxiosInstance => {
   const client = axios.create({
     baseURL: BASE_URL,
     timeout: 30000,
@@ -13,7 +13,7 @@ const createApiClient = (withBearerToken = false): AxiosInstance => {
     },
   });
 
-  setupInterceptors(client, { withBearerToken });
+  setupInterceptors(client, { isAuth });
 
   return client;
 };

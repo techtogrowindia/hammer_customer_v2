@@ -5,13 +5,16 @@ import { useBoundStore } from '@/store/boundStore';
 import { router } from 'expo-router';
 import { toastiva } from 'toastiva';
 import { useShallow } from 'zustand/shallow';
+import { useAddressApisHelper } from './useAddressApisHelper';
 
 export const useAuthApisHelper = () => {
-  const { toggleAppLoader, updateUserInfo, setIsLoggedIn } = useBoundStore(
+  const { getAddresses } = useAddressApisHelper();
+  const { toggleAppLoader, updateUserInfo, setIsLoggedIn, setUserToken } = useBoundStore(
     useShallow((state) => ({
       toggleAppLoader: state.toggleAppLoader,
       updateUserInfo: state.updateUserInfo,
       setIsLoggedIn: state.setIsLoggedIn,
+      setUserToken: state.setUserToken,
     })),
   );
   const sendOTP = async ({ mobileNumber, isFromReSend }: { mobileNumber: string; isFromReSend?: boolean }) => {
@@ -58,6 +61,8 @@ export const useAuthApisHelper = () => {
       if (response?.success && response?.token && !isEmpty(response?.data)) {
         setIsLoggedIn(true);
         updateUserInfo(response?.data);
+        setUserToken(response?.token);
+        await getAddresses();
         // router.replace('/profile/complete-profile');
         router.replace('/(tabs)/(home)');
       } else {

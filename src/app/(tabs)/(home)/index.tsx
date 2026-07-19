@@ -71,9 +71,11 @@ export default function HomeScreen() {
 
   const { userInfo } = useBoundStore(
     useShallow((state) => ({
-      userInfo: state.userInfo,
+      userInfo: state.userToken,
     })),
   );
+
+  console.log('======', userInfo);
 
   const goToItemDetails = () => router.push('/(tabs)/(home)/service/service-details/12');
   const goToCategory = (id: string) =>

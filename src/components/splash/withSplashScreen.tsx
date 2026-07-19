@@ -1,4 +1,6 @@
 import { AppColors } from '@/core/theme/app-colors';
+import { useAddressApisHelper } from '@/hooks/useAddressApisHelper';
+import { useBoundStore } from '@/store/boundStore';
 import {
   Poppins_300Light,
   Poppins_400Regular,
@@ -10,6 +12,7 @@ import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { ReactNode, useEffect, useState } from 'react';
 import { View } from 'react-native';
+import { useShallow } from 'zustand/shallow';
 import LottieLoader from '../common/lottie/LottieLoader';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -23,6 +26,12 @@ type Props = {
 export function WithSplashScreen({ children }: Props) {
   const [showApp, setShowApp] = useState(false);
 
+  const { getAddresses } = useAddressApisHelper();
+  const { isLoggedIn } = useBoundStore(
+    useShallow((state) => ({
+      isLoggedIn: state.isLoggedIn,
+    })),
+  );
   const [fontsLoaded] = useFonts({
     Poppins_300Light,
     Poppins_400Regular,
@@ -38,7 +47,9 @@ export function WithSplashScreen({ children }: Props) {
 
     const prepare = async () => {
       try {
-        await new Promise((resolve) => setTimeout(resolve, SPLASH_DELAY));
+        if (isLoggedIn) {
+          await getAddresses();
+        }
       } finally {
         await SplashScreen.hideAsync();
 
