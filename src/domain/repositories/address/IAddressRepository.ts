@@ -5,5 +5,5 @@ export interface IAddressRepository {
   addAddress: (request: AddAddressRequest) => Promise<GetAddressResponse>;
   editAddress: (request: AddAddressRequest) => Promise<GetAddressResponse>;
   getAddress: () => Promise<GetAddressResponse>;
-  deleteAddress: (addressID: string) => Promise<GetAddressResponse>;
+  deleteAddress: (addressID: number) => Promise<GetAddressResponse>;
 }

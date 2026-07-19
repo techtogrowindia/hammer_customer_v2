@@ -1,6 +1,8 @@
+import AppLoader from '@/components/common/loader/app-loader';
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
 import { Address } from '@/domain/models/address/get-address-reponse';
+import { useAddressApisHelper } from '@/hooks/useAddressApisHelper';
 import { useBoundStore } from '@/store/boundStore';
 import { router } from 'expo-router';
 import { MapPin, MapPinPlus, Pencil, Trash2 } from 'lucide-react-native';
@@ -23,12 +25,14 @@ const buildSecondaryLine = (addr: Address) =>
 export default function SelectAddressScreen() {
   const { bottom } = useSafeAreaInsets();
 
-  const { addressList, removeAddress } = useBoundStore(
+  const { addressList, showAddressModuleLoader } = useBoundStore(
     useShallow((state) => ({
       addressList: state.addressList,
-      removeAddress: state.removeAddress,
+      showAddressModuleLoader: state.showAddressModuleLoader,
     })),
   );
+
+  const { deleteAddress } = useAddressApisHelper();
 
   const [selectedId, setSelectedId] = useState<number | undefined>(undefined);
 
@@ -65,7 +69,7 @@ export default function SelectAddressScreen() {
     } as never);
   };
 
-  const deleteAddress = (addr: Address) => {
+  const onDeleteAddress = (addr: Address) => {
     Alert.alert('Delete address', 'Remove this address from your saved addresses?', [
       { text: 'Cancel', style: 'cancel' },
       {
@@ -77,7 +81,7 @@ export default function SelectAddressScreen() {
             const fallback = addressList.find((a) => a.id !== addr.id)?.id;
             setSelectedId(fallback);
           }
-          removeAddress(addr.id);
+          deleteAddress(addr.id);
         },
       },
     ]);
@@ -85,6 +89,7 @@ export default function SelectAddressScreen() {
 
   return (
     <View style={styles.screen}>
+      <AppLoader visible={showAddressModuleLoader} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionLabel}>Saved addresses</Text>
@@ -147,7 +152,7 @@ export default function SelectAddressScreen() {
                   ]}
                   onPress={(e) => {
                     e.stopPropagation();
-                    deleteAddress(addr);
+                    onDeleteAddress(addr);
                   }}
                 >
                   <Trash2 size={12.5} color={AppColors.error} strokeWidth={2.25} />

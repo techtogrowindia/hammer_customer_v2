@@ -7,11 +7,13 @@ import { toastiva } from 'toastiva';
 import { useShallow } from 'zustand/shallow';
 
 export const useAddressApisHelper = () => {
-  const { toggleAddressModuleLoader, addOrUpdateAddress, setAddressList } = useBoundStore(
+  const { toggleAddressModuleLoader, addOrUpdateAddress, setAddressList, addressList, removeAddress } = useBoundStore(
     useShallow((state) => ({
       toggleAddressModuleLoader: state.toggleAddressModuleLoader,
       setAddressList: state.setAddressList,
       addOrUpdateAddress: state.addOrUpdateAddress,
+      addressList: state.addressList,
+      removeAddress: state.removeAddress,
     })),
   );
   const addAddress = async (request: AddAddressRequest) => {
@@ -56,7 +58,12 @@ export const useAddressApisHelper = () => {
       }
 
       if (response?.data && response?.data?.address_line_1) {
-        addOrUpdateAddress(response.data);
+        const isEditFound = addressList.find((address) => address.id === response?.data?.id);
+        if (isEditFound) {
+          addOrUpdateAddress(response.data);
+        } else {
+          throw new Error('Something went wrong while updating the address. Please try again later.');
+        }
       }
       router.dismissTo({ pathname: '/(tabs)/(home)/address/select-address' });
 
@@ -109,10 +116,41 @@ export const useAddressApisHelper = () => {
       toggleAddressModuleLoader(false);
     }
   };
+  const deleteAddress = async (addressId: number) => {
+    toggleAddressModuleLoader(true);
+    try {
+      const response = await AddressRepository.deleteAddress(addressId);
+
+      if (!response?.success) {
+        throw new Error(response?.message);
+      }
+      if (response?.success) {
+        removeAddress(addressId);
+      }
+
+      return response;
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message || error?.message || 'Unable to delete address. Please try again later.';
+
+      toastiva.error(message, {
+        fill: AppColors.white,
+        styles: {
+          title: { color: AppColors.error },
+        },
+        showProgress: false,
+      });
+      console.error('Error deleting address:', error);
+      throw error;
+    } finally {
+      toggleAddressModuleLoader(false);
+    }
+  };
 
   return {
     addAddress,
     editAddress,
     getAddresses,
+    deleteAddress,
   };
 };

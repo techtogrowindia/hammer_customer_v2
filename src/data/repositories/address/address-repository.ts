@@ -17,7 +17,7 @@ export const AddressRepository: IAddressRepository = {
     const response = await apiClient.get(apiEndpoints.address);
     return response.data;
   },
-  deleteAddress: async (addressID: string): Promise<GetAddressResponse> => {
+  deleteAddress: async (addressID: number): Promise<GetAddressResponse> => {
     const response = await apiClient.delete(`${apiEndpoints.address}/${addressID}`);
     return response.data;
   },
