@@ -33,6 +33,7 @@ const config: ExpoConfig = {
 
   plugins: [
     'expo-router',
+    '@react-native-community/datetimepicker',
 
     [
       'expo-camera',
@@ -87,7 +88,7 @@ const config: ExpoConfig = {
       },
     ],
 
-    ['./plugins/withAndroidSigning.ts'],
+    './plugins/withAndroidSigning.ts',
   ],
 
   experiments: {

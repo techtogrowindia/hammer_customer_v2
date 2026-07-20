@@ -1,7 +1,4 @@
-import { withAppBuildGradle, withGradleProperties } from '@expo/config-plugins';
-
-import type { ConfigPlugin } from '@expo/config-plugins';
-
+import { withAppBuildGradle, withGradleProperties, type ConfigPlugin } from '@expo/config-plugins';
 const withAndroidSigning: ConfigPlugin = (config) => {
   config = withGradleProperties(config, (config) => {
     const properties = [
