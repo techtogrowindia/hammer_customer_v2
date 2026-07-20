@@ -1,7 +1,10 @@
 import { CameraCaptureModal } from '@/components/common/camera/camera-capture-modal';
+import AppLoader from '@/components/common/loader/app-loader';
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
-import { authClient } from '@/data/api/api-client';
+import { useOrderApisHelper } from '@/hooks/useOrdersApisHelper';
+import { useBoundStore } from '@/store/boundStore';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import {
   AudioModule,
   RecordingPresets,
@@ -18,6 +21,7 @@ import {
   Calendar,
   Camera,
   ChevronRight,
+  Clock,
   Image as ImageIcon,
   MapPin,
   Mic,
@@ -29,8 +33,19 @@ import {
   X,
 } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import { Alert, Pressable, Image as RNImage, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  Alert,
+  Platform,
+  Pressable,
+  Image as RNImage,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useShallow } from 'zustand/shallow';
 
 const font = {
   regular: fontTokens.fontFamily.regular,
@@ -42,10 +57,9 @@ const font = {
 type MediaItem = { id: string; uri: string; type: 'image' | 'video' };
 type VoiceNote = { id: string; uri: string; durationSeconds: number };
 type ServiceTiming = 'immediate' | 'later';
+type PickerMode = 'date' | 'time' | null;
 
 const genId = () => `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-const UPLOAD_ENDPOINT = '/uploads';
-const BOOKING_ENDPOINT = '/customer/bookings';
 
 const formatDuration = (seconds: number) => {
   const totalSeconds = Math.floor(seconds);
@@ -89,28 +103,30 @@ const getMimeType = (uri: string, fallbackType: string) => {
   }
 };
 
-const extractUploadedFile = (data: unknown) => {
-  if (!data || typeof data !== 'object') return data;
 
-  const record = data as Record<string, unknown>;
-  const nested = record.data && typeof record.data === 'object' ? (record.data as Record<string, unknown>) : null;
-  return (
-    nested?.url ??
-    nested?.file_url ??
-    nested?.fileUrl ??
-    nested?.path ??
-    nested?.id ??
-    record.url ??
-    record.file_url ??
-    record.fileUrl ??
-    record.path ??
-    record.id ??
-    data
-  );
+const buildFilePayload = (uri: string, kind: 'image' | 'video' | 'voice') => {
+  const fallbackExtension = kind === 'image' ? 'jpg' : kind === 'video' ? 'mp4' : 'm4a';
+  const fallbackMimeType = kind === 'image' ? 'image/jpeg' : kind === 'video' ? 'video/mp4' : 'audio/mp4';
+  return {
+    uri,
+    name: getFileName(uri, kind, fallbackExtension),
+    type: getMimeType(uri, fallbackMimeType),
+  };
 };
 
-// Real paused-first-frame video thumbnail via expo-video, rather than a
-// generic icon placeholder — each grid item gets its own player instance.
+const pad = (n: number) => String(n).padStart(2, '0');
+
+const formatForApi = (date: Date) =>
+  `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(
+    date.getMinutes(),
+  )}:00`;
+
+const formatDateLabel = (date: Date) =>
+  date.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
+
+const formatTimeLabel = (date: Date) => date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+
+
 function VideoThumb({ uri }: { uri: string }) {
   const player = useVideoPlayer(uri, (p) => {
     p.pause();
@@ -121,12 +137,16 @@ function VideoThumb({ uri }: { uri: string }) {
 export default function BookingScreen() {
   const { top, bottom } = useSafeAreaInsets();
   const params = useLocalSearchParams<{ id?: string }>();
-
+  const { placeOrder } = useOrderApisHelper();
+  const { showAppLoader } = useBoundStore(
+    useShallow((state) => ({
+      showAppLoader: state.showAppLoader,
+    })),
+  );
   const [issueText, setIssueText] = useState('');
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [cameraVisible, setCameraVisible] = useState(false);
 
-  // Voice note recording — expo-audio hooks
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const recorderState = useAudioRecorderState(audioRecorder, 200);
   const [currentClip, setCurrentClip] = useState<{ uri: string; durationSeconds: number } | null>(null);
@@ -135,11 +155,11 @@ export default function BookingScreen() {
   const [voiceNotes, setVoiceNotes] = useState<VoiceNote[]>([]);
 
   const [timing, setTiming] = useState<ServiceTiming>('immediate');
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Single current address, shared with SelectAddressScreen via the store —
-  // that screen writes the pick, this screen just reads + displays it.
-  // const selectedAddress = useAddressStore((state) => state.selectedAddress);
+  const [scheduledDate, setScheduledDate] = useState<Date | null>(null);
+  const [pickerMode, setPickerMode] = useState<PickerMode>(null);
+
+
 
   const [showValidation, setShowValidation] = useState(false);
 
@@ -147,7 +167,41 @@ export default function BookingScreen() {
     setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
   }, []);
 
-  // ---- Media (images/videos) ----
+
+  const selectTiming = (next: ServiceTiming) => {
+    setTiming(next);
+    if (next === 'immediate') {
+      setScheduledDate(null);
+      setPickerMode(null);
+    }
+  };
+
+  const openDatePicker = () => setPickerMode('date');
+  const openTimePicker = () => setPickerMode('time');
+
+  const onPickerChange = (event: DateTimePickerEvent, selected?: Date) => {
+    const mode = pickerMode;
+    if (Platform.OS === 'android') setPickerMode(null);
+
+    if (event.type === 'dismissed' || !selected) {
+      if (Platform.OS !== 'android') setPickerMode(null);
+      return;
+    }
+
+    setScheduledDate((prev) => {
+      const base = prev ?? new Date();
+      const next = new Date(base);
+      if (mode === 'date') {
+        next.setFullYear(selected.getFullYear(), selected.getMonth(), selected.getDate());
+      } else {
+        next.setHours(selected.getHours(), selected.getMinutes(), 0, 0);
+      }
+      return next;
+    });
+
+    if (Platform.OS !== 'android') setPickerMode(null);
+  };
+
   const pickFromLibrary = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
@@ -177,7 +231,6 @@ export default function BookingScreen() {
 
   const removeMedia = (id: string) => setMedia((prev) => prev.filter((m) => m.id !== id));
 
-  // ---- Voice note recording (expo-audio) ----
   const startRecording = async () => {
     const status = await AudioModule.requestRecordingPermissionsAsync();
     if (!status.granted) {
@@ -222,91 +275,51 @@ export default function BookingScreen() {
 
   const removeVoiceNote = (id: string) => setVoiceNotes((prev) => prev.filter((v) => v.id !== id));
 
-  // ---- Validation + submit ----
   const errors = {
     media: media.length === 0 ? 'Attach at least one image or video' : null,
     voice: voiceNotes.length === 0 ? 'A voice note is required' : null,
+    schedule: timing === 'later' && !scheduledDate ? 'Pick a date and time' : null,
   };
-  const hasErrors = Boolean(errors.media || errors.voice);
-
-  const uploadFile = async ({
-    uri,
-    type,
-    durationSeconds,
-  }: {
-    uri: string;
-    type: 'image' | 'video' | 'voice';
-    durationSeconds?: number;
-  }) => {
-    const formData = new FormData();
-    const fallbackExtension = type === 'image' ? 'jpg' : type === 'video' ? 'mp4' : 'm4a';
-    const fallbackMimeType = type === 'image' ? 'image/jpeg' : type === 'video' ? 'video/mp4' : 'audio/mp4';
-
-    formData.append('file', {
-      uri,
-      name: getFileName(uri, type, fallbackExtension),
-      type: getMimeType(uri, fallbackMimeType),
-    } as unknown as Blob);
-    formData.append('type', type);
-    if (typeof durationSeconds === 'number') formData.append('duration_seconds', String(durationSeconds));
-
-    const response = await authClient.post(UPLOAD_ENDPOINT, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
-
-    return extractUploadedFile(response.data);
-  };
+  const hasErrors = Boolean(errors.media || errors.voice || errors.schedule);
 
   const bookService = async () => {
-    // if (isSubmitting) return;
-    // if (hasErrors) {
-    //   setShowValidation(true);
-    //   return;
-    // }
+    if (showAppLoader) return;
+    if (hasErrors) {
+      setShowValidation(true);
+      return;
+    }
+    if (!params.id) {
+      Alert.alert('Something went wrong', 'Missing service reference. Please go back and try again.');
+      return;
+    }
 
-    // setIsSubmitting(true);
+    try {
+      const images = media.filter((item) => item.type === 'image').map((item) => buildFilePayload(item.uri, 'image'));
+      const videos = media.filter((item) => item.type === 'video').map((item) => buildFilePayload(item.uri, 'video'));
+      const voice_notes = voiceNotes.map((note) => buildFilePayload(note.uri, 'voice'));
 
-    // try {
-    //   const [uploadedMedia, uploadedVoiceNotes] = await Promise.all([
-    //     Promise.all(media.map((item) => uploadFile({ uri: item.uri, type: item.type }))),
-    //     Promise.all(
-    //       voiceNotes.map((note) =>
-    //         uploadFile({ uri: note.uri, type: 'voice', durationSeconds: note.durationSeconds }),
-    //       ),
-    //     ),
-    //   ]);
+      const response = await placeOrder({
+        service_id: params.id,
+        issue_description: issueText.trim() || 'No additional details provided.',
+        type: timing === 'immediate' ? 'immediate' : 'scheduled',
+        scheduled_at: timing === 'later' && scheduledDate ? formatForApi(scheduledDate) : '',
+        address_id: '1',
+        images,
+        videos,
+        voice_notes,
+      });
 
-    //   const response = await authClient.post(BOOKING_ENDPOINT, {
-    //     service_id: params.id ?? '',
-    //     issue_text: issueText.trim(),
-    //     media: uploadedMedia,
-    //     voice_notes: uploadedVoiceNotes.map((file, index) => ({
-    //       file,
-    //       duration_seconds: voiceNotes[index].durationSeconds,
-    //     })),
-    //     timing,
-    //     selected_address: {
-    //       label: 'Home - India',
-    //       detail: '203 0303',
-    //     },
-    //   });
-
-    //   const submittedBooking = response.data?.data ?? response.data;
-    //   const submittedBookingId = submittedBooking?.id ?? submittedBooking?.booking_id ?? params.id ?? '';
-
-    router.push({
-      pathname: '/booking/confirm-booking' as never,
-      params: { id: String('BK-8834521') } as never,
-    });
-    // } catch {
-    // //   Alert.alert('Booking failed', 'We could not submit your booking. Please try again.');
-    // } finally {
-    // //   setIsSubmitting(false);
-    // }
+      router.push({
+        pathname: '/booking/confirm-booking' as never,
+        params: { id: String(response?.data?.order_number ?? response?.data?.id ?? '') },
+      });
+    } catch {
+    }
   };
 
   return (
     <View style={styles.screen}>
+      <AppLoader visible={showAppLoader} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <Text style={styles.pageSubtitle}>Add details and we'll connect you with a verified professional.</Text>
 
@@ -481,7 +494,7 @@ export default function BookingScreen() {
           <View style={styles.timingRow}>
             <Pressable
               accessibilityRole='button'
-              onPress={() => setTiming('immediate')}
+              onPress={() => selectTiming('immediate')}
               style={styles.timingOption}
               hitSlop={6}
             >
@@ -492,7 +505,7 @@ export default function BookingScreen() {
             </Pressable>
             <Pressable
               accessibilityRole='button'
-              onPress={() => setTiming('later')}
+              onPress={() => selectTiming('later')}
               style={styles.timingOption}
               hitSlop={6}
             >
@@ -502,6 +515,60 @@ export default function BookingScreen() {
               <Text style={styles.timingLabel}>Later</Text>
             </Pressable>
           </View>
+
+          {timing === 'later' && (
+            <View style={styles.scheduleRow}>
+              <Pressable
+                accessibilityRole='button'
+                onPress={openDatePicker}
+                style={({ pressed }) => [
+                  styles.scheduleChip,
+                  Boolean(scheduledDate) && styles.scheduleChipFilled,
+                  pressed && { opacity: 0.8 },
+                ]}
+              >
+                <Calendar
+                  size={14}
+                  color={scheduledDate ? AppColors.primaryDark : AppColors.textTertiary}
+                  strokeWidth={2}
+                />
+                <Text style={[styles.scheduleChipText, scheduledDate && styles.scheduleChipTextFilled]}>
+                  {scheduledDate ? formatDateLabel(scheduledDate) : 'Select date'}
+                </Text>
+              </Pressable>
+
+              <Pressable
+                accessibilityRole='button'
+                onPress={openTimePicker}
+                style={({ pressed }) => [
+                  styles.scheduleChip,
+                  Boolean(scheduledDate) && styles.scheduleChipFilled,
+                  pressed && { opacity: 0.8 },
+                ]}
+              >
+                <Clock
+                  size={14}
+                  color={scheduledDate ? AppColors.primaryDark : AppColors.textTertiary}
+                  strokeWidth={2}
+                />
+                <Text style={[styles.scheduleChipText, scheduledDate && styles.scheduleChipTextFilled]}>
+                  {scheduledDate ? formatTimeLabel(scheduledDate) : 'Select time'}
+                </Text>
+              </Pressable>
+            </View>
+          )}
+
+          {showValidation && errors.schedule && <Text style={styles.errorText}>{errors.schedule}</Text>}
+
+          {pickerMode && (
+            <DateTimePicker
+              value={scheduledDate ?? new Date()}
+              mode={pickerMode}
+              minimumDate={new Date()}
+              is24Hour={false}
+              onChange={onPickerChange}
+            />
+          )}
         </View>
 
         {/* Service address — shows the current default/selected address only;
@@ -523,7 +590,6 @@ export default function BookingScreen() {
               </Text>
               <Text style={styles.addressDetail} numberOfLines={1}>
                 {'203 0303'}
-                {/* {[selectedAddress.line2, selectedAddress.city, selectedAddress.pincode].filter(Boolean).join(', ')} */}
               </Text>
             </View>
             <View style={styles.changeRow}>
@@ -770,4 +836,24 @@ const styles = StyleSheet.create({
   },
   bookBtnPressed: { backgroundColor: AppColors.primaryDark },
   bookBtnText: { fontFamily: font.semiBold, fontSize: 14, color: AppColors.white },
+
+  scheduleRow: { flexDirection: 'row', gap: 10, marginTop: 12 },
+  scheduleChip: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    height: 44,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: AppColors.border,
+    backgroundColor: AppColors.background,
+  },
+  scheduleChipFilled: {
+    borderColor: AppColors.primaryLight,
+    backgroundColor: AppColors.warningLight,
+  },
+  scheduleChipText: { fontFamily: font.medium, fontSize: 12.5, color: AppColors.textTertiary },
+  scheduleChipTextFilled: { color: AppColors.primaryDark, fontFamily: font.semiBold },
 });
