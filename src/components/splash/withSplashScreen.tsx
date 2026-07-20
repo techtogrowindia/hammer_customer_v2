@@ -1,5 +1,6 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { useAddressApisHelper } from '@/hooks/useAddressApisHelper';
+import { useSCApisHelper } from '@/hooks/useSCApisHelper';
 import { useBoundStore } from '@/store/boundStore';
 import {
   Poppins_300Light,
@@ -27,6 +28,7 @@ export function WithSplashScreen({ children }: Props) {
   const [showApp, setShowApp] = useState(false);
 
   const { getAddresses } = useAddressApisHelper();
+  const { getServiceCategories } = useSCApisHelper();
   const { isLoggedIn } = useBoundStore(
     useShallow((state) => ({
       isLoggedIn: state.isLoggedIn,
@@ -48,8 +50,10 @@ export function WithSplashScreen({ children }: Props) {
     const prepare = async () => {
       try {
         if (isLoggedIn) {
-          await getAddresses();
+          await Promise.all([getAddresses(), getServiceCategories()]);
         }
+      } catch (error) {
+        console.error('App initialization failed:', error);
       } finally {
         await SplashScreen.hideAsync();
 
@@ -64,8 +68,7 @@ export function WithSplashScreen({ children }: Props) {
     return () => {
       mounted = false;
     };
-  }, [fontsLoaded]);
-
+  }, [fontsLoaded, isLoggedIn]);
   if (!showApp) {
     return (
       <View

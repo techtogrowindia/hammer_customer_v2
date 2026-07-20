@@ -1,22 +1,13 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
+import { GCCategory } from '@/domain/models/service-categories/getCategoriesResponse';
 import React from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { CategoryItem } from '../home.types';
 
 interface CategoryScrollerProps {
-  categories: CategoryItem[];
+  categories: GCCategory[];
   onSelect: (id: string) => void;
 }
-
-const categoryImages = [
-  'https://picsum.photos/id/1062/120/120',
-  'https://picsum.photos/id/1074/120/120',
-  'https://picsum.photos/id/1080/120/120',
-  'https://picsum.photos/id/1084/120/120',
-  'https://picsum.photos/id/1081/120/120',
-  'https://picsum.photos/id/1067/120/120',
-];
 
 export function CategoryScroller({ categories, onSelect }: CategoryScrollerProps) {
   return (
@@ -25,19 +16,21 @@ export function CategoryScroller({ categories, onSelect }: CategoryScrollerProps
         <Pressable
           key={cat.id}
           accessibilityRole='button'
-          onPress={() => onSelect(cat.id)}
+          onPress={() => onSelect(cat.id?.toString() || '')}
           style={({ pressed }) => [styles.item, pressed && { opacity: 0.75 }]}
         >
           <View style={styles.imageWrapper}>
             <Image
               source={{
-                uri: categoryImages[index % categoryImages.length],
+                uri: 'https://picsum.photos/id/1084/120/120',
               }}
               style={styles.image}
             />
           </View>
 
-          <Text style={styles.label}>{cat.label}</Text>
+          <Text numberOfLines={2} ellipsizeMode='tail' style={styles.label}>
+            {cat?.name}
+          </Text>
         </Pressable>
       ))}
     </ScrollView>

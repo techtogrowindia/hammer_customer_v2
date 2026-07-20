@@ -1,51 +1,19 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
-import { ArrowRight, Flame, Heart } from 'lucide-react-native';
-import React from 'react';
+import { GetGCServicesResponse } from '@/domain/models/service-categories/getCategoriesResponse';
+import { ArrowRight, Heart } from 'lucide-react-native';
+import React, { useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
-type IconType = typeof Flame;
-
-export interface ServiceCardData {
-  id: string;
-  name: string;
-  category: string;
-  description?: string;
-  tag?: 'bestseller' | 'trending' | 'new';
-  Icon: IconType;
-  price?: string;
-  originalPrice?: string;
-  discountPercent?: number;
-  rating?: string;
-  reviews?: string;
-  duration?: string;
-}
-
 interface ServiceCardProps {
-  service: ServiceCardData;
+  service: GetGCServicesResponse;
   onPress: (id: string) => void;
   isFavorite?: boolean;
   onToggleFavorite?: (id: string) => void;
   width?: string | number;
 }
 
-const TAG_CONFIG = {
-  bestseller: { label: 'Bestseller', color: AppColors.error },
-  trending: { label: 'Trending', color: AppColors.info },
-  new: { label: 'New', color: AppColors.success },
-};
-
-const CATEGORY_IMAGES: Record<string, string> = {
-  cleaning: 'https://loremflickr.com/400/300/bathroom',
-  electrical: 'https://loremflickr.com/400/300/electrician,wiring',
-  plumbing: 'https://loremflickr.com/400/300/plumber,pipe',
-  repair: 'https://loremflickr.com/400/300/appliance,repair',
-  painting: 'https://loremflickr.com/400/300/housepainting,paintroller',
-  salon: 'https://loremflickr.com/400/300/haircut,barber',
-  laundry: 'https://loremflickr.com/400/300/laundry,ironing',
-  power: 'https://loremflickr.com/400/300/generator,powertools',
-};
-const DEFAULT_IMAGE = 'https://loremflickr.com/400/300/homeservice,handyman';
+const PLACEHOLDER = 'https://hammer-assets.s3.ap-south-1.amazonaws.com/images/category-placeholder.png';
 
 export function ServiceCard({
   service,
@@ -54,51 +22,37 @@ export function ServiceCard({
   onToggleFavorite,
   width = '48%',
 }: ServiceCardProps) {
-  const tagConfig = service.tag ? TAG_CONFIG[service.tag] : null;
-  const imageUri = CATEGORY_IMAGES[service.category] ?? DEFAULT_IMAGE;
-  const { Icon } = service;
+  const [image, setImage] = useState(service?.image || PLACEHOLDER);
 
   return (
     <Pressable
       accessibilityRole='button'
-      onPress={() => onPress(service.id)}
       style={({ pressed }) => [styles.card, { width }, pressed && styles.cardPressed]}
+      onPress={() => onPress(String(service?.id ?? ''))}
     >
       <View style={styles.imageContainer}>
-        <Image source={{ uri: imageUri }} style={styles.image} resizeMode='cover' />
-
-        {tagConfig && (
-          <View style={[styles.tagBadge, { backgroundColor: tagConfig.color }]}>
-            <Text style={styles.tagBadgeText}>{tagConfig.label}</Text>
-          </View>
-        )}
+        <Image source={{ uri: image }} style={styles.image} resizeMode='cover' onError={() => setImage(PLACEHOLDER)} />
 
         <Pressable
-          accessibilityRole='button'
-          hitSlop={8}
-          onPress={() => onToggleFavorite?.(service.id)}
+          hitSlop={10}
           style={styles.favoriteBtn}
+          onPress={(e) => {
+            e.stopPropagation();
+            onToggleFavorite?.(String(service?.id ?? ''));
+          }}
         >
           <Heart
-            size={14}
+            size={15}
+            strokeWidth={2}
             color={isFavorite ? AppColors.error : AppColors.white}
             fill={isFavorite ? AppColors.error : 'transparent'}
-            strokeWidth={2}
           />
         </Pressable>
       </View>
 
       <View style={styles.body}>
-        {/* <View style={styles.iconWrap}>
-          <Icon size={16} color={AppColors.primary} strokeWidth={2.25} />
-        </View> */}
-
-        <Text style={styles.name} numberOfLines={1}>
-          {service.name}
-        </Text>
-
-        <Text style={styles.description} numberOfLines={1}>
-          {service.description ?? 'Verified & background-checked pros'}
+        <Text style={styles.name} numberOfLines={2}>
+          {service?.service_name || 'Service'}
         </Text>
 
         <View style={styles.bookBtn}>
@@ -120,13 +74,13 @@ const styles = StyleSheet.create({
   },
 
   cardPressed: {
-    opacity: 0.92,
+    opacity: 0.9,
   },
 
   imageContainer: {
-    height: 100,
-    position: 'relative',
+    height: 110,
     backgroundColor: AppColors.warningLight,
+    position: 'relative',
   },
 
   image: {
@@ -134,29 +88,13 @@ const styles = StyleSheet.create({
     height: '100%',
   },
 
-  tagBadge: {
-    position: 'absolute',
-    top: 8,
-    left: 8,
-    backgroundColor: 'rgba(255,255,255,0.94)',
-    paddingHorizontal: 7,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-
-  tagBadgeText: {
-    fontFamily: 'Poppins_600SemiBold',
-    fontSize: 8.5,
-    color: AppColors.white,
-  },
-
   favoriteBtn: {
     position: 'absolute',
     top: 8,
     right: 8,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(0,0,0,0.35)',
@@ -166,35 +104,19 @@ const styles = StyleSheet.create({
     padding: 12,
   },
 
-  iconWrap: {
-    width: 30,
-    height: 30,
-    borderRadius: 9,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: AppColors.warningLight,
-    marginBottom: 8,
-  },
-
   name: {
+    minHeight: 38,
     fontFamily: 'Poppins_600SemiBold',
     fontSize: 13,
     color: AppColors.textPrimary,
   },
 
-  description: {
-    marginTop: 2,
-    fontFamily: fontTokens.fontFamily.regular,
-    fontSize: 11,
-    color: AppColors.textSecondary,
-  },
-
   bookBtn: {
+    marginTop: 12,
     alignSelf: 'flex-start',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    marginTop: 10,
     paddingHorizontal: 12,
     paddingVertical: 7,
     borderRadius: 8,
@@ -202,7 +124,7 @@ const styles = StyleSheet.create({
   },
 
   bookBtnText: {
-    fontFamily: 'Poppins_600SemiBold',
+    fontFamily: fontTokens.fontFamily.medium,
     fontSize: 11,
     color: AppColors.white,
   },

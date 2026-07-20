@@ -2,11 +2,13 @@ import { Spacer } from '@/components/common/spacer/Spacer';
 import { SectionHeader } from '@/components/home/header/section-header';
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
+import { useBoundStore } from '@/store/boundStore';
 import { router, useLocalSearchParams } from 'expo-router';
 import { ArrowLeft, Award, Check, ChevronRight, Clock, Heart, ShieldCheck } from 'lucide-react-native';
 import { useRef, useState } from 'react';
 import { Animated, Pressable, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useShallow } from 'zustand/shallow';
 
 const font = {
   regular: fontTokens.fontFamily.regular,
@@ -45,37 +47,47 @@ const COLLAPSE_RANGE = HERO_MAX_HEIGHT - HERO_MIN_HEIGHT;
 const DESCRIPTION_COLLAPSED_LINES = 3;
 
 export default function ServiceDetailsScreen() {
-  const { top, bottom } = useSafeAreaInsets();
-  const params = useLocalSearchParams<{ id?: string }>();
+  const { top } = useSafeAreaInsets();
+  const params = useLocalSearchParams<{
+    'service-details-id'?: string;
+    subCategoryId?: string;
+  }>();
+
+  const serviceId = params['service-details-id'];
+  const subCategoryId = params.subCategoryId;
+  const { categories } = useBoundStore(
+    useShallow((state) => ({
+      categories: state.categoryList,
+    })),
+  );
+
+  const subCategory = categories
+    .filter((category) => category.subcategories?.some((sub) => String(sub.id) === subCategoryId))
+    .flatMap((category) => category.subcategories ?? [])
+    .find((sub) => String(sub.id) === subCategoryId);
+
+  const service = subCategory?.services?.find((service) => String(service.id) === serviceId);
 
   const [isFavorite, setIsFavorite] = useState(false);
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const scrollY = useRef(new Animated.Value(0)).current;
 
   const goToBooking = () => {
-    router.push({ pathname: '/booking/12', params: { id: params.id ?? '' } } as never);
+    router.push({ pathname: '/booking/12', params: { id: params?.['service-details-id'] ?? '' } } as never);
   };
 
-  // Hero shrinks from HERO_MAX_HEIGHT to HERO_MIN_HEIGHT (both plus safe-area
-  // inset) over COLLAPSE_RANGE of scroll, then stays pinned at the min height —
-  // same idea as a native collapsing large-title nav bar.
   const heroHeight = scrollY.interpolate({
     inputRange: [0, COLLAPSE_RANGE],
     outputRange: [HERO_MAX_HEIGHT + top, HERO_MIN_HEIGHT + top],
     extrapolate: 'clamp',
   });
 
-  // Full-bleed background image fades out across the whole collapse range,
-  // so by the time the hero reaches its min height it's a solid color bar
-  // (AppColors.primary, set on `hero` itself) rather than a squashed photo.
   const imageOpacity = scrollY.interpolate({
     inputRange: [0, COLLAPSE_RANGE],
     outputRange: [1, 0],
     extrapolate: 'clamp',
   });
 
-  // Compact title fades in only once the image is mostly gone, so the
-  // collapsed header reads as clean solid-color + text.
   const compactTitleOpacity = scrollY.interpolate({
     inputRange: [COLLAPSE_RANGE * 0.5, COLLAPSE_RANGE],
     outputRange: [0, 1],
@@ -86,16 +98,13 @@ export default function ServiceDetailsScreen() {
     <View style={styles.screen}>
       <StatusBar barStyle='light-content' backgroundColor={AppColors.primary} translucent={false} />
 
-      {/* Collapsing hero — sits above the scroll content, animated by scrollY */}
       <Animated.View style={[styles.hero, { height: heroHeight }]}>
         <Animated.Image
           source={{ uri: SERVICE_IMAGE_URL }}
           resizeMode='cover'
           style={[StyleSheet.absoluteFillObject, { opacity: imageOpacity }]}
         />
-        {/* Navy tint over the photo so white icons/text stay legible against
-            any image, and so the hero reads as on-brand (secondary navy)
-            rather than washed out. */}
+
         <Animated.View style={[styles.heroOverlay, { opacity: imageOpacity }]} />
 
         <View style={[styles.heroTopRow, { paddingTop: top + 12 }]}>
@@ -108,9 +117,8 @@ export default function ServiceDetailsScreen() {
             <ArrowLeft size={19} color={AppColors.white} strokeWidth={2.25} />
           </Pressable>
 
-          {/* Compact title — only visible once the hero has mostly collapsed */}
           <Animated.Text style={[styles.compactTitle, { opacity: compactTitleOpacity }]} numberOfLines={1}>
-            Bathroom Deep Cleaning
+            {service?.service_name ?? 'Service Details'}
           </Animated.Text>
 
           <View style={{ flexDirection: 'row', gap: 10 }}>
@@ -140,12 +148,11 @@ export default function ServiceDetailsScreen() {
         <View style={styles.body}>
           <View style={styles.titleBlock}>
             <View style={styles.categoryTag}>
-              <Text style={styles.categoryTagText}>Cleaning</Text>
+              <Text style={styles.categoryTagText}>{subCategory?.name ?? ''}</Text>
             </View>
-            <Text style={styles.title}>Bathroom Deep Cleaning</Text>
+            <Text style={styles.title}>{service?.service_name ?? 'Service Details'}</Text>
           </View>
 
-          {/* Description */}
           <SectionHeader title='Description' />
           <View style={styles.descriptionCard}>
             <Text

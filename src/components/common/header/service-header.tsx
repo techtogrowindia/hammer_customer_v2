@@ -56,23 +56,23 @@ export function ServiceHeader({ address, onChangeAddress }: ServiceHeaderProps) 
 
           <View style={styles.addressText}>
             {address ? (
-              <>
+              <View style={{ gap: 2 }}>
                 <Text style={styles.addressLabel} numberOfLines={1}>
                   {address.label}
                 </Text>
                 <Text style={styles.addressDetail} numberOfLines={1}>
                   {address.detail}
                 </Text>
-              </>
+              </View>
             ) : (
-              <>
+              <View style={{ gap: 2 }}>
                 <Text style={styles.addressLabel} numberOfLines={1}>
                   Add your address
                 </Text>
                 <Text style={styles.addressDetail} numberOfLines={1}>
                   So we can show services available near you
                 </Text>
-              </>
+              </View>
             )}
           </View>
 
@@ -146,11 +146,11 @@ const styles = StyleSheet.create({
     backgroundColor: AppColors.warningLight,
   },
   addressText: { flex: 1 },
-  addressLabel: { fontFamily: font.semiBold, fontSize: 13, color: AppColors.textPrimary },
+  addressLabel: { fontFamily: font.semiBold, fontSize: 14, color: AppColors.textPrimary },
   addressDetail: {
     marginTop: 2,
     fontFamily: font.regular,
-    fontSize: 11,
+    fontSize: 12,
     color: AppColors.textTertiary,
   },
   changeBtn: { flexDirection: 'row', alignItems: 'center', gap: 1 },

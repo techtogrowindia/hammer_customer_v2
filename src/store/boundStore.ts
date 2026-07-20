@@ -2,10 +2,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { addressSliceType, createAddressSlice } from './addressSlice';
+import { createServiceCatSlice, serviceCatSliceType } from './serviceCatSlice';
 import { createUISlice, uiSliceType } from './uiSlice';
 import { UserSliceType, createUserSlice } from './userSlice';
 
-type StoreState = uiSliceType & UserSliceType & addressSliceType;
+type StoreState = uiSliceType & UserSliceType & addressSliceType & serviceCatSliceType;
 
 export const useBoundStore = create<StoreState>()(
   persist(
@@ -13,6 +14,7 @@ export const useBoundStore = create<StoreState>()(
       ...createUISlice(...a),
       ...createUserSlice(...a),
       ...createAddressSlice(...a),
+      ...createServiceCatSlice(...a),
     }),
     {
       name: 'react-native-store',

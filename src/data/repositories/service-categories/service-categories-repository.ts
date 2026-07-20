@@ -5,10 +5,10 @@ import { apiClient } from '@/data/api/api-client';
 import { apiEndpoints } from '@/data/api/api-endpoints';
 
 const getSCParams = (params?: Record<string, string | boolean | number>) => {
-  //   const { sessionId } = useBoundStore.getState();
+  const pincode = '625107';
   return {
     params: {
-      //   ...(sessionId ? { nudataSessionId: sessionId } : {}),
+      ...(pincode ? { pincode } : {}),
       ...(params ?? {}),
     },
   };
@@ -16,7 +16,8 @@ const getSCParams = (params?: Record<string, string | boolean | number>) => {
 
 export const ServiceCategoriesRepository: IServiceCategoriesRepository = {
   getCategories: async (): Promise<GetCategoriesResponse> => {
-    const response = await apiClient.get(apiEndpoints.serviceCategories);
+    const response = await apiClient.get(apiEndpoints.services, { ...getSCParams() });
+
     return response.data;
   },
 };

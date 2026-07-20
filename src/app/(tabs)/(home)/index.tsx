@@ -4,43 +4,18 @@ import { PromoStrip } from '@/components/home/banner-promo/promo-strip';
 import { BannerCarousel } from '@/components/home/carousel/banner-carousel';
 import { CategoryScroller } from '@/components/home/category/category-scroller';
 import { SectionHeader } from '@/components/home/header/section-header';
-import { BannerItem, BookAgainItem, CategoryItem, HowItWorksStep, ServiceItem } from '@/components/home/home.types';
+import { BannerItem, BookAgainItem, HowItWorksStep, ServiceItem } from '@/components/home/home.types';
 import { StepRow } from '@/components/home/how-it-works/how-it-works';
 import { BookAgainList } from '@/components/home/services/book-again';
 import { ServiceGrid } from '@/components/home/services/service-grid';
 import { AppColors } from '@/core/theme/app-colors';
 import { useBoundStore } from '@/store/boundStore';
 import { router } from 'expo-router';
-import {
-  CalendarCheck2,
-  Clock,
-  Crown,
-  Gift,
-  Hammer,
-  Paintbrush,
-  Plug,
-  Scissors,
-  ShieldCheck,
-  Shirt,
-  Sparkles,
-  Wrench,
-  Zap,
-} from 'lucide-react-native';
+import { CalendarCheck2, Clock, Crown, Gift, Paintbrush, Plug, ShieldCheck, Sparkles, Zap } from 'lucide-react-native';
 import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useShallow } from 'zustand/shallow';
-
-const categories: CategoryItem[] = [
-  { id: 'cleaning', label: 'Cleaning', Icon: Sparkles },
-  { id: 'electrical', label: 'Electrical', Icon: Plug },
-  { id: 'plumbing', label: 'Plumbing', Icon: Hammer },
-  { id: 'repair', label: 'Repair', Icon: Wrench },
-  { id: 'painting', label: 'Painting', Icon: Paintbrush },
-  { id: 'salon', label: 'Salon', Icon: Scissors },
-  { id: 'laundry', label: 'Laundry', Icon: Shirt },
-  { id: 'power', label: 'Power', Icon: Zap },
-];
 
 const banners: BannerItem[] = [
   { id: 'b1', tag: 'New user offer', title: 'Flat 20% off', subtitle: 'On your first booking' },
@@ -69,13 +44,11 @@ const howItWorks: HowItWorksStep[] = [
 export default function HomeScreen() {
   const { top } = useSafeAreaInsets();
 
-  const { userInfo } = useBoundStore(
+  const { categoryList } = useBoundStore(
     useShallow((state) => ({
-      userInfo: state.userToken,
+      categoryList: state.categoryList,
     })),
   );
-
-  console.log('======', userInfo);
 
   const goToItemDetails = () => router.push('/(tabs)/(home)/service/service-details/12');
   const goToCategory = (id: string) =>
@@ -99,7 +72,7 @@ export default function HomeScreen() {
           actionLabel='See all'
           onActionPress={() => router.push('/(tabs)/(services)')}
         />
-        <CategoryScroller categories={categories} onSelect={goToCategory} />
+        <CategoryScroller categories={categoryList ?? []} onSelect={goToCategory} />
 
         <BookAgainList items={bookAgain} onSeeAll={goToOrders} onRebook={goToItemDetails} />
 

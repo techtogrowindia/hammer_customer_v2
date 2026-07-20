@@ -2,7 +2,7 @@ import React, { JSX } from 'react';
 
 import { AppColors } from '@/core/theme/app-colors';
 import { useHeaderNavigation } from '@/hooks/useHeaderNavigation';
-import { router } from 'expo-router';
+import { router, useGlobalSearchParams } from 'expo-router';
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { HeaderWithTitle } from './header-with-title';
@@ -14,6 +14,12 @@ import { ServiceHeader } from './service-header';
 const Header = () => {
   const { currentSegmentName, pathname, rootTabPath, currentTab } = useHeaderNavigation();
 
+  const params = useGlobalSearchParams<{
+    title?: string;
+  }>();
+
+  const title = params?.title;
+
   const handleRouterBack = () => {
     if (router.canGoBack()) {
       router.back();
@@ -24,8 +30,8 @@ const Header = () => {
 
   const segmentHeaders: Record<string, JSX.Element> = {
     'service-details': <View />,
-    'service-item': <HeaderWithTitle title='Plumbing' onBack={handleRouterBack} />,
-    booking: <HeaderWithTitle title='Bathroom deep cleaning' onBack={handleRouterBack} />,
+    'service-item': <HeaderWithTitle title={title ?? 'Service Item'} onBack={handleRouterBack} />,
+    booking: <HeaderWithTitle title={title ?? 'Booking'} onBack={handleRouterBack} />,
     notification: <HeaderWithTitle title='Notifications' onBack={handleRouterBack} />,
     'confirm-booking': <View />,
     'edit-profile': <HeaderWithTitle title='Edit Profile' onBack={handleRouterBack} />,
