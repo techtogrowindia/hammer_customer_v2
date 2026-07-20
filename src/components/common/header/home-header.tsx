@@ -1,10 +1,48 @@
+// HomeHeader.jsx
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
 import { router } from 'expo-router';
 import { Bell, ChevronDown, MapPin, Search } from 'lucide-react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+const SERVICE_NAMES = ['salon', 'AC repair', 'plumber', 'electrician', 'home cleaning', 'pest control', 'carpenter'];
+const ROTATE_INTERVAL = 2200;
+const TRANSITION_MS = 220;
+
+function AnimatedServiceWord() {
+  const [index, setIndex] = useState(0);
+  const translateY = useSharedValue(0);
+  const opacity = useSharedValue(1);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      opacity.value = withTiming(0, { duration: TRANSITION_MS, easing: Easing.in(Easing.ease) });
+      translateY.value = withTiming(-6, { duration: TRANSITION_MS, easing: Easing.in(Easing.ease) }, (finished) => {
+        if (finished) {
+          runOnJS(setIndex)((i) => (i + 1) % SERVICE_NAMES.length);
+          translateY.value = 6;
+          translateY.value = withTiming(0, { duration: TRANSITION_MS, easing: Easing.out(Easing.ease) });
+          opacity.value = withTiming(1, { duration: TRANSITION_MS, easing: Easing.out(Easing.ease) });
+        }
+      });
+    }, ROTATE_INTERVAL);
+    return () => clearInterval(timer);
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  return (
+    <Animated.Text style={[styles.searchPlaceholder, styles.searchPlaceholderWord, animatedStyle]} numberOfLines={1}>
+      {SERVICE_NAMES[index]}
+    </Animated.Text>
+  );
+}
 
 export function HomeHeader() {
   const { top } = useSafeAreaInsets();
@@ -23,9 +61,7 @@ export function HomeHeader() {
             <Text style={styles.greeting}>Hi, User</Text>
             <Pressable
               accessibilityRole='button'
-              onPress={() => {
-                router.push('/(tabs)/(home)/address/select-address');
-              }}
+              onPress={() => router.push('/(tabs)/(home)/address/select-address')}
               style={styles.locationPill}
               hitSlop={6}
             >
@@ -39,9 +75,7 @@ export function HomeHeader() {
 
           <Pressable
             accessibilityRole='button'
-            onPress={() => {
-              router.push('/(tabs)/(home)/notification');
-            }}
+            onPress={() => router.push('/(tabs)/(home)/notification')}
             style={({ pressed }) => [styles.bellButton, pressed && { opacity: 0.8 }]}
             hitSlop={8}
           >
@@ -55,24 +89,14 @@ export function HomeHeader() {
       <View style={styles.searchCardWrap}>
         <Pressable
           accessibilityRole='button'
-          onPress={() => {
-            router.push('/(tabs)/(home)/search');
-          }}
+          onPress={() => router.push('/(tabs)/(home)/search')}
           style={({ pressed }) => [styles.searchCard, pressed && styles.searchCardPressed]}
         >
           <Search size={17} color={AppColors.textTertiary} strokeWidth={2} />
-          <Text style={styles.searchPlaceholder} numberOfLines={1}>
-            Search for products
-          </Text>
-          {/* <View style={styles.divider} /> */}
-          {/* <Pressable
-            accessibilityRole='button'
-            onPress={onFilterPress}
-            hitSlop={8}
-            style={({ pressed }) => [styles.filterButton, pressed && { opacity: 0.7 }]}
-          >
-            <SlidersHorizontal size={15} color={AppColors.primary} strokeWidth={2.25} />
-          </Pressable> */}
+          <View style={styles.placeholderRow}>
+            <Text style={styles.searchPlaceholder}>Search for </Text>
+            <AnimatedServiceWord />
+          </View>
         </Pressable>
       </View>
     </View>
@@ -83,25 +107,15 @@ const SEARCH_CARD_HEIGHT = 56;
 
 const styles = StyleSheet.create({
   wrap: { marginBottom: SEARCH_CARD_HEIGHT / 2 + 8 },
-  // wrap: { marginBottom: 16 },
   hero: {
     backgroundColor: AppColors.primary,
     paddingHorizontal: 20,
     paddingBottom: SEARCH_CARD_HEIGHT / 2 + 22,
-    // paddingBottom: SEARCH_CARD_HEIGHT / 2,
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
     overflow: 'hidden',
   },
-  heroDecor: {
-    position: 'absolute',
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    top: -70,
-    right: -50,
-    // backgroundColor: 'rgba(255,255,255,0.08)',
-  },
+  heroDecor: { position: 'absolute', width: 180, height: 180, borderRadius: 90, top: -70, right: -50 },
   topRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   avatar: {
     width: 50,
@@ -112,7 +126,6 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.35)',
   },
   avatarImage: { width: '100%', height: '100%' },
-  avatarText: { fontFamily: 'Poppins_600SemiBold', fontSize: 15, color: AppColors.white },
   greetingWrap: { flex: 1 },
   greeting: { fontFamily: 'Poppins_600SemiBold', fontSize: 15, color: AppColors.textPrimary, marginBottom: 5 },
   locationPill: {
@@ -147,13 +160,7 @@ const styles = StyleSheet.create({
     borderColor: AppColors.primary,
   },
 
-  // Floating card
-  searchCardWrap: {
-    position: 'absolute',
-    left: 20,
-    right: 20,
-    bottom: -SEARCH_CARD_HEIGHT / 2,
-  },
+  searchCardWrap: { position: 'absolute', left: 20, right: 20, bottom: -SEARCH_CARD_HEIGHT / 2 },
   searchCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -169,21 +176,10 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   searchCardPressed: { backgroundColor: AppColors.warningLight },
-  searchPlaceholder: {
-    flex: 1,
-    fontFamily: fontTokens.fontFamily.regular,
-    fontSize: 13,
-    color: AppColors.textTertiary,
-  },
-  divider: { width: 1, height: 22, backgroundColor: AppColors.divider },
-  filterButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: AppColors.warningLight,
-  },
+
+  placeholderRow: { flex: 1, flexDirection: 'row', alignItems: 'center', overflow: 'hidden', height: 18 },
+  searchPlaceholder: { fontFamily: fontTokens.fontFamily.regular, fontSize: 13, color: AppColors.textTertiary },
+  searchPlaceholderWord: { fontFamily: fontTokens.fontFamily.medium, color: AppColors.primaryDark },
 });
 
 export default HomeHeader;
