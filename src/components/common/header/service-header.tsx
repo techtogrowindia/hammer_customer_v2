@@ -1,10 +1,13 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
+import { Address } from '@/domain/models/address/get-address-reponse';
+import { useBoundStore } from '@/store/boundStore';
 import { router } from 'expo-router';
 import { ChevronRight, MapPin } from 'lucide-react-native';
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useShallow } from 'zustand/shallow';
 
 const font = {
   regular: fontTokens.fontFamily.regular,
@@ -13,28 +16,23 @@ const font = {
   bold: fontTokens.fontFamily.bold,
 };
 
-type Address = {
-  label: string;
-  detail: string;
-};
-
-interface ServiceHeaderProps {
-  address?: Address;
-  onChangeAddress?: () => void;
-}
-
 const CARD_HEIGHT = 78;
 
-export function ServiceHeader({ address, onChangeAddress }: ServiceHeaderProps) {
+export function ServiceHeader() {
   const { top } = useSafeAreaInsets();
 
+  const { addressList } = useBoundStore(
+    useShallow((state) => ({
+      addressList: state.addressList,
+    })),
+  );
+
   const handlePress = () => {
-    if (onChangeAddress) {
-      onChangeAddress();
-      return;
-    }
     router.push('/(tabs)/(services)/address/select-address');
   };
+
+  const addressDetail = (a?: Address) =>
+    a ? [a.address_line_1, a.address_line_2, a.city, a.pincode].filter(Boolean).join(', ') : 'No address selected';
 
   return (
     <View style={styles.wrap}>
@@ -51,17 +49,17 @@ export function ServiceHeader({ address, onChangeAddress }: ServiceHeaderProps) 
           style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
         >
           <View style={styles.pinWrap}>
-            <MapPin size={18} color={AppColors.primary} strokeWidth={2.25} opacity={address ? 1 : 0.6} />
+            <MapPin size={18} color={AppColors.primary} strokeWidth={2.25} opacity={addressList?.[0] ? 1 : 0.6} />
           </View>
 
           <View style={styles.addressText}>
-            {address ? (
+            {addressList?.[0] ? (
               <View style={{ gap: 2 }}>
                 <Text style={styles.addressLabel} numberOfLines={1}>
-                  {address.label}
+                  {'Your Address'}
                 </Text>
                 <Text style={styles.addressDetail} numberOfLines={1}>
-                  {address.detail}
+                  {addressDetail(addressList?.[0])}
                 </Text>
               </View>
             ) : (
@@ -77,7 +75,7 @@ export function ServiceHeader({ address, onChangeAddress }: ServiceHeaderProps) 
           </View>
 
           <View style={styles.changeBtn}>
-            <Text style={styles.changeBtnText}>{address ? 'Change' : 'Add'}</Text>
+            <Text style={styles.changeBtnText}>{addressList?.[0] ? 'Change' : 'Add'}</Text>
             <ChevronRight size={14} color={AppColors.primary} strokeWidth={2.25} />
           </View>
         </Pressable>
