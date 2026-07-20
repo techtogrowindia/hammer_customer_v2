@@ -47,4 +47,9 @@ export const OrdersRepository: IOrdersRepository = {
 
     return response.data;
   },
+  listOrders: async (): Promise<GetPlaceOrderResponse> => {
+    const response = await apiClient.get(apiEndpoints.listOrders);
+
+    return response.data;
+  },
 };

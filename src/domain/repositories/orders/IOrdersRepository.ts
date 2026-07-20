@@ -3,4 +3,5 @@ import type { GetPlaceOrderResponse } from '@/domain/models/orders/place-order-r
 
 export interface IOrdersRepository {
   placeOrder: (request: PlaceOrderRequest) => Promise<GetPlaceOrderResponse>;
+  listOrders: () => Promise<GetPlaceOrderResponse>;
 }

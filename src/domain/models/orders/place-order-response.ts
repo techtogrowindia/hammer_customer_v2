@@ -3,8 +3,14 @@ import { Address } from '../address/get-address-reponse';
 export interface GetPlaceOrderResponse {
   success?: boolean;
   message?: string;
-  data?: GPDData;
+  data?: GPDDatas;
 }
+
+export type GPDDatas = {
+  orders?: GPDOrders;
+} & GPDData;
+
+export type GPDOrders = GPDData[];
 
 export interface GPDData {
   order_id?: number;

@@ -1,5 +1,6 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
+import { GPDData } from '@/domain/models/orders/place-order-response';
 import { ChevronRight } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -11,66 +12,53 @@ const font = {
   bold: fontTokens.fontFamily.bold,
 };
 
-export type OrderStatus = 'completed' | 'pending' | 'ongoing' | 'cancelled';
-
-export interface OrderCardData {
-  id: string;
-  title: string;
-  date: string;
-  time: string;
-  status: OrderStatus;
-  imageUrl?: string;
-}
-
 interface OrderCardProps {
-  order: OrderCardData;
-  onViewOrder: (id: string) => void;
+  order: GPDData;
+  onViewOrder: (id: number) => void;
 }
 
-const STATUS_CONFIG: Record<OrderStatus, { label: string; color: string }> = {
-  completed: { label: 'Completed', color: AppColors.success },
-  ongoing: { label: 'Ongoing', color: AppColors.primaryDark },
-  pending: { label: 'Pending', color: AppColors.textSecondary },
-  cancelled: { label: 'Cancelled', color: AppColors.error },
-};
-
-/**
- * Three-column row: image | title/date/view-more | status. Status sits in
- * its own fixed-width column, vertically centered against the full card
- * height (not tied to the title line or the image), so it reads as an
- * independent piece of information rather than a label stuck onto
- * something else.
- */
 export function OrderCard({ order, onViewOrder }: OrderCardProps) {
   const [imageFailed, setImageFailed] = useState(false);
-  const statusConfig = STATUS_CONFIG[order.status];
-
+  const statusConfig = (() => {
+    switch (order.status) {
+      case 'completed':
+        return { label: 'Completed', color: AppColors.success };
+      case 'ongoing':
+        return { label: 'Ongoing', color: AppColors.primaryDark };
+      case 'pending':
+        return { label: 'Pending', color: AppColors.textSecondary };
+      case 'cancelled':
+        return { label: 'Cancelled', color: AppColors.error };
+      default:
+        return { label: 'Unknown', color: AppColors.textSecondary };
+    }
+  })();
   return (
     <View style={styles.card}>
-      {order.imageUrl && !imageFailed ? (
+      {order?.images?.[0] && !imageFailed ? (
         <Image
-          source={{ uri: order.imageUrl }}
+          source={{ uri: order.images[0] }}
           style={styles.image}
           resizeMode='cover'
           onError={() => setImageFailed(true)}
         />
       ) : (
         <View style={[styles.image, styles.imageFallback]}>
-          <Text style={styles.imageFallbackText}>{order.title.charAt(0)}</Text>
+          <Text style={styles.imageFallbackText}>{order?.order_id?.toString().charAt(0)}</Text>
         </View>
       )}
 
       <View style={styles.body}>
         <Text style={styles.title} numberOfLines={1}>
-          {order.title}
+          {order?.service_name || 'Service Name Unavailable'}
         </Text>
         <Text style={styles.datetime} numberOfLines={1}>
-          {order.date} · {order.time}
+          {order?.created_at}
         </Text>
 
         <Pressable
           accessibilityRole='button'
-          onPress={() => onViewOrder(order.id)}
+          onPress={() => onViewOrder(order?.order_id ?? 0)}
           style={({ pressed }) => [styles.viewMoreBtn, pressed && styles.viewMoreBtnPressed]}
         >
           <Text style={styles.viewMoreText}>View more</Text>

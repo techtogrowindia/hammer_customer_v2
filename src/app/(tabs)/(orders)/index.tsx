@@ -1,12 +1,13 @@
 import { CircleIcon } from '@/components/common/circle-icon/circle-icon';
-import { OrderCard, OrderCardData, OrderStatus } from '@/components/order/order-card';
+import { OrderCard, OrderStatus } from '@/components/order/order-card';
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
+import { useBoundStore } from '@/store/boundStore';
 import { router } from 'expo-router';
 import { PackageSearch } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useShallow } from 'zustand/shallow';
 
 const font = {
   regular: fontTokens.fontFamily.regular,
@@ -23,60 +24,22 @@ const FILTERS: { id: OrderStatus | 'all'; label: string }[] = [
   { id: 'cancelled', label: 'Cancelled' },
 ];
 
-const orders: OrderCardData[] = [
-  {
-    id: 'o1',
-    title: 'Bathroom Deep Cleaning',
-    date: 'Jul 14, 2026',
-    time: '10:30 AM',
-    status: 'completed',
-    imageUrl: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=200&h=200&fit=crop',
-  },
-  {
-    id: 'o2',
-    title: 'Fan Installation',
-    date: 'Jul 16, 2026',
-    time: '2:00 PM',
-    status: 'ongoing',
-    imageUrl: 'https://images.unsplash.com/photo-1567696911980-2eed69a46042?w=200&h=200&fit=crop',
-  },
-  {
-    id: 'o3',
-    title: 'Full Home Painting',
-    date: 'Jul 18, 2026',
-    time: '9:00 AM',
-    status: 'pending',
-    imageUrl: 'https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=200&h=200&fit=crop',
-  },
-  {
-    id: 'o4',
-    title: 'Switchboard Repair',
-    date: 'Jul 10, 2026',
-    time: '4:15 PM',
-    status: 'cancelled',
-    imageUrl: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=200&h=200&fit=crop',
-  },
-  {
-    id: 'o5',
-    title: 'Haircut at Home',
-    date: 'Jul 5, 2026',
-    time: '11:00 AM',
-    status: 'completed',
-    imageUrl: 'https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=200&h=200&fit=crop',
-  },
-];
-
 export default function OrderHistoryScreen() {
   const [activeFilter, setActiveFilter] = useState<OrderStatus | 'all'>('all');
-  const { top } = useSafeAreaInsets();
+
+  const { orderList } = useBoundStore(
+    useShallow((state) => ({
+      orderList: state.orderList,
+    })),
+  );
 
   const viewOrder = (orderId: string) => {
-    router.push({ pathname: '/order/[id]', params: { id: orderId } } as never);
+    router.push({ pathname: '/(tabs)/order-details', params: { id: orderId } } as never);
   };
 
   const visibleOrders = useMemo(
-    () => orders.filter((o) => activeFilter === 'all' || o.status === activeFilter),
-    [activeFilter],
+    () => orderList.filter((o) => activeFilter === 'all' || o.status === activeFilter),
+    [activeFilter, orderList],
   );
 
   return (
@@ -111,7 +74,7 @@ export default function OrderHistoryScreen() {
           </Text>
         </View>
       ) : (
-        visibleOrders.map((order) => <OrderCard key={order.id} order={order} onViewOrder={viewOrder} />)
+        visibleOrders.map((order) => <OrderCard key={order?.order_id} order={order} onViewOrder={viewOrder} />)
       )}
     </ScrollView>
   );

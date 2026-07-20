@@ -6,4 +6,5 @@ export const apiEndpoints = {
   services: '/customer/services',
   address: '/customer/addresses',
   placeOrder: 'customer/place-order',
+  listOrders: 'customer/orders',
 };

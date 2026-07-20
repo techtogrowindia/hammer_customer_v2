@@ -1,5 +1,6 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { useAddressApisHelper } from '@/hooks/useAddressApisHelper';
+import { useOrderApisHelper } from '@/hooks/useOrdersApisHelper';
 import { useSCApisHelper } from '@/hooks/useSCApisHelper';
 import { useBoundStore } from '@/store/boundStore';
 import {
@@ -29,6 +30,7 @@ export function WithSplashScreen({ children }: Props) {
 
   const { getAddresses } = useAddressApisHelper();
   const { getServiceCategories } = useSCApisHelper();
+  const { listOrders } = useOrderApisHelper();
   const { isLoggedIn } = useBoundStore(
     useShallow((state) => ({
       isLoggedIn: state.isLoggedIn,
@@ -50,7 +52,7 @@ export function WithSplashScreen({ children }: Props) {
     const prepare = async () => {
       try {
         if (isLoggedIn) {
-          await Promise.all([getAddresses(), getServiceCategories()]);
+          await Promise.all([getAddresses(), getServiceCategories(), listOrders()]);
         }
       } catch (error) {
         console.error('App initialization failed:', error);
