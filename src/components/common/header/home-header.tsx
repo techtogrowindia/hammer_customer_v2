@@ -55,7 +55,9 @@ export function HomeHeader() {
       <View style={styles.searchCardWrap}>
         <Pressable
           accessibilityRole='button'
-          onPress={() => {}}
+          onPress={() => {
+            router.push('/(tabs)/(home)/search');
+          }}
           style={({ pressed }) => [styles.searchCard, pressed && styles.searchCardPressed]}
         >
           <Search size={17} color={AppColors.textTertiary} strokeWidth={2} />

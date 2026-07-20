@@ -3,11 +3,17 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { addressSliceType, createAddressSlice } from './addressSlice';
 import { createOrdersSlice, ordersSliceType } from './ordersSlice';
+import { createSearchSlice, searchSliceType } from './searchSlice';
 import { createServiceCatSlice, serviceCatSliceType } from './serviceCatSlice';
 import { createUISlice, uiSliceType } from './uiSlice';
 import { UserSliceType, createUserSlice } from './userSlice';
 
-type StoreState = uiSliceType & UserSliceType & addressSliceType & serviceCatSliceType & ordersSliceType;
+type StoreState = uiSliceType &
+  UserSliceType &
+  addressSliceType &
+  serviceCatSliceType &
+  ordersSliceType &
+  searchSliceType;
 
 export const useBoundStore = create<StoreState>()(
   persist(
@@ -17,6 +23,7 @@ export const useBoundStore = create<StoreState>()(
       ...createAddressSlice(...a),
       ...createServiceCatSlice(...a),
       ...createOrdersSlice(...a),
+      ...createSearchSlice(...a),
     }),
     {
       name: 'react-native-store',

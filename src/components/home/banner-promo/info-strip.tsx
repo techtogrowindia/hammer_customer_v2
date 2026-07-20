@@ -8,20 +8,24 @@ import { IconType } from '../home.types';
 interface InfoStripProps {
   text: string;
   Icon?: IconType;
-  backgroundColor?: string;
+  tagColor?: string;
   iconColor?: string;
 }
 
 export function InfoStrip({
   text,
   Icon = ShieldCheck,
-  backgroundColor = AppColors.warningLight,
-  iconColor = AppColors.primary,
+  tagColor = AppColors.primary,
+  iconColor = AppColors.white,
 }: InfoStripProps) {
   return (
-    <View style={[styles.strip, { backgroundColor }]}>
-      <Icon size={15} color={iconColor} strokeWidth={2} />
-      <Text style={styles.text}>{text}</Text>
+    <View style={styles.strip}>
+      <View style={[styles.tag, { backgroundColor: tagColor }]}>
+        <Icon size={16} color={iconColor} strokeWidth={2.25} />
+      </View>
+      <Text style={styles.text} numberOfLines={2}>
+        {text}
+      </Text>
     </View>
   );
 }
@@ -29,17 +33,26 @@ export function InfoStrip({
 const styles = StyleSheet.create({
   strip: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    padding: 14,
+    alignItems: 'stretch',
     borderRadius: 14,
+    borderWidth: 1,
+    borderColor: AppColors.border,
+    backgroundColor: AppColors.surface,
+    overflow: 'hidden',
+  },
+  tag: {
+    width: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   text: {
     flex: 1,
-    fontFamily: fontTokens.fontFamily.regular,
+    fontFamily: fontTokens.fontFamily.medium,
     fontSize: 12,
     lineHeight: 17,
-    color: AppColors.textSecondary,
+    color: AppColors.textPrimary,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
   },
 });
 

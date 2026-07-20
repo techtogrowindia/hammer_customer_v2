@@ -56,7 +56,7 @@ export function AddressCard({
           <MapPin size={17} color={AppColors.primary} strokeWidth={2.25} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={cardStyles.addressLabel} numberOfLines={1}>
+          <Text style={cardStyles.addressLabel} numberOfLines={2}>
             {addressDetail(selectedAddress)}
           </Text>
           {/* <Text style={cardStyles.addressDetail} numberOfLines={1}></Text> */}

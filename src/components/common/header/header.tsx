@@ -9,6 +9,7 @@ import { HeaderWithTitle } from './header-with-title';
 import { HomeHeader } from './home-header';
 import { OrderHeader } from './order-header';
 import { ProfileHeader } from './profile-header';
+import { SearchHeader } from './search-header';
 import { ServiceHeader } from './service-header';
 
 const Header = () => {
@@ -39,6 +40,7 @@ const Header = () => {
     'add-address': <HeaderWithTitle title='Add New Address' onBack={handleRouterBack} />,
     'select-location': <HeaderWithTitle title='Select Location' onBack={handleRouterBack} />,
     'order-details': <HeaderWithTitle title='Order Details' onBack={handleRouterBack} />,
+    search: <SearchHeader placeholder='Search for products' />,
   };
 
   const tabHeaders: Record<string, JSX.Element> = {

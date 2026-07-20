@@ -1,6 +1,7 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { useAddressApisHelper } from '@/hooks/useAddressApisHelper';
 import { useOrderApisHelper } from '@/hooks/useOrdersApisHelper';
+import { usePermissions } from '@/hooks/usePermission';
 import { useSCApisHelper } from '@/hooks/useSCApisHelper';
 import { useBoundStore } from '@/store/boundStore';
 import {
@@ -29,6 +30,7 @@ export function WithSplashScreen({ children }: Props) {
   const [showApp, setShowApp] = useState(false);
 
   const { getAddresses } = useAddressApisHelper();
+  const { getCurrentLocation } = usePermissions();
   const { getServiceCategories } = useSCApisHelper();
   const { listOrders } = useOrderApisHelper();
   const { isLoggedIn } = useBoundStore(
@@ -51,6 +53,10 @@ export function WithSplashScreen({ children }: Props) {
 
     const prepare = async () => {
       try {
+        // const locationDetails = getCurrentLocation();
+
+        // console.log('Location details:', locationDetails);
+
         if (isLoggedIn) {
           await Promise.all([getAddresses(), getServiceCategories(), listOrders()]);
         }
