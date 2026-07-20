@@ -16,7 +16,7 @@ export const useAddressApisHelper = () => {
       removeAddress: state.removeAddress,
     })),
   );
-  const addAddress = async (request: AddAddressRequest) => {
+  const addAddress = async (request: AddAddressRequest, fromOrderFlow: boolean) => {
     toggleAddressModuleLoader(true);
     try {
       const response = await AddressRepository.addAddress(request);
@@ -28,7 +28,12 @@ export const useAddressApisHelper = () => {
       if (response?.data && response?.data?.address_line_1) {
         addOrUpdateAddress(response.data);
       }
-      router.dismissTo({ pathname: '/(tabs)/(home)/address/select-address' });
+      if (fromOrderFlow) {
+        router.back();
+        router.back();
+      } else {
+        router.dismissTo({ pathname: '/(tabs)/(home)/address/select-address' });
+      }
 
       return response;
     } catch (error: any) {

@@ -33,6 +33,7 @@ type RouteParams = {
   landmark?: string;
   state?: string;
   country?: string;
+  fromOrderFlow?: string;
 };
 
 export default function AddAddressScreen() {
@@ -42,6 +43,9 @@ export default function AddAddressScreen() {
   console.log('AddAddressScreen params:', params);
 
   const isEditing = Boolean(params.id);
+
+  const fromOrderFlow = params.fromOrderFlow === 'true';
+  console.log('AddAddressScreen fromOrderFlow:', fromOrderFlow);
 
   const isAddressLoading = useBoundStore(useShallow((state) => state.showAddressModuleLoader));
 
@@ -97,7 +101,7 @@ export default function AddAddressScreen() {
         latitude: params.lat ? parseFloat(params.lat) : 0,
         longitude: params.lng ? parseFloat(params.lng) : 0,
       };
-      addAddress(addressData);
+      addAddress(addressData, fromOrderFlow);
     }
   };
 

@@ -1,34 +1,46 @@
+import { styles } from '@/app/(tabs)/(home,orders,services,profile)/booking/[booking-id]';
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
-import { useBoundStore } from '@/store/boundStore';
+import { Address } from '@/domain/models/address/get-address-reponse';
 import { router } from 'expo-router';
 import { Check, ChevronDown, MapPin, Navigation } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, LinearTransition } from 'react-native-reanimated';
-import { useShallow } from 'zustand/shallow';
 
 const font = {
   regular: fontTokens.fontFamily.regular,
   semiBold: 'Poppins_600SemiBold',
 };
 
-export function AddressCard() {
-  const { addressList } = useBoundStore(
-    useShallow((state) => ({
-      addressList: state.addressList ?? [],
-    })),
-  );
-
+export function AddressCard({
+  addressList,
+  setSelectedAddressId,
+  selectedAddressId,
+  error,
+  showValidation,
+}: {
+  addressList: Address[];
+  setSelectedAddressId: (id: number) => void;
+  selectedAddressId: number;
+  error?: string | null;
+  showValidation: boolean;
+}) {
   const [open, setOpen] = useState(false);
-  const selectedAddress = addressList[0];
+  const selectedAddress = addressList.find((a) => a.id === selectedAddressId);
 
   const addressDetail = (a?: typeof selectedAddress) =>
     a ? [a.address_line_1, a.address_line_2, a.city, a.pincode].filter(Boolean).join(', ') : 'No address selected';
 
   const goToCurrentLocation = () => {
     setOpen(false);
-    router.push('/address/select-location' as never);
+
+    router.push({
+      pathname: '/address/select-location',
+      params: {
+        fromOrderFlow: 'true',
+      },
+    });
   };
 
   return (
@@ -45,11 +57,9 @@ export function AddressCard() {
         </View>
         <View style={{ flex: 1 }}>
           <Text style={cardStyles.addressLabel} numberOfLines={1}>
-            {selectedAddress?.label ?? 'Select an address'}
-          </Text>
-          <Text style={cardStyles.addressDetail} numberOfLines={1}>
             {addressDetail(selectedAddress)}
           </Text>
+          {/* <Text style={cardStyles.addressDetail} numberOfLines={1}></Text> */}
         </View>
         <Animated.View style={{ transform: [{ rotate: open ? '180deg' : '0deg' }] }}>
           <ChevronDown size={16} color={AppColors.textTertiary} strokeWidth={2} />
@@ -65,7 +75,7 @@ export function AddressCard() {
                 <Pressable
                   accessibilityRole='button'
                   onPress={() => {
-                    // setSelectedAddressId(address.id);
+                    setSelectedAddressId(address.id);
                     setOpen(false);
                   }}
                   style={({ pressed }) => [
@@ -75,8 +85,7 @@ export function AddressCard() {
                   ]}
                 >
                   <View style={{ flex: 1 }}>
-                    <Text style={cardStyles.dropdownItemLabel}>{address.label}</Text>
-                    <Text style={cardStyles.dropdownItemDetail} numberOfLines={1}>
+                    <Text style={cardStyles.dropdownItemLabel} numberOfLines={4}>
                       {addressDetail(address)}
                     </Text>
                   </View>
@@ -98,6 +107,7 @@ export function AddressCard() {
           </Pressable>
         </Animated.View>
       )}
+      {error && <Text style={styles.errorText}>{error}</Text>}
     </View>
   );
 }
@@ -142,7 +152,7 @@ const cardStyles = StyleSheet.create({
     borderBottomColor: AppColors.border,
   },
   dropdownItemSelected: { backgroundColor: AppColors.warningLight },
-  dropdownItemLabel: { fontFamily: font.semiBold, fontSize: 12.5, color: AppColors.textPrimary },
+  dropdownItemLabel: { fontFamily: font.regular, fontSize: 12.5, color: AppColors.textPrimary },
   dropdownItemDetail: { marginTop: 2, fontFamily: font.regular, fontSize: 11, color: AppColors.textTertiary },
   emptyText: {
     padding: 14,

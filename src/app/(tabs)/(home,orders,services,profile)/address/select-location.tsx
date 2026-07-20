@@ -1,7 +1,7 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
 import { usePermissions } from '@/hooks/usePermission';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Check, Crosshair, MapPin, Search, X } from 'lucide-react-native';
 import React, { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -66,6 +66,8 @@ export default function SelectLocationScreen() {
   const mapRef = useRef<MapView>(null);
   const sessionToken = useRef(genSessionToken());
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const params = useLocalSearchParams<{ fromOrderFlow?: string }>();
 
   const [query, setQuery] = useState('');
   const [predictions, setPredictions] = useState<Prediction[]>([]);
@@ -218,6 +220,7 @@ export default function SelectLocationScreen() {
         country: 'India',
         state: pinnedAddress?.state ?? '',
         addressLine1: pinnedAddress?.addressLine1 ?? '',
+        fromOrderFlow: params.fromOrderFlow ?? 'false',
       },
     } as never);
   };

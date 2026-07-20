@@ -24,15 +24,18 @@ import { useShallow } from 'zustand/shallow';
 export default function BookingScreen() {
   const params = useLocalSearchParams<{ id?: string }>();
   const { placeOrder } = useOrderApisHelper();
-  const { showAppLoader } = useBoundStore(
+  const { showAppLoader, addressList } = useBoundStore(
     useShallow((state) => ({
       showAppLoader: state.showAppLoader,
+      addressList: state.addressList,
     })),
   );
 
   const [issueText, setIssueText] = useState('');
   const [cameraVisible, setCameraVisible] = useState(false);
   const [showValidation, setShowValidation] = useState(false);
+
+  const [selectedAddressId, setSelectedAddressId] = useState<number>(addressList[0]?.id ?? 0);
 
   const { media, pickFromLibrary, onCameraCapture, removeMedia } = useMediaPicker();
   const voiceRecorder = useVoiceRecorder();
@@ -46,8 +49,9 @@ export default function BookingScreen() {
     media: media.length === 0 ? 'Attach at least one image or video' : null,
     voice: voiceRecorder.voiceNotes.length === 0 ? 'A voice note is required' : null,
     schedule: schedule.timing === 'later' && !schedule.scheduledDate ? 'Pick a date and time' : null,
+    address: !selectedAddressId ? 'Select a service address' : null,
   };
-  const hasErrors = Boolean(errors.media || errors.voice || errors.schedule);
+  const hasErrors = Boolean(errors.media || errors.voice || errors.schedule || errors.address);
 
   const bookService = async () => {
     if (showAppLoader) return;
@@ -69,8 +73,11 @@ export default function BookingScreen() {
         service_id: params.id,
         issue_description: issueText.trim() || 'No additional details provided.',
         type: schedule.timing === 'immediate' ? 'immediate' : 'scheduled',
-        scheduled_at: schedule.timing === 'later' && schedule.scheduledDate ? formatForApi(schedule.scheduledDate) : '',
-        address_id: '17',
+        scheduled_at:
+          schedule.timing === 'later' && schedule.scheduledDate
+            ? formatForApi(schedule.scheduledDate)
+            : formatForApi(new Date()),
+        address_id: String(selectedAddressId),
         images,
         videos,
         voice_notes,
@@ -132,7 +139,13 @@ export default function BookingScreen() {
           showValidation={showValidation}
         />
 
-        <AddressCard />
+        <AddressCard
+          addressList={addressList}
+          setSelectedAddressId={setSelectedAddressId}
+          selectedAddressId={selectedAddressId}
+          error={errors.address}
+          showValidation={showValidation}
+        />
       </ScrollView>
 
       <BookingFooter onPress={bookService} />
