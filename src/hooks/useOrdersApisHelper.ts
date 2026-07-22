@@ -23,6 +23,8 @@ export const useOrderApisHelper = () => {
         throw new Error(response?.message);
       }
 
+      await listOrders();
+
       return response;
     } catch (error: any) {
       const message =

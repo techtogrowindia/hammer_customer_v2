@@ -46,12 +46,16 @@ export default function BookingScreen() {
   }, []);
 
   const errors = {
-    media: media.length === 0 ? 'Attach at least one image or video' : null,
-    voice: voiceRecorder.voiceNotes.length === 0 ? 'A voice note is required' : null,
+    // media: media.length === 0 ? 'Attach at least one image or video' : null,
+    // voice: voiceRecorder.voiceNotes.length === 0 ? 'A voice note is required' : null,
+    media: null,
+    voice: null,
     schedule: schedule.timing === 'later' && !schedule.scheduledDate ? 'Pick a date and time' : null,
     address: !selectedAddressId ? 'Select a service address' : null,
+    issueText: !issueText.trim() ? 'Please explain the issue' : null,
   };
-  const hasErrors = Boolean(errors.media || errors.voice || errors.schedule || errors.address);
+  // const hasErrors = Boolean(errors.media || errors.voice || errors.schedule || errors.address);
+  const hasErrors = Boolean(errors.schedule || errors.address || errors.issueText);
 
   const bookService = async () => {
     if (showAppLoader) return;
@@ -85,11 +89,9 @@ export default function BookingScreen() {
 
       router.push({
         pathname: '/booking/confirm-booking' as never,
-        params: { id: String(response?.data?.order_number ?? response?.data?.id ?? '') },
+        params: { id: String(response?.data?.order_number ?? '') },
       });
-    } catch {
-      // Errors are already surfaced via toast inside useOrderApisHelper.placeOrder
-    }
+    } catch {}
   };
 
   return (
@@ -98,7 +100,12 @@ export default function BookingScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <Text style={styles.pageSubtitle}>Add details and we'll connect you with a verified professional.</Text>
 
-        <IssueDescriptionCard value={issueText} onChange={setIssueText} />
+        <IssueDescriptionCard
+          value={issueText}
+          onChange={setIssueText}
+          error={errors.issueText}
+          showValidation={showValidation}
+        />
 
         <MediaUploadCard
           media={media}

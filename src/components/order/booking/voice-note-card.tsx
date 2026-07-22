@@ -41,7 +41,7 @@ export function VoiceNoteCard({
     <View style={styles.card}>
       <View style={styles.sectionLabelRow}>
         <Text style={styles.sectionLabel}>Voice note</Text>
-        <Text style={styles.requiredMark}>*</Text>
+        {/* <Text style={styles.requiredMark}>*</Text> */}
       </View>
 
       <View style={styles.voiceRow}>

@@ -1,12 +1,12 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
-import { GCCategory } from '@/domain/models/service-categories/getCategoriesResponse';
+import { GCCategory, GCSubCategory } from '@/domain/models/service-categories/getCategoriesResponse';
 import React from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 interface CategoryScrollerProps {
   categories: GCCategory[];
-  onSelect: (id: string) => void;
+  onSelect: (sub: GCSubCategory) => void;
 }
 
 export function CategoryScroller({ categories, onSelect }: CategoryScrollerProps) {
@@ -16,7 +16,7 @@ export function CategoryScroller({ categories, onSelect }: CategoryScrollerProps
         <Pressable
           key={cat.id}
           accessibilityRole='button'
-          onPress={() => onSelect(cat.id?.toString() || '')}
+          onPress={() => onSelect(cat.subcategories?.[0] || ({} as GCSubCategory))}
           style={({ pressed }) => [styles.item, pressed && { opacity: 0.75 }]}
         >
           <View style={styles.imageWrapper}>

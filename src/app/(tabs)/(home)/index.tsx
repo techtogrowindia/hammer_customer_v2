@@ -9,6 +9,7 @@ import { StepRow } from '@/components/home/how-it-works/how-it-works';
 import { BookAgainList } from '@/components/home/services/book-again';
 import { ServiceGrid } from '@/components/home/services/service-grid';
 import { AppColors } from '@/core/theme/app-colors';
+import { GCSubCategory } from '@/domain/models/service-categories/getCategoriesResponse';
 import { useBoundStore } from '@/store/boundStore';
 import { router } from 'expo-router';
 import { CalendarCheck2, Clock, Crown, Gift, Paintbrush, Plug, ShieldCheck, Sparkles, Zap } from 'lucide-react-native';
@@ -51,8 +52,16 @@ export default function HomeScreen() {
   );
 
   const goToItemDetails = () => router.push('/(tabs)/(home)/service/service-details/12');
-  const goToCategory = (id: string) =>
-    router.push({ pathname: '/(tabs)/(home)/service/service-item/12', params: { category: id } } as never);
+  const handleSelectSubcategory = (sub: GCSubCategory) => {
+    router.push({
+      pathname: '/service/service-item/[service-item-id]',
+      params: {
+        'service-item-id': String(sub.id),
+        title: sub?.name,
+      },
+    });
+  };
+
   const goToOrders = () => router.push('/(tabs)/(orders)');
 
   return (
@@ -72,11 +81,11 @@ export default function HomeScreen() {
           actionLabel='See all'
           onActionPress={() => router.push('/(tabs)/(services)')}
         />
-        <CategoryScroller categories={categoryList ?? []} onSelect={goToCategory} />
+        <CategoryScroller categories={categoryList.slice(0, 6) ?? []} onSelect={handleSelectSubcategory} />
 
-        <BookAgainList items={bookAgain} onSeeAll={goToOrders} onRebook={goToItemDetails} />
+        <BookAgainList items={bookAgain} onSeeAll={goToOrders} onRebook={goToOrders} />
 
-        <ServiceGrid services={mostBooked} onSelect={goToOrders} onSeeAll={goToItemDetails} />
+        <ServiceGrid services={mostBooked} onSelect={goToOrders} onSeeAll={goToOrders} />
 
         <StepRow steps={howItWorks} />
 

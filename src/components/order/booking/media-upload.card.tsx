@@ -20,7 +20,7 @@ export function MediaUploadCard({ media, onPickFromLibrary, onOpenCamera, onRemo
     <View style={styles.card}>
       <View style={styles.sectionLabelRow}>
         <Text style={styles.sectionLabel}>Images / Videos</Text>
-        <Text style={styles.requiredMark}>*</Text>
+        {/* <Text style={styles.requiredMark}>*</Text> */}
       </View>
       <Text style={styles.helperText}>At least one; add multiple for a better quote.</Text>
 

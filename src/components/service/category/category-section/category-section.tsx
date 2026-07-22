@@ -1,8 +1,7 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
 import { GCCategory, GCSubCategory } from '@/domain/models/service-categories/getCategoriesResponse';
-import { LinearGradient } from 'expo-linear-gradient';
-import { ChevronUp } from 'lucide-react-native';
+import { ChevronDown } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
@@ -40,7 +39,7 @@ function Tile({ onPress, children }: { onPress: () => void; children: React.Reac
       <Pressable
         accessibilityRole='button'
         onPress={onPress}
-        onPressIn={() => (scale.value = withSpring(0.92, { damping: 14, stiffness: 260 }))}
+        onPressIn={() => (scale.value = withSpring(0.95, { damping: 14, stiffness: 260 }))}
         onPressOut={() => (scale.value = withSpring(1, { damping: 14, stiffness: 260 }))}
         style={styles.itemInner}
       >
@@ -67,17 +66,9 @@ export function CategorySection({ category, onSelectSubcategory }: CategorySecti
   return (
     <View style={styles.section}>
       <View style={styles.headerRow}>
-        <LinearGradient
-          colors={[PRIMARY, PRIMARY_DARK]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0, y: 1 }}
-          style={styles.headerAccent}
-        />
-        <View>
-          <Text style={styles.headerTitle}>{category.name}</Text>
-          <Text style={styles.headerSubtitle}>
-            {subcategories.length} {subcategories.length === 1 ? 'service' : 'services'}
-          </Text>
+        <Text style={styles.headerTitle}>{category.name}</Text>
+        <View style={styles.countBadge}>
+          <Text style={styles.countBadgeText}>{subcategories.length}</Text>
         </View>
       </View>
 
@@ -85,14 +76,12 @@ export function CategorySection({ category, onSelectSubcategory }: CategorySecti
         {visible.map((sub) => (
           <Animated.View key={sub.id} entering={FadeIn.duration(220)} style={styles.gridItem}>
             <Tile onPress={() => onSelectSubcategory(sub)}>
-              <View style={styles.imageRing}>
-                <View style={styles.imageWrapper}>
-                  {sub.image ? (
-                    <Image source={{ uri: sub.image }} style={styles.image} />
-                  ) : (
-                    <View style={[styles.image, styles.imageFallback]} />
-                  )}
-                </View>
+              <View style={styles.tileBox}>
+                {sub.image ? (
+                  <Image source={{ uri: sub.image }} style={styles.image} />
+                ) : (
+                  <View style={[styles.image, styles.imageFallback]} />
+                )}
               </View>
               <Text style={styles.label} numberOfLines={2}>
                 {sub.name}
@@ -104,15 +93,8 @@ export function CategorySection({ category, onSelectSubcategory }: CategorySecti
         {hasOverflow && !expanded && (
           <Animated.View entering={FadeIn.duration(220)} style={styles.gridItem}>
             <Tile onPress={() => setExpanded(true)}>
-              <View style={styles.moreRing}>
-                <LinearGradient
-                  colors={[PRIMARY, PRIMARY_DARK]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.moreCircle}
-                >
-                  <Text style={styles.moreCount}>+{subcategories.length - (MAX_VISIBLE - 1)}</Text>
-                </LinearGradient>
+              <View style={[styles.tileBox, styles.moreBox]}>
+                <Text style={styles.moreCount}>+{subcategories.length - (MAX_VISIBLE - 1)}</Text>
               </View>
               <Text style={styles.label} numberOfLines={2}>
                 See more
@@ -126,10 +108,10 @@ export function CategorySection({ category, onSelectSubcategory }: CategorySecti
         <Pressable
           onPress={() => setExpanded(false)}
           accessibilityRole='button'
-          style={({ pressed }) => [styles.collapsePill, pressed && { opacity: 0.75 }]}
+          style={({ pressed }) => [styles.collapseRow, pressed && { opacity: 0.6 }]}
         >
           <Text style={styles.collapseLabel}>Show less</Text>
-          <ChevronUp size={14} color={PRIMARY_DARK} />
+          <ChevronDown size={14} color={AppColors.textTertiary} style={{ transform: [{ rotate: '180deg' }] }} />
         </Pressable>
       )}
     </View>
@@ -139,70 +121,61 @@ export function CategorySection({ category, onSelectSubcategory }: CategorySecti
 const styles = StyleSheet.create({
   section: {
     backgroundColor: '#fff',
-    borderRadius: 24,
     marginHorizontal: 14,
     marginTop: 16,
-    paddingVertical: 18,
+    paddingVertical: 16,
     paddingHorizontal: 14,
-    shadowColor: PRIMARY_DARK,
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 3,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.035)',
+    borderColor: 'rgba(0,0,0,0.06)',
   },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 4,
-    marginBottom: 16,
-    gap: 10,
-  },
-  headerAccent: {
-    width: 5,
-    height: 28,
-    borderRadius: 3,
+    justifyContent: 'space-between',
+    paddingHorizontal: 2,
+    marginBottom: 14,
   },
   headerTitle: {
     fontFamily: font.bold,
-    fontSize: 16,
+    fontSize: 15.5,
     color: AppColors.textPrimary,
     letterSpacing: -0.2,
   },
-  headerSubtitle: {
-    fontFamily: font.regular,
-    fontSize: 11.5,
-    color: AppColors.textTertiary,
-    marginTop: 1,
+  countBadge: {
+    minWidth: 22,
+    height: 22,
+    paddingHorizontal: 6,
+    borderRadius: 11,
+    backgroundColor: 'rgba(244,167,3,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  countBadgeText: {
+    fontFamily: font.semiBold,
+    fontSize: 11,
+    color: PRIMARY_DARK,
   },
   grid: { flexDirection: 'row', flexWrap: 'wrap' },
   gridItem: { width: '25%', alignItems: 'center', paddingVertical: 8 },
   itemInner: { alignItems: 'center' },
-  imageRing: {
-    width: 54,
-    height: 54,
-    borderRadius: 32,
+
+  /* flat outlined tile: no shadow, thin border, tinted fill — icon sits on a quiet card */
+  tileBox: {
+    width: 56,
+    height: 56,
+    borderRadius: 50,
+    backgroundColor: 'rgba(244,167,3,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(244,167,3,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: 'rgba(244,167,3,0.25)',
-  },
-  imageWrapper: {
-    width: 46,
-    height: 46,
-    borderRadius: 28,
     overflow: 'hidden',
-    backgroundColor: AppColors.warningLight,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
   },
-  image: { width: '100%', height: '100%' },
-  imageFallback: { backgroundColor: AppColors.warningLight },
+  image: { width: '78%', height: '78%', borderRadius: 50 },
+  imageFallback: { backgroundColor: 'rgba(0,0,0,0.04)' },
   label: {
-    marginTop: 8,
+    marginTop: 7,
     fontFamily: font.medium,
     fontSize: 11,
     color: AppColors.textSecondary,
@@ -210,46 +183,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
     lineHeight: 14,
   },
-  moreRing: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: 'rgba(244,167,3,0.25)',
-  },
-  moreCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: PRIMARY_DARK,
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
+  moreBox: {
+    backgroundColor: 'transparent',
+    borderStyle: 'dashed',
+    borderColor: 'rgba(0,0,0,0.18)',
   },
   moreCount: {
     fontFamily: font.bold,
-    fontSize: 14,
-    color: '#fff',
-    letterSpacing: -0.2,
+    fontSize: 13,
+    color: AppColors.textSecondary,
   },
-  collapsePill: {
+  collapseRow: {
     alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    marginTop: 12,
-    paddingVertical: 7,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    backgroundColor: 'rgba(244,167,3,0.1)',
+    gap: 4,
+    marginTop: 10,
+    paddingVertical: 6,
   },
   collapseLabel: {
-    fontFamily: font.semiBold,
+    fontFamily: font.medium,
     fontSize: 12,
-    color: PRIMARY_DARK,
+    color: AppColors.textTertiary,
   },
 });

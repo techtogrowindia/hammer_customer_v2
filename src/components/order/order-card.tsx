@@ -1,9 +1,11 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
 import { GPDData } from '@/domain/models/orders/place-order-response';
+import { useBoundStore } from '@/store/boundStore';
 import { ChevronRight } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useShallow } from 'zustand/shallow';
 
 const font = {
   regular: fontTokens.fontFamily.regular,
@@ -18,15 +20,30 @@ interface OrderCardProps {
 }
 
 export function OrderCard({ order, onViewOrder }: OrderCardProps) {
+  const { categoryList } = useBoundStore(
+    useShallow((state) => ({
+      categoryList: state.categoryList,
+    })),
+  );
+  const serviceId = Number(order?.service?.id);
+
+  const subCategory = categoryList
+    .flatMap((category) => category.subcategories ?? [])
+    .find((sub) => sub.services?.some((service) => service.id === serviceId));
+
+  console.log(subCategory);
+
   const [imageFailed, setImageFailed] = useState(false);
   const statusConfig = (() => {
+    console.log('order.status', order.status);
     switch (order.status) {
       case 'completed':
         return { label: 'Completed', color: AppColors.success };
       case 'ongoing':
         return { label: 'Ongoing', color: AppColors.primaryDark };
       case 'pending':
-        return { label: 'Pending', color: AppColors.textSecondary };
+      case 'pending_technician':
+        return { label: 'Pending', color: AppColors.warning };
       case 'cancelled':
         return { label: 'Cancelled', color: AppColors.error };
       default:
@@ -35,9 +52,9 @@ export function OrderCard({ order, onViewOrder }: OrderCardProps) {
   })();
   return (
     <View style={styles.card}>
-      {order?.images?.[0] && !imageFailed ? (
+      {subCategory?.image && !imageFailed ? (
         <Image
-          source={{ uri: order.images[0] }}
+          source={{ uri: subCategory.image }}
           style={styles.image}
           resizeMode='cover'
           onError={() => setImageFailed(true)}
@@ -50,10 +67,19 @@ export function OrderCard({ order, onViewOrder }: OrderCardProps) {
 
       <View style={styles.body}>
         <Text style={styles.title} numberOfLines={1}>
-          {order?.service_name || 'Service Name Unavailable'}
+          {subCategory?.name || 'Service Name Unavailable'}
         </Text>
         <Text style={styles.datetime} numberOfLines={1}>
-          {order?.created_at}
+          {order?.created_at
+            ? new Date(order.created_at).toLocaleString('en-IN', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+              })
+            : ''}
         </Text>
 
         <Pressable

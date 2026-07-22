@@ -8,7 +8,7 @@ const WithAppShell = ({ children }: { children: ReactNode }) => {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <ToastivaProvider position='top-center'>
+        <ToastivaProvider position='top-center' mode='stack'>
           <SafeAreaView edges={[]} style={{ flex: 1 }}>
             <AppKeyboardHandler>{children}</AppKeyboardHandler>
           </SafeAreaView>

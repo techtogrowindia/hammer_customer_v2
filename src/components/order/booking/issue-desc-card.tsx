@@ -6,12 +6,18 @@ import { styles } from '../../../app/(tabs)/(home,orders,services,profile)/booki
 interface Props {
   value: string;
   onChange: (text: string) => void;
+  error?: string | null;
+  showValidation: boolean;
 }
 
-export function IssueDescriptionCard({ value, onChange }: Props) {
+export function IssueDescriptionCard({ value, onChange, error, showValidation }: Props) {
   return (
     <View style={styles.card}>
-      <Text style={styles.sectionLabel}>Explain the issue</Text>
+      <View style={styles.sectionLabelRow}>
+        <Text style={styles.sectionLabel}>Explain the issue</Text>
+        <Text style={styles.requiredMark}>*</Text>
+      </View>
+
       <TextInput
         value={value}
         onChangeText={onChange}
@@ -21,6 +27,7 @@ export function IssueDescriptionCard({ value, onChange }: Props) {
         numberOfLines={3}
         style={styles.textArea}
       />
+      {showValidation && error ? <Text style={styles.errorText}>{error}</Text> : null}
     </View>
   );
 }
