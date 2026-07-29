@@ -19,7 +19,8 @@ export default function TabLayout() {
     segments.includes('add-address') ||
     segments.includes('select-location') ||
     segments.includes('notification') ||
-    segments.includes('order-details');
+    segments.includes('order-details') ||
+    segments.includes('legal');
   const renderHeader = useCallback(() => <Header />, []);
 
   return (

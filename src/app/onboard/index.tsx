@@ -1,3 +1,4 @@
+import { LEGAL_LINKS } from '@/core/constants/legal';
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
 import { useBoundStore } from '@/store/boundStore';
@@ -94,11 +95,11 @@ export default function OnboardingScreen() {
     setCurrentIndex(nextIndex);
   };
   const openPrivacyPolicy = () => {
-    Linking.openURL('https://privacy-policy-hammer.vercel.app/');
+    Linking.openURL(LEGAL_LINKS.privacy.url);
   };
 
   const openTerms = () => {
-    Linking.openURL('https://hammerapp.in/terms');
+    Linking.openURL(LEGAL_LINKS.terms.url);
   };
   return (
     <SafeAreaView style={styles.screen}>

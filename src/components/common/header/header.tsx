@@ -1,5 +1,6 @@
 import React, { JSX } from 'react';
 
+import { LEGAL_LINKS, LegalDocType } from '@/core/constants/legal';
 import { AppColors } from '@/core/theme/app-colors';
 import { useHeaderNavigation } from '@/hooks/useHeaderNavigation';
 import { router, useGlobalSearchParams } from 'expo-router';
@@ -17,9 +18,11 @@ const Header = () => {
 
   const params = useGlobalSearchParams<{
     title?: string;
+    type?: string;
   }>();
 
   const title = params?.title;
+  const legalTitle = params?.type ? LEGAL_LINKS[params.type as LegalDocType]?.title : undefined;
 
   const handleRouterBack = () => {
     if (router.canGoBack()) {
@@ -40,6 +43,7 @@ const Header = () => {
     'add-address': <HeaderWithTitle title='Add New Address' onBack={handleRouterBack} />,
     'select-location': <HeaderWithTitle title='Select Location' onBack={handleRouterBack} />,
     'order-details': <HeaderWithTitle title='Order Details' onBack={handleRouterBack} />,
+    legal: <HeaderWithTitle title={legalTitle ?? 'Legal'} onBack={handleRouterBack} />,
     search: <SearchHeader placeholder='Search for products' />,
   };
 

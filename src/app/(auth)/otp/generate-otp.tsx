@@ -1,6 +1,7 @@
 import PrimaryFooter from '@/components/common/footer/footer-button';
 import { FormikTextInput } from '@/components/common/form/formik-text-input';
 import RingIcon from '@/components/common/ring-icon/ring-icon';
+import { LEGAL_LINKS } from '@/core/constants/legal';
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
 import { useAuthApisHelper } from '@/hooks/useAuthApisHelper';
@@ -39,11 +40,11 @@ export default function GenerateOtpScreen() {
   };
 
   const openPrivacyPolicy = () => {
-    Linking.openURL('https://privacy-policy-hammer.vercel.app/');
+    Linking.openURL(LEGAL_LINKS.privacy.url);
   };
 
   const openTerms = () => {
-    Linking.openURL('https://hammerapp.in/terms');
+    Linking.openURL(LEGAL_LINKS.terms.url);
   };
 
   return (
