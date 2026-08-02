@@ -1,4 +1,11 @@
-import { withAppBuildGradle, withGradleProperties, type ConfigPlugin } from '@expo/config-plugins';
+// @expo/config-plugins is CommonJS. Under Node 22+ this file is loaded as ESM,
+// and a named import from a CJS module is not statically analysable there —
+// prebuild died with "does not provide an export named 'withAppBuildGradle'".
+// The default import is the module object, so destructure from it.
+import configPlugins from '@expo/config-plugins';
+import type { ConfigPlugin } from '@expo/config-plugins';
+
+const { withAppBuildGradle, withGradleProperties } = configPlugins;
 const withAndroidSigning: ConfigPlugin = (config) => {
   config = withGradleProperties(config, (config) => {
     const properties = [
