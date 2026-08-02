@@ -1,7 +1,8 @@
 import axios, { AxiosInstance } from 'axios';
 import { setupInterceptors } from './api-interceptor';
 
-const BASE_URL = 'https://hammerapp.in/api';
+// admin.hammerapp.in serves both the admin dashboard and the mobile API.
+const BASE_URL = 'https://admin.hammerapp.in/api';
 
 const createApiClient = (isAuth = false): AxiosInstance => {
   const client = axios.create({
