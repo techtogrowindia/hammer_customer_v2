@@ -47,9 +47,7 @@ export function BannerCarousel({ banners, horizontalInset = 20 }: BannerCarousel
         {banners.map((banner, index) => (
           <View key={banner.id} style={[styles.bannerCard, { width: bannerWidth }]}>
             <Image
-              source={{
-                uri: `https://picsum.photos/800/400?random=${index + 20}`,
-              }}
+              source={{ uri: banner.image }}
               style={styles.bannerImage}
             />
 

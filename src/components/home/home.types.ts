@@ -13,6 +13,9 @@ export interface BannerItem {
   tag: string;
   title: string;
   subtitle: string;
+  /// Uploaded in the admin panel. The carousel used to pull a random photo from
+  /// picsum.photos, so the artwork changed on every render.
+  image?: string;
 }
 
 export interface BookAgainItem {

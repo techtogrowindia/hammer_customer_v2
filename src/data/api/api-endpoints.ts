@@ -4,6 +4,7 @@ export const apiEndpoints = {
   serviceCategories: '/customer/service-categories',
   subServiceCategories: '/customer/service-subcategories',
   services: '/customer/services',
+  sliderImages: '/customer/slider-images',
   address: '/customer/addresses',
   placeOrder: 'customer/place-order',
   listOrders: 'customer/orders',

@@ -13,16 +13,12 @@ import { GCSubCategory } from '@/domain/models/service-categories/getCategoriesR
 import { useBoundStore } from '@/store/boundStore';
 import { router } from 'expo-router';
 import { CalendarCheck2, Clock, Crown, Gift, Paintbrush, Plug, ShieldCheck, Sparkles, Zap } from 'lucide-react-native';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useShallow } from 'zustand/shallow';
+import { useSliderImages } from '@/hooks/useSliderImages';
 
-const banners: BannerItem[] = [
-  { id: 'b1', tag: 'New user offer', title: 'Flat 20% off', subtitle: 'On your first booking' },
-  { id: 'b2', tag: 'This weekend', title: 'Deep cleaning', subtitle: 'Starting at ₹499' },
-  { id: 'b3', tag: 'Trending', title: 'AC service', subtitle: 'Beat the summer heat' },
-];
 
 const bookAgain: BookAgainItem[] = [
   { id: 'a1', name: 'Bathroom Cleaning', lastDate: 'Booked 14 May', Icon: Sparkles },
@@ -43,6 +39,22 @@ const howItWorks: HowItWorksStep[] = [
 ];
 
 export default function HomeScreen() {
+  const { data: apiBanners } = useSliderImages();
+
+  // Straight from Manage → App Banners. No fallback copy: an invented "Flat 20%
+  // off" is a promise nobody agreed to honour.
+  const banners: BannerItem[] = useMemo(
+    () =>
+      apiBanners.map((b) => ({
+        id: String(b.id),
+        tag: b.tag ?? '',
+        title: b.title ?? '',
+        subtitle: b.subtitle ?? '',
+        image: b.image ?? undefined,
+      })),
+    [apiBanners],
+  );
+
   const { top } = useSafeAreaInsets();
 
   const { categoryList } = useBoundStore(
@@ -74,7 +86,7 @@ export default function HomeScreen() {
           style={{ marginBottom: 20 }}
         />
 
-        <BannerCarousel banners={banners} />
+        {banners.length > 0 && <BannerCarousel banners={banners} />}
 
         <SectionHeader
           title='What are you looking for?'
