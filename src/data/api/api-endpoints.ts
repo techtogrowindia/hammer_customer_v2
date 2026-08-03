@@ -8,4 +8,8 @@ export const apiEndpoints = {
   address: '/customer/addresses',
   placeOrder: 'customer/place-order',
   listOrders: 'customer/orders',
+  confirmQuote: '/customer/confirm-quote',
+  confirmAdditionalQuote: '/customer/confirm-additional-quote',
+  cancelOrder: '/customer/cancel-order',
+  additionalQuotes: '/customer/additional-quotes',
 };

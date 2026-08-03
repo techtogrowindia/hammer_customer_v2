@@ -52,4 +52,42 @@ export const OrdersRepository: IOrdersRepository = {
 
     return response.data;
   },
+
+  getOrder: async (orderId: number): Promise<GetPlaceOrderResponse> => {
+    const response = await apiClient.get(`${apiEndpoints.listOrders}?id=${orderId}`);
+
+    return response.data;
+  },
+
+  /**
+   * The order screen used to accept a quote by changing local state and
+   * nothing else, so the choice never left the phone. `technician_id` is what
+   * the endpoint matches on.
+   */
+  confirmQuote: async (orderId: number, technicianId: number) => {
+    const response = await apiClient.post(apiEndpoints.confirmQuote, {
+      order_id: orderId,
+      technician_id: technicianId,
+    });
+
+    return response.data;
+  },
+
+  answerAdditionalQuote: async (quoteId: number, accept: boolean) => {
+    const response = await apiClient.post(apiEndpoints.confirmAdditionalQuote, {
+      quote_id: quoteId,
+      action: accept ? 'approve' : 'reject',
+    });
+
+    return response.data;
+  },
+
+  cancelOrder: async (orderId: number, reason: string) => {
+    const response = await apiClient.post(apiEndpoints.cancelOrder, {
+      order_id: orderId,
+      reason,
+    });
+
+    return response.data;
+  },
 };

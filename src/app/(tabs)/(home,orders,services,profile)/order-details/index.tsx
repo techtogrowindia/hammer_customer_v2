@@ -1,6 +1,8 @@
 import { ConfirmSheet } from '@/components/common/confirm-sheet/confirm-sheet';
 import { RaiseConcernCard } from '@/components/order/concern-card';
 import { MOCK_ORDERS } from '@/components/order/mock-data';
+import { mapOrder } from '@/data/mappers/orders/map-order';
+import { OrdersRepository } from '@/data/repositories/orders/orders-repository';
 import { QuoteOfferCard } from '@/components/order/quote-offer-card';
 import { ReviewCard } from '@/components/order/review-card';
 import { StatusPill } from '@/components/order/status-pill';
@@ -10,7 +12,7 @@ import { AdditionalQuote, Order, PendingConfirm, QuoteOffer } from '@/components
 import { AppColors } from '@/core/theme/app-colors';
 import { useLocalSearchParams } from 'expo-router';
 import { AlertTriangle, Ban, Check, Clock, PauseCircle, Receipt, ShieldCheck, Wrench, X } from 'lucide-react-native';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, StatusBar, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -20,6 +22,25 @@ export default function OrderDetailsScreen() {
 
   const initialOrder = MOCK_ORDERS.find((o) => o.id === params.id) ?? MOCK_ORDERS[0];
   const [order, setOrder] = useState<Order>(initialOrder);
+  const [busy, setBusy] = useState(false);
+
+  // The screen used to render MOCK_ORDERS and nothing else, so every button
+  // changed state on the phone and the server never heard about it.
+  const orderId = Number(params.id);
+  const reload = useCallback(async () => {
+    if (!Number.isFinite(orderId) || orderId <= 0) return;
+    try {
+      const res = await OrdersRepository.getOrder(orderId);
+      const rows = (res.data as any)?.orders ?? [];
+      if (rows.length > 0) setOrder(mapOrder(rows[0]));
+    } catch {
+      // Leave whatever is on screen; a failed refresh must not blank the page.
+    }
+  }, [orderId]);
+
+  useEffect(() => {
+    reload();
+  }, [reload]);
 
   const switchCase = (id: string) => {
     const next = MOCK_ORDERS.find((o) => o.id === id);
@@ -62,33 +83,46 @@ export default function OrderDetailsScreen() {
     setPendingConfirm({ kind: 'cancel', fee });
   };
 
-  const runConfirm = () => {
-    if (!pendingConfirm) return;
-
-    if (pendingConfirm.kind === 'offer') {
-      setOrder((prev) => ({
-        ...prev,
-        status: 'confirmed',
-        acceptedOffer: pendingConfirm.offer,
-        confirmedPhase: 'assigned',
-        etaMinutes: 30,
-      }));
-    } else if (pendingConfirm.kind === 'additional') {
-      setOrder((prev) => ({
-        ...prev,
-        additionalQuotes: prev.additionalQuotes.map((q) =>
-          q.id === pendingConfirm.quote.id ? { ...q, status: 'confirmed' } : q,
-        ),
-      }));
-    } else if (pendingConfirm.kind === 'cancel') {
-      setOrder((prev) => ({
-        ...prev,
-        status: 'cancelled',
-        cancelledAt: 'just now',
-        cancellationFee: pendingConfirm.fee,
-      }));
-    }
+  const runConfirm = async () => {
+    if (!pendingConfirm || busy) return;
+    const choice = pendingConfirm;
     setPendingConfirm(null);
+    setBusy(true);
+
+    try {
+      if (choice.kind === 'offer') {
+        const res = await OrdersRepository.confirmQuote(orderId, Number(choice.offer.id));
+        if (!res.success) throw new Error(res.message);
+      } else if (choice.kind === 'additional') {
+        const res = await OrdersRepository.answerAdditionalQuote(Number(choice.quote.id), true);
+        if (!res.success) throw new Error(res.message);
+      } else if (choice.kind === 'cancel') {
+        const res = await OrdersRepository.cancelOrder(orderId, 'Cancelled from the app');
+        if (!res.success) throw new Error(res.message);
+      }
+      // Re-read rather than guessing: the server decides the resulting status,
+      // and it refuses some of these outright.
+      await reload();
+    } catch (e: any) {
+      Alert.alert('Could not do that', e?.message ?? 'Please try again.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  /** Declining a mid-job charge — the screen only ever offered accepting. */
+  const rejectAdditionalQuote = async (quote: AdditionalQuote) => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const res = await OrdersRepository.answerAdditionalQuote(Number(quote.id), false);
+      if (!res.success) throw new Error(res.message);
+      await reload();
+    } catch (e: any) {
+      Alert.alert('Could not do that', e?.message ?? 'Please try again.');
+    } finally {
+      setBusy(false);
+    }
   };
 
   const canShowCancel = order.status === 'pending' || order.status === 'quoted' || order.status === 'confirmed';
