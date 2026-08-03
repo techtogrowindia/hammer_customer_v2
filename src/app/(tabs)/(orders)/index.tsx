@@ -2,10 +2,11 @@ import { CircleIcon } from '@/components/common/circle-icon/circle-icon';
 import { OrderCard, OrderStatus } from '@/components/order/order-card';
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
+import { useOrderApisHelper } from '@/hooks/useOrdersApisHelper';
 import { useBoundStore } from '@/store/boundStore';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { PackageSearch } from 'lucide-react-native';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useShallow } from 'zustand/shallow';
 
@@ -31,6 +32,22 @@ export default function OrderHistoryScreen() {
     useShallow((state) => ({
       orderList: state.orderList,
     })),
+  );
+
+  const { listOrders } = useOrderApisHelper();
+
+  // The store is filled once at launch and after placing an order, so without
+  // this the list kept showing the status it had when the app started — a job
+  // the technician had since started or finished still read as pending until
+  // the app was killed and reopened. Refetch whenever the tab comes into view.
+  useFocusEffect(
+    useCallback(() => {
+      listOrders().catch(() => {
+        // The helper already logs; a background refresh must not throw a
+        // screen away, and the list keeps showing what it last had.
+      });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []),
   );
 
   const viewOrder = (orderId: string) => {
