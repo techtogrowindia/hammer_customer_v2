@@ -18,6 +18,12 @@ const STATUS: Record<string, OrderStatus> = {
   hold: 'on_hold',
   pending_confirmation: 'completing',
   completed: 'completed',
+  // Not reachable through the technician flow, but an admin can set either by
+  // hand from the dashboard. Leaving them out meant they fell to the
+  // `?? 'pending'` below, so a finished — even a paid — job read as though no
+  // technician had been found yet.
+  pending_payment: 'completed',
+  paid: 'completed',
   cancelled: 'cancelled',
 };
 

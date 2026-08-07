@@ -1,5 +1,6 @@
 import { CircleIcon } from '@/components/common/circle-icon/circle-icon';
-import { OrderCard, OrderStatus } from '@/components/order/order-card';
+import { OrderCard } from '@/components/order/order-card';
+import { bucketOf, type OrderBucket } from '@/components/order/order-status';
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
 import { useOrderApisHelper } from '@/hooks/useOrdersApisHelper';
@@ -17,7 +18,7 @@ const font = {
   bold: fontTokens.fontFamily.bold,
 };
 
-const FILTERS: { id: OrderStatus | 'all'; label: string }[] = [
+const FILTERS: { id: OrderBucket | 'all'; label: string }[] = [
   { id: 'all', label: 'All' },
   { id: 'ongoing', label: 'Ongoing' },
   { id: 'pending', label: 'Pending' },
@@ -26,7 +27,7 @@ const FILTERS: { id: OrderStatus | 'all'; label: string }[] = [
 ];
 
 export default function OrderHistoryScreen() {
-  const [activeFilter, setActiveFilter] = useState<OrderStatus | 'all'>('all');
+  const [activeFilter, setActiveFilter] = useState<OrderBucket | 'all'>('all');
 
   const { orderList } = useBoundStore(
     useShallow((state) => ({
@@ -50,12 +51,19 @@ export default function OrderHistoryScreen() {
     }, []),
   );
 
-  const viewOrder = (orderId: string) => {
+  // A number, which is what the card passes (`order.order_id`) and what the
+  // detail screen reads back with Number(params.id). It was typed as a string.
+  const viewOrder = (orderId: number) => {
     router.push({ pathname: '/(tabs)/order-details', params: { id: orderId } } as never);
   };
 
+  // `o.status` is the wire value (`pending_technician`, `technician_assigned`,
+  // …) while a chip is a group (`pending`, `ongoing`). Comparing them directly
+  // meant Pending and Ongoing matched nothing and showed "No orders found" —
+  // Completed and Cancelled only worked because those two words happen to be
+  // spelled the same on both sides.
   const visibleOrders = useMemo(
-    () => orderList.filter((o) => activeFilter === 'all' || o.status === activeFilter),
+    () => orderList.filter((o) => activeFilter === 'all' || bucketOf(o.status) === activeFilter),
     [activeFilter, orderList],
   );
 

@@ -1,6 +1,7 @@
 import { AppColors } from '@/core/theme/app-colors';
 import { fontTokens } from '@/core/theme/typography';
 import { GPDData } from '@/domain/models/orders/place-order-response';
+import { statusDisplay } from '@/components/order/order-status';
 import { useBoundStore } from '@/store/boundStore';
 import { ChevronRight } from 'lucide-react-native';
 import React, { useState } from 'react';
@@ -31,25 +32,12 @@ export function OrderCard({ order, onViewOrder }: OrderCardProps) {
     .flatMap((category) => category.subcategories ?? [])
     .find((sub) => sub.services?.some((service) => service.id === serviceId));
 
-  console.log(subCategory);
-
   const [imageFailed, setImageFailed] = useState(false);
-  const statusConfig = (() => {
-    console.log('order.status', order.status);
-    switch (order.status) {
-      case 'completed':
-        return { label: 'Completed', color: AppColors.success };
-      case 'ongoing':
-        return { label: 'Ongoing', color: AppColors.primaryDark };
-      case 'pending':
-      case 'pending_technician':
-        return { label: 'Pending', color: AppColors.warning };
-      case 'cancelled':
-        return { label: 'Cancelled', color: AppColors.error };
-      default:
-        return { label: 'Unknown', color: AppColors.textSecondary };
-    }
-  })();
+  // This switch knew four statuses while the server sends ten, so every job
+  // actually in progress — assigned, on the way, on hold, waiting on the
+  // customer — hit the default and read "Unknown". The mapping lives in
+  // order-status.ts now, shared with the filter chips so the two agree.
+  const statusConfig = statusDisplay(order.status);
   return (
     <View style={styles.card}>
       {subCategory?.image && !imageFailed ? (
